@@ -1,13 +1,10 @@
-const cool = require('cool-ascii-faces');
-const express = require('express');
-const path = require('path');
-const PORT = process.env.PORT || 5000;
+var app = require('express')();
+var http = require('http').createServer(app);
 
-express()
-  .use(express.static(path.join(__dirname, 'public')))
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'))
-  .get('/room', (req, res) => res.render('pages/index'))
-  .get('/cool', (req, res) => res.send(cool()))
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+app.get('/', (req, res) => {
+  res.send('<h1>Hello world</h1>');
+});
+
+http.listen(3000, () => {
+  console.log('listening on *:3000');
+});
