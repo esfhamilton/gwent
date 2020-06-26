@@ -1,27 +1,34 @@
 *{
     margin: 0;
-    padding: 0;
-    font-family: sans-serif;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    text-align: center;
+    font-family: fantasy;
+    font-weight: 40;
 }
 
 html,
 body {
     background-color: #020202;
-    color: #fff;
-    font-size: 25px;
+    color: #e0e0e0;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
 }
 
 h1 {
-    text-align: center;
+    padding: 20px;
+    margin-top: 5%;
+    font-size: 500%;
 }
 
-a {
-    text-decoration: none;
-    color: #00c4ff;
+h2 {
+    padding: 10px;
+    font-size: 170%
+}
+
+input {
+    margin: 15px 0px;
+    font-size: 150%;
 }
 
 /* ------ MAIN ------ */
@@ -60,46 +67,6 @@ a {
 
 
 
-/* ------ SLIDERS ------ */
-
-.slidecontainer {
-  width: 100%;
-}
-
-.slider {
-  -webkit-appearance: none;
-  width:90%;
-  height: 15px;
-  border-radius: 5px;
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  transition: opacity .2s;
-}
-
-.slider:hover {
-  opacity: 1;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #00c4ff;
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #00c4ff;
-}
-
-
-
 /* ------ BUTTONS ------ */
 
 button{
@@ -118,7 +85,7 @@ button{
 }
 
 .btn{
-    margin: 15px 5px;
+    margin: 35px 5px;
     font-size: 120%;
 }
 
@@ -137,79 +104,5 @@ button{
     opacity: 0.8;
 }
 
-.list-left{
-    float:left;   
-    margin-left: 20px;
-    text-align: center;
-    display: grid;
-    width: 25%;
-}
-
-.list-right{
-    float:right;    
-    margin-right: 20px;
-    text-align: center;
-    display: grid;
-    width: 25%;
-}
-
-.list-right h2{
-    padding: 15px 10px;
-}
-
-.list-right p{
-    font-size: 120%;
-    padding: 15px 10px;
-}
 
 
-
-/* ------ ICONS ------ */
-
-ion-icon{
-    font-size: 155%;
-    padding: 0 10px; 
-    color: #fff;
-    transition: color 0.3s;
-}
-
-ion-icon:hover{
-    color: pink;
-}
-
-.icon-facebook:hover { color: #3b5998; }
-
-.icon-linkedin:hover { color: #55acee; }
-
-.icon-instagram:hover { color: #dd2a7b; }
-
-.icon-github:hover { color: pink; }
-
-
-
-/* CURRENTLY OBSOLETE */
-.mobile-nav-icon {
-    float: right;
-    margin-top: 30px;
-    cursor: pointer;
-    display: none;
-}
-
-.mobile-nav-icon i {
-    font-size: 200%;
-    color: #fff;
-}
-
-.icon-close {
-    font-size: 200%;
-    display: absolute;
-    color: #bbb;
-    float: right;
-    margin-top: 0.3em;
-    margin-right: 0.4em;
-    -webkit-transition: color 0.2s;
-}
-
-.icon-close:hover {
-    color: #1025c4
-}
