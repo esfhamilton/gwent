@@ -1,12 +1,17 @@
-const express = require('express')();
+const express = require('express');
+const app = express();
 const cool = require('cool-ascii-faces');
 const PORT = process.env.PORT || 5000;
-const http = require('http').createServer(express);
-const io = require('socket.io')(http);
 
-express.set('view engine', 'ejs');
-express.get('/', (req, res) => {res.render('pages/index')});
-express.get('/cool', (req, res) => res.send(cool()));
+
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.get('/', (req, res) => {res.render('pages/index')});
+app.get('/cool', (req, res) => res.send(cool()));
+
+server = app.listen(PORT);
+
+const io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
     console.log('a user connected');
@@ -18,8 +23,4 @@ io.on('connection', (socket) => {
     socket.on('chat message',(msg) => {
         io.emit('chat message', msg);
     });
-});
-
-http.listen(PORT, () => {
-  console.log(`listening on ${PORT}`);
 });
