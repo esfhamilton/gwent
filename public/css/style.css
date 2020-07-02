@@ -27,8 +27,14 @@ h2 {
 }
 
 input {
-    margin: 15px 0px;
+    margin: 5px 0px;
     font-size: 150%;
+}
+
+a {
+    font-size: 130%;
+    text-decoration: none;
+    color: #5300f5;
 }
 
 /* ------ BUTTONS ------ */
@@ -49,7 +55,7 @@ button{
 }
 
 .btn{
-    margin: 35px 18px;
+    margin: 25px 18px;
     font-size: 120%;
 }
 
@@ -60,6 +66,17 @@ button{
 .btn:active{
     opacity: 0.8;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
