@@ -18,6 +18,7 @@ io.on('connection', (socket) => {
             if (numClients.length<2){
                 // Authorise join request
                 socket.join(SID);
+                socket.emit('validRoom', SID);
                 console.log(`Room: ${SID} successfully joined`);
             } else {
                 // Room is full, only 2 people can enter a room at a time
@@ -46,6 +47,7 @@ io.on('connection', (socket) => {
         
         // Join room and add corresponding SID to openRooms
         socket.join(SID);
+        socket.emit('validRoom', SID);
         console.log(`Room: ${SID} successfully created`);
         openRooms.push(SID);     
     })
