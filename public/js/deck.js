@@ -1,20 +1,37 @@
 const socket = io();
 
-// Get session ID from URL
-const roomQuery = Qs.parse(location.search, {
+// Get faction ID from URL
+const factionQuery = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 })
 
-let lobbyMsg = document.getElementById("msgPlaceholder");
+const faction = ''+Object.values(factionQuery);
 
-// IF SID is not present in query => create session
-// ELSE send joinRequest to session SID
-if (Object.keys(roomQuery) != "SID"){
-    socket.emit('createRequest');
+/*  
+    6.65% First column
+    35.5% Second column
+    64.5% Third column
+    93.4% Final column
+    6% Top row
+    50% Second row
+    94% Final row
+    455% 331% height width 
+*/
+if (faction === 'NR'){
+    document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
+    document.getElementById('Lead2').style = "background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%;";
+    document.getElementById('Lead3').style = "background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%;";
+    document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
 }
+/*
+    Currently only northern realms is in use
+    other faction decks can be added in else ifs
+*/
 else{
-    const SID = +Object.values(roomQuery);
-    socket.emit('joinRequest', SID);
+    document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
+    document.getElementById('Lead2').style = "background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%;";
+    document.getElementById('Lead3').style = "background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%;";
+    document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
 }
 
 // Shows session ID to users who have joined a room
@@ -27,13 +44,4 @@ socket.on("continue", (SID) => {
     location.replace(`http://localhost:5000/faction.html`);
 });
 
-// Deals with users trying to join a full room
-socket.on("full", (SID) => {    
-    lobbyMsg.innerHTML = `Error: Room ${SID} is full, please create a new room.`;
-});
-
-// Deals with users trying to join a non-existent room
-socket.on("invalidRoom", (SID) => {
-    lobbyMsg.innerHTML = `ERROR: Room ${SID} is an invalid room, please check the session ID has been entered correctly.`;
-});
 

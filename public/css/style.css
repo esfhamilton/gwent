@@ -23,7 +23,11 @@ h1 {
 
 h2 {
     padding: 10px;
-    font-size: 170%
+    font-size: 170%;
+}
+
+h3 {
+    font-size: 240%;
 }
 
 input {
@@ -67,7 +71,27 @@ button{
     opacity: 0.8;
 }
 
+/* ------ CARDS ------ */
 
+.leaders {
+    margin: 20px 18%;
+    height: 400px;
+}
+
+.card {
+    margin: 20px 5%;
+    float: left;
+    text-align: center;
+    display: block;
+    height: 240px;
+    width: 144px;
+    transition: transform 300ms ease 0s;
+    border-radius: 5px;
+}
+
+.card:hover {
+    transform: scale(1.4);
+}
 
 
 

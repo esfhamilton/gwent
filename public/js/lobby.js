@@ -24,7 +24,9 @@ socket.on("validRoom", (SID) => {
 
 // Advances users to faction selection after 2 users have connected to a room
 socket.on("continue", (SID) => {
-    location.replace(`http://localhost:5000/faction.html`);
+    // TESTING: localhost:5000
+    // LIVE: gwent-io.herokuapp.com
+    location.replace(`http://gwent-io.herokuapp.com/faction.html`);
 });
 
 // Deals with users trying to join a full room
