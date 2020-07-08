@@ -78,10 +78,15 @@ button{
     height: 400px;
 }
 
-.card {
+.column {
+    float: left;
+    width: 50%;
+    height: 400px;
+}
+
+.leaderCard {
     margin: 20px 5%;
     float: left;
-    text-align: center;
     display: block;
     height: 240px;
     width: 144px;
@@ -89,8 +94,22 @@ button{
     border-radius: 5px;
 }
 
+.leaderCard:hover {
+    transform: scale(1.35);
+}
+
+.card {
+    margin: 20px 6%;
+    float: left;
+    display: none;
+    height: 240px;
+    width: 144px;
+    transition: transform 300ms ease 0s;
+    border-radius: 5px;
+}
+
 .card:hover {
-    transform: scale(1.4);
+    transform: scale(1.2);
 }
 
 
