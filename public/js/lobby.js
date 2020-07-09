@@ -26,7 +26,7 @@ socket.on("validRoom", (SID) => {
 socket.on("continue", (SID) => {
     // TESTING: localhost:5000
     // LIVE: gwent-io.herokuapp.com
-    location.replace(`http://gwent-io.herokuapp.com/faction.html`);
+    location.replace(`http://localhost:5000/faction.html`);
 });
 
 // Deals with users trying to join a full room
