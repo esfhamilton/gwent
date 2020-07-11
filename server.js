@@ -20,6 +20,9 @@ io.on('connection', (socket) => {
                 socket.join(SID);
                 io.in(SID).emit('continue', SID);
                 console.log(`Room: ${SID} successfully joined`);
+               
+                // Save SID and immediately pass it into next page
+                
             } else {
                 // Room is full, only 2 people can enter a room at a time
                 console.log("Room is full, only 2 people can enter a room at a time");

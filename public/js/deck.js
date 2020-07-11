@@ -17,7 +17,7 @@ let zeroAvailable = [];
 let threeAdded = [];
 let twoAdded = [];
 let oneAdded = [];
-let zeroAdded = [];
+let zeroAdded;
 
 let allCards = [];
 for (let i=1; i<29; i++) {
@@ -89,14 +89,13 @@ if (faction === 'NR'){
                     "faction1","faction2","faction3","faction4","faction6","faction7","faction8","faction9","faction10",
                     "faction11","faction12","faction13","faction14","faction15","faction16","faction17","faction18","faction19",
                     "faction20","faction21","faction23","faction24","faction26","faction27"];
-    
+    zeroAdded = allCards;
     /*
         Iterates through every ID, updates html of
         of availabilityID depending on which
         availability array card's id is in
     */
     allCards.forEach(id => {
-        console.log(id.length);
         let availabilityID;
         if(id.length===8){
             availabilityID = id[0]+id[id.length-1];
@@ -105,7 +104,6 @@ if (faction === 'NR'){
             availabilityID = id[0]+id[id.length-2]+id[id.length-1];
         }
         
-        console.log(availabilityID);
         if (threeAvailable.includes(id)) {
             document.getElementById(availabilityID).innerHTML = "x3";
         }
@@ -269,7 +267,7 @@ function cardSelected(id) {
         // Add to twoAvailable
         twoAvailable.push(id);
         document.getElementById(availabilityID).innerHTML = "x2";
-        updateAddedCards(id,deckID,addedID);
+        updateAddedCards(id,addedID);
     }
     // Check is 2 available
     else if (twoAvailable.includes(id)) {
@@ -281,7 +279,7 @@ function cardSelected(id) {
         // Add to oneAvailable
         oneAvailable.push(id);
         document.getElementById(availabilityID).innerHTML = "x1";
-        updateAddedCards(id,deckID,addedID);
+        updateAddedCards(id,addedID);
     }
     // Must only be one available
     else {
@@ -294,7 +292,7 @@ function cardSelected(id) {
         zeroAvailable.push(id);
         // Hide card
         document.getElementById(id).style="display: none;";
-        updateAddedCards(id,deckID,addedID);
+        updateAddedCards(id,addedID);
     }
 
     // Show card in "current deck"
@@ -302,10 +300,11 @@ function cardSelected(id) {
 }
 
 // Updates the added amounts on each card in deck
-function updateAddedCards(id,deckID,addedID) {
+function updateAddedCards(id,addedID) {
+    let index;
     if (twoAdded.includes(id)) {
         // Remove from oneAdded
-        index = twoAdded.indexOf(deckID);
+        index = twoAdded.indexOf(id);
         if (index > -1) {
           twoAdded.splice(index, 1);
         }
@@ -315,7 +314,7 @@ function updateAddedCards(id,deckID,addedID) {
     }
     else if (oneAdded.includes(id)) {
         // Remove from oneAdded
-        index = oneAdded.indexOf(deckID);
+        index = oneAdded.indexOf(id);
         if (index > -1) {
           oneAdded.splice(index, 1);
         }
@@ -325,7 +324,7 @@ function updateAddedCards(id,deckID,addedID) {
     }
     else {
         // Remove from zeroAdded
-        index = zeroAdded.indexOf(deckID);
+        index = zeroAdded.indexOf(id);
         if (index > -1) {
           zeroAdded.splice(index, 1);
         }
@@ -335,7 +334,94 @@ function updateAddedCards(id,deckID,addedID) {
     }
 }
 
+function deckSelected(id) {
+    let index;
+    let availabilityID;
+    if (id.length===8) {
+        availabilityID = id[0]+id[id.length-1];
+    }
+    else {
+        availabilityID = id[0]+id[id.length-2]+id[id.length-1];
+    }
+    const deckID = id+'CD';
+    const addedID = availabilityID + "CD"; 
+    
+    // Check if 3 have been added 
+    if (threeAdded.includes(id)) {
+        // Remove from threeAdded
+        index = threeAdded.indexOf(id);
+        if (index > -1) {
+          threeAdded.splice(index, 1);
+        }
+        // Add to twoAdded
+        twoAdded.push(id);
+        document.getElementById(addedID).innerHTML = "x2";
+        updateAvailableCards(id,availabilityID);
+    }
+    // Check if 2 have been added
+    else if (twoAdded.includes(id)) {
+        // Remove from twoAvailable
+        index = twoAdded.indexOf(id);
+        if (index > -1) {
+          twoAdded.splice(index, 1);
+        }
+        // Add to oneAdded
+        oneAdded.push(id);
+        document.getElementById(addedID).innerHTML = "x1";
+        updateAvailableCards(id,availabilityID);
+    }
+    // Must only be one of this card ID in deck
+    else {
+        // Remove from oneAdded
+        index = oneAdded.indexOf(id);
+        if (index > -1) {
+          oneAdded.splice(index, 1);
+        }
+        // Add to zeroAdded
+        zeroAdded.push(id);
+        // Hide card
+        document.getElementById(deckID).style="display: none;";
+        updateAvailableCards(id,availabilityID);
+    }
 
+    // Show card in "current deck"
+    document.getElementById(id).style = styles[id];
+}
+
+// Updates the available amounts on each card in deck
+function updateAvailableCards(id,availabilityID) {
+    let index;
+    if (twoAvailable.includes(id)) {
+        // Remove from oneAdded
+        index = twoAvailable.indexOf(id);
+        if (index > -1) {
+          twoAvailable.splice(index, 1);
+        }
+        // Add to twoAdded
+        threeAvailable.push(id);
+        document.getElementById(availabilityID).innerHTML = "x3";
+    }
+    else if (oneAvailable.includes(id)) {
+        // Remove from oneAdded
+        index = oneAvailable.indexOf(id);
+        if (index > -1) {
+          oneAvailable.splice(index, 1);
+        }
+        // Add to twoAdded
+        twoAvailable.push(id);
+        document.getElementById(availabilityID).innerHTML = "x2";
+    }
+    else {
+        // Remove from zeroAvailable
+        index = zeroAvailable.indexOf(id);
+        if (index > -1) {
+          zeroAvailable.splice(index, 1);
+        }
+        // Add to oneAvailable
+        oneAvailable.push(id);
+        document.getElementById(availabilityID).innerHTML = "x1";
+    }
+}
 
 /* Use below after room is complete */
 

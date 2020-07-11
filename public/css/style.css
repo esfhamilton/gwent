@@ -114,7 +114,7 @@ button{
     transform: scale(1.2);
 }
 
-.available {
+.cardAmount {
     font-size: 130%;
     text-align: right;
     margin: 1px 3px;
