@@ -114,6 +114,22 @@ button{
     transform: scale(1.2);
 }
 
+.available {
+    font-size: 130%;
+    text-align: right;
+    margin: 1px 3px;
+    text-shadow:
+        0.05em 0 black,
+        0 0.05em black,
+        -0.05em 0 black,
+        0 -0.05em black,
+        -0.05em -0.05em black,
+        -0.05em 0.05em black,
+        0.05em -0.05em black,
+        0.05em 0.05em black;    
+    color: #fff;
+}
+
 
 
 

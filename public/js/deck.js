@@ -13,6 +13,21 @@ let twoAvailable = [];
 let oneAvailable = [];
 let zeroAvailable = [];
 
+// How many cards have been added to deck
+let threeAdded = [];
+let twoAdded = [];
+let oneAdded = [];
+let zeroAdded = [];
+
+let allCards = [];
+for (let i=1; i<29; i++) {
+    // Add the 17 neutrals too
+    if (i<=17) {
+        allCards.push("neutral"+i);
+    }
+    allCards.push("faction"+i);
+}
+
 // Object to store each cards style parameters
 let styles = {};
 
@@ -69,10 +84,38 @@ if (faction === 'NR'){
     // Initialises availability of cards
     threeAvailable = ["neutral1","neutral2","neutral3","neutral4","neutral5","neutral6","neutral7",
                       "faction17","faction22","faction25","faction28"];
+    twoAvailable = ["faction5"];
     oneAvailable = ["neutral8","neutral9","neutral10","neutral11","neutral12","neutral13","neutral14","neutral15","neutral16","neutral17",
-                    "faction1","faction2","faction3","faction4","faction5","faction6","faction7","faction8","faction9","faction10",
+                    "faction1","faction2","faction3","faction4","faction6","faction7","faction8","faction9","faction10",
                     "faction11","faction12","faction13","faction14","faction15","faction16","faction17","faction18","faction19",
                     "faction20","faction21","faction23","faction24","faction26","faction27"];
+    
+    /*
+        Iterates through every ID, updates html of
+        of availabilityID depending on which
+        availability array card's id is in
+    */
+    allCards.forEach(id => {
+        console.log(id.length);
+        let availabilityID;
+        if(id.length===8){
+            availabilityID = id[0]+id[id.length-1];
+        }
+        else {
+            availabilityID = id[0]+id[id.length-2]+id[id.length-1];
+        }
+        
+        console.log(availabilityID);
+        if (threeAvailable.includes(id)) {
+            document.getElementById(availabilityID).innerHTML = "x3";
+        }
+        else if (twoAvailable.includes(id)) {
+            document.getElementById(availabilityID).innerHTML = "x2";
+        }
+        else {
+            document.getElementById(availabilityID).innerHTML = "x1";
+        }
+    });
     
     // Initialises neutral and faction styles
     styles ={neutral1:"background: url(img/cards_01.jpg) 6.65% 6% / 455% 331%; display: block;",
@@ -126,6 +169,7 @@ if (faction === 'NR'){
     document.getElementById('Lead2').style = "background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%;";
     document.getElementById('Lead3').style = "background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%;";
     document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
+    // Faction cards
     // Vernon Roche
     document.getElementById('faction1').style = "background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;";
     // John Natalis
@@ -204,29 +248,96 @@ function leaderSelected(id) {
 }
 
 function cardSelected(id) {
-    deckID = id+'CD';
+    let index;
+    let availabilityID;
+    if (id.length===8) {
+        availabilityID = id[0]+id[id.length-1];
+    }
+    else {
+        availabilityID = id[0]+id[id.length-2]+id[id.length-1];
+    }
+    const deckID = id+'CD';
+    const addedID = availabilityID + "CD"; 
     
     // Check if 3 available 
-    if (threeAvailable.includes(id)){
+    if (threeAvailable.includes(id)) {
         // Remove from threeAvailable
+        index = threeAvailable.indexOf(id);
+        if (index > -1) {
+          threeAvailable.splice(index, 1);
+        }
         // Add to twoAvailable
+        twoAvailable.push(id);
+        document.getElementById(availabilityID).innerHTML = "x2";
+        updateAddedCards(id,deckID,addedID);
     }
     // Check is 2 available
-    else if (twoAvailable.includes(id)){
+    else if (twoAvailable.includes(id)) {
         // Remove from twoAvailable
+        index = twoAvailable.indexOf(id);
+        if (index > -1) {
+          twoAvailable.splice(index, 1);
+        }
         // Add to oneAvailable
+        oneAvailable.push(id);
+        document.getElementById(availabilityID).innerHTML = "x1";
+        updateAddedCards(id,deckID,addedID);
     }
     // Must only be one available
     else {
         // Remove from oneAvailable
+        index = oneAvailable.indexOf(id);
+        if (index > -1) {
+          oneAvailable.splice(index, 1);
+        }
         // Add to zeroAvailable
-        
+        zeroAvailable.push(id);
         // Hide card
+        document.getElementById(id).style="display: none;";
+        updateAddedCards(id,deckID,addedID);
     }
-    
+
     // Show card in "current deck"
     document.getElementById(deckID).style = styles[id];
 }
+
+// Updates the added amounts on each card in deck
+function updateAddedCards(id,deckID,addedID) {
+    if (twoAdded.includes(id)) {
+        // Remove from oneAdded
+        index = twoAdded.indexOf(deckID);
+        if (index > -1) {
+          twoAdded.splice(index, 1);
+        }
+        // Add to twoAdded
+        threeAdded.push(id);
+        document.getElementById(addedID).innerHTML = "x3";
+    }
+    else if (oneAdded.includes(id)) {
+        // Remove from oneAdded
+        index = oneAdded.indexOf(deckID);
+        if (index > -1) {
+          oneAdded.splice(index, 1);
+        }
+        // Add to twoAdded
+        twoAdded.push(id);
+        document.getElementById(addedID).innerHTML = "x2";
+    }
+    else {
+        // Remove from zeroAdded
+        index = zeroAdded.indexOf(deckID);
+        if (index > -1) {
+          zeroAdded.splice(index, 1);
+        }
+        // Add to oneAdded
+        oneAdded.push(id);
+        document.getElementById(addedID).innerHTML = "x1";
+    }
+}
+
+
+
+/* Use below after room is complete */
 
 // Shows session ID to users who have joined a room
 socket.on("validRoom", (SID) => {
