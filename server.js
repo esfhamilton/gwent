@@ -55,6 +55,20 @@ io.on('connection', (socket) => {
         openRooms.push(SID);     
     })
     
+    // Reconnects user to room with each new page
+    socket.on('rejoinRequest', (SID) => {                
+        if (openRooms.includes(SID)){
+            // Authorise join request
+            socket.join(SID);    
+            console.log(`Room: ${SID} successfully joined`);
+        } else {
+            // Room needs recreating
+            socket.join(SID);
+            openRooms.push(SID);   
+            console.log(`Room: ${SID} successfully created`);
+        }           
+    })
+    
     socket.on('disconnect', () => {
         console.log('user disconnected'); // LOGGING
         

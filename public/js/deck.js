@@ -1,11 +1,11 @@
 const socket = io();
 
-// Get faction ID from URL as an object
-const factionQuery = Qs.parse(location.search, {
+// Get SID and faction ID from URL
+const {SID, faction} = Qs.parse(location.search, {
     ignoreQueryPrefix: true
-});
-// Converts faction id from object to string value
-const faction = ''+Object.values(factionQuery); 
+})
+
+socket.emit('rejoinRequest', SID);
 
 // How many cards are available to add to deck 
 let threeAvailable = [];
@@ -19,9 +19,9 @@ let twoAdded = [];
 let oneAdded = [];
 let zeroAdded;
 
+// Stores every card id
 let allCards = [];
 for (let i=1; i<29; i++) {
-    // Add the 17 neutrals too
     if (i<=17) {
         allCards.push("neutral"+i);
     }
@@ -90,6 +90,7 @@ if (faction === 'NR'){
                     "faction11","faction12","faction13","faction14","faction15","faction16","faction17","faction18","faction19",
                     "faction20","faction21","faction23","faction24","faction26","faction27"];
     zeroAdded = allCards;
+    
     /*
         Iterates through every ID, updates html of
         of availabilityID depending on which
@@ -236,7 +237,9 @@ else{
     document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
 }
 
+let leader = 0;
 function leaderSelected(id) {
+    leader = +id[id.length-1];
     document.getElementById('Lead1').style.border = "none";
     document.getElementById('Lead2').style.border = "none";
     document.getElementById('Lead3').style.border = "none";
@@ -245,6 +248,7 @@ function leaderSelected(id) {
     document.getElementById(id).style.borderColor = "gold";
 }
 
+let deck = [];
 function cardSelected(id) {
     let index;
     let availabilityID;
@@ -256,6 +260,9 @@ function cardSelected(id) {
     }
     const deckID = id+'CD';
     const addedID = availabilityID + "CD"; 
+    
+    // Add card to deck array
+    deck.push(id);
     
     // Check if 3 available 
     if (threeAvailable.includes(id)) {
@@ -346,6 +353,12 @@ function deckSelected(id) {
     const deckID = id+'CD';
     const addedID = availabilityID + "CD"; 
     
+    // Remove card from deck array
+    index = deck.indexOf(id);
+    if (index > -1) {
+      deck.splice(index, 1);
+    }
+    
     // Check if 3 have been added 
     if (threeAdded.includes(id)) {
         // Remove from threeAdded
@@ -423,16 +436,31 @@ function updateAvailableCards(id,availabilityID) {
     }
 }
 
-/* Use below after room is complete */
+/*
+    NEXT STEPS
+    Add array to store deck/ faction/ leader/ everything needed...
+    Add Next button to transition to game.html
+    socket emit all chosen cards/ leader
+    server side will store user deck under player x and SID
+    on game.html load this data will be retrieved from server
+*/
 
-// Shows session ID to users who have joined a room
-socket.on("validRoom", (SID) => {
-    lobbyMsg.innerHTML = `Session ID: ${SID}`;
-});
 
-// Advances users to faction selection after 2 users have connected to a room
-socket.on("continue", (SID) => {
-    location.replace(`http://localhost:5000/faction.html`);
-});
+function submit() {
+    if (leader===0) {
+        document.getElementById('info').innerHTML = "You need to select a leader first.";
+    }
+    else {
+        if (deck.length<20) {
+            document.getElementById('info').innerHTML = "Your deck is too weak. Add at least 20 cards before proceeding.";
+        }
+        else {
+            // socket emit deck, leader and faction
+            // TESTING: localhost:5000
+            // LIVE: gwent-io.herokuapp.com
+            location.replace(`http://gwent-io.herokuapp.com/game.html?SID=${SID}`);
+        }
+    }
+}
 
 

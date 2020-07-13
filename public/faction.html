@@ -10,15 +10,19 @@
     <body>    
         <h1>Choose your Faction</h1>
         <br><br>
-        <form action="deck.html">
-            <select style="font-size: 150%;" name="faction">
-                <option value="NR">Northern Realms</option>
-                <option value="ST">Scoia'Tael</option>
-                <option value="NG">Nilfgaard</option>
-                <option value="MO">Monsters</option>
-            </select>
-            <br><br>
-            <button class="btn"><h2>Next</h2></button>
-        </form>
+        <select style="font-size: 175%;" name="faction" id="faction">
+            <option value="NR">Northern Realms</option>
+            <option value="ST">Scoia'Tael</option>
+            <option value="NG">Nilfgaard</option>
+            <option value="MO">Monsters</option>
+        </select>
+        <br><br>
+        <button class="btn" onclick="submit()"><h2>Next</h2></button>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 
+                integrity="sha256-ijqLssetA1NMNjZ+w1zaUafQQLm4IW5OoM8O+4tatME=" 
+                crossorigin="anonymous">
+        </script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/faction.js"></script>
     </body>
 </html>
