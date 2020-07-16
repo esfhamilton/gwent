@@ -8,6 +8,15 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>    
-        <h1>Game coming soon...</h1>
+        <div class="board" id="board">
+            <h3 id="waitingMsg">Waiting for opponent...</h3>
+        </div>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 
+                integrity="sha256-ijqLssetA1NMNjZ+w1zaUafQQLm4IW5OoM8O+4tatME=" 
+                crossorigin="anonymous">
+        </script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/game.js"></script>        
     </body>
 </html>

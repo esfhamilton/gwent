@@ -451,14 +451,15 @@ function submit() {
         document.getElementById('info').innerHTML = "You need to select a leader first.";
     }
     else {
-        if (deck.length<20) {
+        if (deck.length<0) {
             document.getElementById('info').innerHTML = "Your deck is too weak. Add at least 20 cards before proceeding.";
         }
         else {
-            // socket emit deck, leader and faction
+            // Send player's deck, leader and SID info to server
+            socket.emit('playerDeck',SID,leader,deck);
             // TESTING: localhost:5000
             // LIVE: gwent-io.herokuapp.com
-            location.replace(`http://gwent-io.herokuapp.com/game.html?SID=${SID}`);
+            location.replace(`http://localhost:5000/game.html?SID=${SID}&faction=${faction}`);
         }
     }
 }
