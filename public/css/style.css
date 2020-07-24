@@ -153,16 +153,6 @@ button{
     color: #fff;
 }
 
-/* ------ GAME ------ */
-
-.board {
-    background-image: url("../img/board.jpg");
-    background-position: center;
-	background-repeat:no-repeat;
-    background-size: 95%;
-    height: 100%;
-}
-
 
 
 

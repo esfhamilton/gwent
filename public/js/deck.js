@@ -161,7 +161,7 @@ if (faction === 'NR'){
              faction25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
              faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
              faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
-             faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"}
+             faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
     
     // Leader cards
     document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
@@ -445,7 +445,6 @@ function updateAvailableCards(id,availabilityID) {
     on game.html load this data will be retrieved from server
 */
 
-
 function submit() {
     if (leader===0) {
         document.getElementById('info').innerHTML = "You need to select a leader first.";
@@ -456,12 +455,13 @@ function submit() {
         }
         else {
             // Send player's deck, leader and SID info to server
-            socket.emit('playerDeck',SID,leader,deck);
-            // TESTING: localhost:5000
-            // LIVE: gwent-io.herokuapp.com
-            location.replace(`http://localhost:5000/game.html?SID=${SID}&faction=${faction}`);
+            socket.emit('playerDeck',SID,leader,deck,faction);
         }
     }
 }
 
-
+socket.on('playerAssignment', (PID) => {
+    // TESTING: localhost:5000
+    // LIVE: gwent-io.herokuapp.com
+    location.replace(`http://localhost:5000/game.html?SID=${SID}&player=${PID}`);
+});

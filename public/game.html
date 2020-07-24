@@ -5,11 +5,18 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>GWENT</title>
         <meta name="description" content="A browser based platform for playing the card game GWENT.">
-        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/game.css">
     </head>
     <body>    
         <div class="board" id="board">
             <h3 id="waitingMsg">Waiting for opponent...</h3>
+            <h3 id="redrawMsg" style="display: none;">Choose a card to redraw. 0/2</h3>
+            <p id="redrawMsg2" style="display: none;">Press Enter to continue</p>
+            <div class="hand" id="hand"></div>
+            <div class="playerLeader" id="playerLeader"></div>
+            <div class="opponentLeader" id="opponentLeader"></div>
+            <div class="playerDeck" id="playerDeck"></div>
+            <div class="opponentDeck" id="opponentDeck"></div>
         </div>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 

@@ -39,7 +39,6 @@ io.on('connection', (socket) => {
     socket.on('createRequest', () => {
         // Generates random 5 digit SID 
         let SID = Math.floor(Math.random() * 89999) + 10000; 
-        
         // Ensures new SID generated is not already in openRooms
         if (openRooms.includes(SID)){
             let repeat = true;
@@ -48,7 +47,6 @@ io.on('connection', (socket) => {
                 repeat = openRooms.includes(SID) ? true : false;
             }
         }
-        
         // Join room and add corresponding SID to openRooms
         socket.join(SID);
         socket.emit('validRoom', SID);
@@ -71,48 +69,60 @@ io.on('connection', (socket) => {
     });
     
     // Gets player details from client and stores them on server
-    socket.on('playerDeck', (SID, leader, deck) => {
+    socket.on('playerDeck', (SID, leader, deck, faction) => {
         let playerA = SID +'A';
         let playerB = SID +'B'; 
         // Check if first player has already been added
         if (playerA in gameData) {
             // Add data under player B
-            gameData[playerB] = {"leader":leader,"deck":deck,"hand":[],"discarded":[]};
+            gameData[playerB] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[]};
+            // Inform client which identifier their data is stored under
+            socket.emit('playerAssignment', 'B');
         }
         else {
             // Add data under player A
-            gameData[playerA] = {"leader":leader,"deck":deck,"hand":[],"discarded":[],"assigned":0};
+            gameData[playerA] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[]};
+            // Inform client which identifier their data is stored under
+            socket.emit('playerAssignment', 'A');
+        }
+    });
+    
+    // Returns corresponding deck to the player
+    socket.on('getPlayerDeck', (SID, player) => {
+        let PID = SID + player;
+        startCheck[PID] = "Added";
+        if (player === 'A') { 
+            socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]);
+        }
+        else {
+            socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]); 
+        }
+    });
+    
+    socket.on('getOpponentDeck', (SID, player) => {
+        let OID;
+        if (player === 'A') {
+            OID = SID + 'B';
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"]);
+        }
+        else {
+            OID = SID + 'A';
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"]);
+            
         }
     });
     
     // Checks whether both players are on the game.html page
     socket.on('startCheck', (SID) => {
-        if (SID in startCheck) {
+        if ((SID+'A') in startCheck && (SID+'B') in startCheck) {
             io.in(SID).emit('startGame');
-            delete startCheck[SID];
+            delete startCheck[SID+'A'];
+            delete startCheck[SID+'B'];
         } 
-        else {
-            startCheck[SID] = "Ready"; 
-        }
-    });
-    
-    // Assigns each user an identifier (A or B)
-    socket.on('playerCheck', (SID) => {
-        let playerA = SID +'A';        
-        if (gameData[playerA]["assigned"] === 0) {
-            // playerA key assigned to player
-            gameData[playerA]["assigned"] = 1;
-            socket.emit('playerAssigned', 'A');
-        }
-        else {
-            // playerB key assigned to player
-            socket.emit('playerAssigned', 'B');
-        }
     });
     
     socket.on('disconnect', () => {
         console.log('user disconnected'); // LOGGING
-        
         // Check each open room and remove SID if every user has disconnected 
         openRooms.forEach((SID, index) => {
             let numClients = io.sockets.adapter.rooms[''+SID];

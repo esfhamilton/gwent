@@ -1,0 +1,141 @@
+*{
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: fantasy;
+    font-weight: 10;
+}
+
+html,
+body {
+    height: 100%;
+    background-color: #020202;
+    color: #a187f3;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    text-shadow:
+        0.05em 0 black,
+        0 0.05em black,
+        -0.05em 0 black,
+        0 -0.05em black,
+        -0.05em -0.05em black,
+        -0.05em 0.05em black,
+        0.05em -0.05em black,
+        0.05em 0.05em black;
+}
+
+h1 {
+    padding: 20px;
+    margin-top: 5%;
+    font-size: 500%;
+}
+
+h2 {
+    padding: 10px;
+    font-size: 170%;
+}
+
+h3 {
+    font-size: 240%;  
+}
+
+p {
+    font-size: 140%;  
+}
+
+/* ------ GAME COMPONENTS ------ */
+
+.board {
+    background-image: url("../img/board.jpg");
+    background-position: center;
+	background-repeat:no-repeat;
+    background-size: 95%;
+    /*background-size: 1500px 715px;*/
+    height: 100%;
+    width: auto;
+}
+
+.hand {
+    position: fixed;
+    bottom: 30%;
+    /*bottom: 20px for after reselection*/
+    left: 50%;
+    margin-left: -400px;
+}
+
+.playerLeader {
+    position: fixed;   
+    /*height: 180px;
+    width: 108px;*/
+    height: 132px;
+    width: 88px;
+    bottom: 11%;
+    left: 137px;
+}
+
+.opponentLeader {
+    position: fixed;   
+    /*height: 180px;
+    width: 108px;*/
+    height: 132px;
+    width: 88px;
+    top: 11%;
+    left: 137px;
+}
+
+.playerDeck {
+    position: fixed;   
+    /*height: 180px;
+    width: 108px;*/
+    height: 132px;
+    width: 88px;
+    bottom: 25%;
+    right: 155px;
+}
+
+.opponentDeck {
+    position: fixed;   
+    /*height: 180px;
+    width: 108px;*/
+    height: 132px;
+    width: 88px;
+    top: 25%;
+    right: 155px;
+}
+
+.card {
+    float: left;
+    display: none;
+    height: 180px;
+    width: 108px;
+    transition: transform 300ms ease 0s;
+    border-radius: 5px;
+}
+
+.card:not(:first-child) {
+    margin-left: -2em;
+}
+
+.card:hover {
+    transform: scale(1.2) translateY(-1em);
+}
+
+.card:hover ~ .card {
+    transform: translateX(42px);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
