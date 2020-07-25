@@ -64,6 +64,18 @@ p {
     margin-left: -400px;
 }
 
+.pStats {
+    position: fixed;
+    left: 160px;
+    bottom: 32%;
+}
+
+.oStats {
+    position: fixed;
+    left: 160px;
+    top: 32%;
+}
+
 .playerLeader {
     position: fixed;   
     /*height: 180px;
@@ -118,6 +130,7 @@ p {
 }
 
 .card:hover {
+    border: solid yellow;
     transform: scale(1.2) translateY(-1em);
 }
 

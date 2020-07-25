@@ -103,11 +103,11 @@ io.on('connection', (socket) => {
         let OID;
         if (player === 'A') {
             OID = SID + 'B';
-            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"]);
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length);
         }
         else {
             OID = SID + 'A';
-            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"]);
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length);
             
         }
     });

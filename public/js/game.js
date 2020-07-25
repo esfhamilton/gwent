@@ -73,9 +73,11 @@ socket.on('playerAssigned', (FID, leaderID, cards) => {
 
 let opponentFaction;
 let opponentLeader;
-socket.on('opponentDeck', (opponentFID, opponentLID) => {
+let opponentDeckSize;
+socket.on('opponentDeck', (opponentFID, opponentLID, opDeckSize) => {
     opponentFaction = opponentFID;
     opponentLeader = 'lead'+opponentLID;
+    opponentDeckSize = opDeckSize;
     setup()
 });
 
@@ -101,12 +103,20 @@ function shuffle(deck) {
   return deck;
 }
 
+// The amount of cards the player draws at the start
+let initDraw = 10;
 function setup() {
-    document.getElementById('redrawMsg').style = "display:fixed;";
-    document.getElementById('redrawMsg2').style = "display:fixed;";
+    document.addEventListener("keydown",keyPressed);
+    document.getElementById('redrawMsg').style = "display: fixed;";
+    document.getElementById('redrawMsg2').style = "display: fixed;";
+    document.getElementById('pStats').style = "display: fixed;";
+    document.getElementById('oStats').style = "display: fixed;";
+    document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    document.getElementById('opponentStats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    
     
     // Styles based on player's faction
-    for (let i=0; i<10; i++){
+    for (let i=0; i<initDraw; i++){
         let card = document.createElement('div');
         card.style = stylesNR[deck[0]];
         card.className = 'card';
@@ -125,6 +135,56 @@ function setup() {
     document.getElementById('waitingMsg').style = "display: none;";
 }
 
+let replaceLimit = 0;
 function replaceCard(card) {
-    console.log(card.id);
+    if (replaceLimit < 2) {
+        // Update limit counter and display to user
+        replaceLimit += 1;
+        document.getElementById('redrawMsg').innerHTML = `Choose a card to redraw. ${replaceLimit}/2`
+        // Add card to deck
+        deck.push(card.id);
+        // Remove card from hand
+        index = hand.indexOf(card.id);
+        if (index > -1) {
+          hand.splice(index, 1);
+        }
+        // Add new card to hand from deck
+        card.style = stylesNR[deck[0]];
+        card.setAttribute("id", deck[0]);
+        hand.push(deck[0]);
+        deck.shift();
+    }
+    if (replaceLimit >= 2) {
+        handSelected();
+    }
 }
+
+function keyPressed(event) {
+    if (event.keyCode === 13) {
+        handSelected();
+    }
+}
+
+function handSelected() {
+    document.getElementById('redrawMsg').style = "display: none;";
+    document.getElementById('redrawMsg2').style = "display: none;";
+    document.getElementById('hand').style = "bottom: 0%;";
+    
+    // Change onclick functionality
+    cards = document.getElementsByClassName('card');
+    for (let i=0; i<hand.length; i++) {
+        cards[i].setAttribute("onclick", "test(this)");
+    }
+    
+    /*TODO
+        Add deck (on card) counters (in setup())
+        Add text and key press event to show/ hide hand 
+        Socket emit to show player is ready
+        When both players have reselected, server decides who goes first 
+    */
+}
+
+function test(card) {
+    console.log(card);
+}
+
