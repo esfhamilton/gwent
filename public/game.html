@@ -15,21 +15,40 @@
             <p id="redrawMsg2" style="display: none;">Press Enter to continue</p>
             <!--Stats contain info regarding hand size & lives-->
             <div class="pStats" id="pStats" style="display: none;">
-                <p id="stats" style="color: white">9 <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
+                <p id="stats" style="color: gold"><span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
                 <!--for lost lives: data-icon="ion:heart-dislike" -->
                 <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
                 <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
             </div>
             <div class="oStats" id="oStats" style="display: none;">
-                <p id="opponentStats" style="color: white">9 <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
+                <p id="opponentStats" style="color: gold"><span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
                 <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
                 <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
             </div>
-            <div class="hand" id="hand"></div>
             <div class="playerLeader" id="playerLeader"></div>
             <div class="opponentLeader" id="opponentLeader"></div>
-            <div class="playerDeck" id="playerDeck"></div>
-            <div class="opponentDeck" id="opponentDeck"></div>
+            <div class="playerDeck" id="playerDeck">
+                <p class="deckSize" id="pDeckSize"></p>
+            </div>
+            <div class="opponentDeck" id="opponentDeck">
+                <p class="deckSize" id="oDeckSize"></p>
+            </div>
+            
+            <!--Lanes display cards like hand div-->
+            <div class="opSiegeLane"></div>
+            <div class="opSiegeHorn"></div>
+            <div class="opRangedLane"></div>
+            <div class="opRangedHorn"></div>
+            <div class="opCombatLane"></div>
+            <div class="opCombatHorn"></div>
+            <div class="combatLane"></div>
+            <div class="combatHorn"></div>
+            <div class="rangedLane"></div>
+            <div class="rangedHorn"></div>
+            <div class="siegeLane"></div>
+            <div class="siegeHorn"></div>
+            <p class="instructions" id="instructions"></p>
+            <div class="hand" id="hand"></div>
         </div>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 

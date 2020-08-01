@@ -12,6 +12,7 @@ const io = require('socket.io')(server);
 let openRooms = [];
 let startCheck = {};
 let gameData = {};
+let redrawnCheck = {};
 
 io.on('connection', (socket) => {
     socket.on('joinRequest', (SID) => {                
@@ -115,10 +116,30 @@ io.on('connection', (socket) => {
     // Checks whether both players are on the game.html page
     socket.on('startCheck', (SID) => {
         if ((SID+'A') in startCheck && (SID+'B') in startCheck) {
-            io.in(SID).emit('startGame');
             delete startCheck[SID+'A'];
             delete startCheck[SID+'B'];
+            io.in(SID).emit('startGame');
         } 
+    });
+    
+    // Checks if players have redrawn the starting hand
+    socket.on('cardsRedrawn', (SID, player) => {
+        if(SID in redrawnCheck) {
+            // Prevents crash from page refresh, should be true
+            if (redrawnCheck[SID] != player) {
+                delete redrawnCheck[SID];
+                io.in(SID).emit('firstTurn', Math.random()>0.5 ? 'A':'B');
+            }       
+        }
+        else {
+            redrawnCheck[SID] = player;
+            socket.emit('waiting');
+        }
+    });
+    
+    // Informs both players to switch their myTurn variable
+    socket.on('skipTurn', (SID) => {
+        io.in(SID).emit('nextTurn');
     });
     
     socket.on('disconnect', () => {

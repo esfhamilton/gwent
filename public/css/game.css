@@ -98,22 +98,119 @@ p {
 
 .playerDeck {
     position: fixed;   
-    /*height: 180px;
-    width: 108px;*/
     height: 132px;
     width: 88px;
+    border-radius: 5px;
     bottom: 25%;
     right: 155px;
 }
 
 .opponentDeck {
     position: fixed;   
-    /*height: 180px;
-    width: 108px;*/
     height: 132px;
     width: 88px;
+    border-radius: 5px;
     top: 25%;
     right: 155px;
+}
+
+/* 12 LANE AND HORN PLACEHOLDERS */
+.opSiegeLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    top: 1.2%;
+    left: 36.5%;
+}
+.opSiegeHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    top: 1.2%;
+    left: 29%;
+}
+.opRangedLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    top: 18%;
+    left: 36.5%;
+}
+.opRangedHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    top: 18%;
+    left: 29%;
+}
+.opCombatLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    top: 34%;
+    left: 36.5%;
+}
+.opCombatHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    top: 34%;
+    left: 29%;
+}
+.combatLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    bottom: 34%;
+    left: 36.5%;
+}
+.combatHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    bottom: 34%;
+    left: 29%;
+}
+.rangedLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    bottom: 18%;
+    left: 36.5%;
+}
+.rangedHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    bottom: 18%;
+    left: 29%;
+}
+.siegeLane {
+    position: fixed;   
+    height: 105px;
+    width: 700px;
+    bottom: 1.2%;
+    left: 36.5%;
+}
+.siegeHorn {
+    position: fixed;   
+    height: 105px;
+    width: 115px;
+    bottom: 1.2%;
+    left: 29%;
+}
+
+.instructions {
+    position: fixed;
+    font-size: 110%;
+    color: gold;
+    bottom: 4%;
+    left: 4%;
+}
+
+.deckSize {
+    padding-top: 110%;
+    color: #ffa700;
 }
 
 .card {
@@ -130,15 +227,13 @@ p {
 }
 
 .card:hover {
-    border: solid yellow;
+    border: solid gold;
     transform: scale(1.2) translateY(-1em);
 }
 
 .card:hover ~ .card {
     transform: translateX(42px);
 }
-
-
 
 
 

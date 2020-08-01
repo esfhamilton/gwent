@@ -109,6 +109,8 @@ function setup() {
     document.addEventListener("keydown",keyPressed);
     document.getElementById('redrawMsg').style = "display: fixed;";
     document.getElementById('redrawMsg2').style = "display: fixed;";
+    document.getElementById('pDeckSize').innerHTML = deck.length;
+    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
     document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
@@ -132,7 +134,7 @@ function setup() {
     // This will require opponent's faction to change styles appropriately
     document.getElementById('opponentLeader').style = stylesNR[opponentLeader];
     document.getElementById('opponentDeck').style = stylesNR["deck"];
-    document.getElementById('waitingMsg').style = "display: none;";
+    hideWaitingMsg();
 }
 
 let replaceLimit = 0;
@@ -159,32 +161,85 @@ function replaceCard(card) {
     }
 }
 
-function keyPressed(event) {
-    if (event.keyCode === 13) {
-        handSelected();
-    }
-}
-
+let handChosen = false;
 function handSelected() {
+    handChosen = true;
     document.getElementById('redrawMsg').style = "display: none;";
     document.getElementById('redrawMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
+    document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+                                                        &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
     
-    // Change onclick functionality
+    // Remove onclick functionality until opponent has reselected their cards
     cards = document.getElementsByClassName('card');
     for (let i=0; i<hand.length; i++) {
-        cards[i].setAttribute("onclick", "test(this)");
+        cards[i].removeAttribute("onclick");
+    }
+    socket.emit('cardsRedrawn', SID, player);
+}
+
+// Informs player that their opponent still needs to confirm starting hand
+socket.on('waiting', () => {
+    document.getElementById('waitingMsg').innerHTML = "Waiting for opponent...";
+    showWaitingMsg();
+});
+
+// Refers to the turn of the client running this script
+let myTurn = false;
+socket.on('firstTurn', (PID) => {
+    document.getElementById('waitingMsg').innerHTML = "Opponent's turn...";
+    if (player != PID){
+        showWaitingMsg();
+    }
+    else {
+        hideWaitingMsg();
+        myTurn = true;
+    }
+});
+
+function showWaitingMsg() {
+    document.getElementById('waitingMsg').style = "display: fixed;";
+}
+
+function hideWaitingMsg() {
+    document.getElementById('waitingMsg').style = "display: none;";
+}
+
+socket.on('nextTurn', () => {
+    if (myTurn) {
+        myTurn = false;
+        showWaitingMsg();
+    }
+    else {
+        myTurn = true;
+        hideWaitingMsg();
+    }
+});
+
+let hidden = false;
+function keyPressed(event) {
+    // Enter pressed
+    if (event.keyCode === 13) {
+        handSelected();
     }
     
-    /*TODO
-        Add deck (on card) counters (in setup())
-        Add text and key press event to show/ hide hand 
-        Socket emit to show player is ready
-        When both players have reselected, server decides who goes first 
-    */
+    // E pressed
+    if (event.keyCode === 69 && handChosen) {
+        if (hidden) {
+            document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip                                                        Turn`;
+            hidden = false;
+        }
+        else {
+            document.getElementById('hand').style = "display: none;";           
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
+                                                                &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
+            hidden = true;
+        }
+    }
+    
+    // Space pressed
+    if (event.keyCode===32 && myTurn) {
+        socket.emit('skipTurn', SID);
+    }
 }
-
-function test(card) {
-    console.log(card);
-}
-
