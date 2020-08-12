@@ -1,0 +1,138 @@
+@media only screen and (max-width: 480px) {
+
+}
+
+@media only screen and (max-width: 618px) { 
+
+}
+
+@media only screen and (max-width: 767px) {
+
+}
+
+@media only screen and (max-width: 1023px) {
+
+}
+
+@media only screen and (max-width: 1200px) {
+
+}
+
+@media only screen and (max-width: 1366px) {
+    
+    .hand {
+        left: 50%;
+        margin-left: -300px;
+    }
+
+    .pStats {
+        font-size: 90%;
+        left: 140px;
+    }
+
+    .oStats {
+        font-size: 90%;
+        left: 140px;
+    }
+    
+    .playerLeader,
+    .opponentLeader,
+    .playerDeck,
+    .opponentDeck {
+        height: 107px;
+        width: 71px;
+    }
+
+    .playerLeader,
+    .opponentLeader {
+        left: 127px;
+    }
+
+    .playerDeck,
+    .opponentDeck {
+        right: 144px;
+    }
+    
+    .deckSize {
+        font-size: 120%;
+    }
+
+    .opSiegeLane,
+    .opRangedLane,
+    .opCombatLane,
+    .combatLane,
+    .rangedLane,
+    .siegeLane {
+        height: 90px;
+        width: 625px;
+    }
+    
+    .opSiegeLane {
+        top: 0.5%;
+    }
+    
+    .opRangedLane {
+        top: 17.3%;
+    }
+    
+    .opClosedLane {
+        top: 33.3%;
+    }
+    
+    .siegeLane {
+        bottom: 0.5%;
+    }
+    
+    .rangedLane {
+        bottom: 17.3%;
+    }
+    
+    .closedLane {
+        bottom: 33.3%;
+    }
+    
+    .opSiegeHorn,
+    .opRangedHorn,
+    .opCombatHorn,
+    .combatHorn,
+    .rangedHorn,
+    .siegeHorn {
+        height: 90px;
+        width: 90px;
+    }
+    
+    .opSiegeHorn {
+        top: 0.5%;
+    }
+    
+    .opRangedHorn {
+        top: 17.7%;
+    }
+    
+    .opCombatHorn {
+        top: 33.3%;
+    }
+    
+    .combatHorn {
+        bottom: 33.3%;
+    }
+    
+    .rangedHorn {
+        bottom: 17.7%;
+    }
+    
+    .siegeHorn {
+        bottom: 0.5%;
+    }
+
+    .instructions {
+        font-size: 100%;
+        bottom: 4%;
+        left: 5%;
+    }
+
+    .card {
+        height: 144px;
+        width: 86px;
+    }
+}

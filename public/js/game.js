@@ -10,7 +10,13 @@ socket.emit('getPlayerDeck', SID, player);
 socket.emit('startCheck', SID);
 
 // Initialises neutral and NR faction styles
-let stylesNR = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
+/*
+    TODO change to be called styles
+    and set the actual styles based 
+    on faction rather than 4 different
+    style objects. Call function for this around line 74
+*/
+let styles= {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead1:"background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead2:"background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%; display: block;",
               lead3:"background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%; display: block;",
@@ -120,7 +126,7 @@ function setup() {
     // Styles based on player's faction
     for (let i=0; i<initDraw; i++){
         let card = document.createElement('div');
-        card.style = stylesNR[deck[0]];
+        card.style = styles[deck[0]];
         card.className = 'card';
         card.setAttribute("id", deck[0]);
         card.setAttribute("onclick", "replaceCard(this)");
@@ -128,12 +134,12 @@ function setup() {
         hand.push(deck[0]);
         deck.shift();
     }
-    document.getElementById('playerLeader').style = stylesNR[leader];
-    document.getElementById('playerDeck').style = stylesNR["deck"];
+    document.getElementById('playerLeader').style = styles[leader];
+    document.getElementById('playerDeck').style = styles["deck"];
     
     // This will require opponent's faction to change styles appropriately
-    document.getElementById('opponentLeader').style = stylesNR[opponentLeader];
-    document.getElementById('opponentDeck').style = stylesNR["deck"];
+    document.getElementById('opponentLeader').style = styles[opponentLeader];
+    document.getElementById('opponentDeck').style = styles["deck"];
     hideWaitingMsg();
 }
 
@@ -151,7 +157,7 @@ function replaceCard(card) {
           hand.splice(index, 1);
         }
         // Add new card to hand from deck
-        card.style = stylesNR[deck[0]];
+        card.style = styles[deck[0]];
         card.setAttribute("id", deck[0]);
         hand.push(deck[0]);
         deck.shift();
@@ -187,6 +193,7 @@ socket.on('waiting', () => {
 // Refers to the turn of the client running this script
 let myTurn = false;
 socket.on('firstTurn', (PID) => {
+    // Inform player if they need to wait for opponent
     document.getElementById('waitingMsg').innerHTML = "Opponent's turn...";
     if (player != PID){
         showWaitingMsg();
@@ -195,7 +202,22 @@ socket.on('firstTurn', (PID) => {
         hideWaitingMsg();
         myTurn = true;
     }
+    
+    // Adds new onclick functionality for player whos turn it is
+    if (myTurn) {
+        cards = document.getElementsByClassName('card');
+        for (let i=0; i<hand.length; i++) {
+            cards[i].setAttribute("onclick", "playCard(this)");
+        }
+    }
 });
+
+function playCard(card) {
+    cardSelectedFlag = true;
+    document.getElementById('cardSelected').style = styles[card.id];
+    document.getElementById('hand').style = "display: none;"; 
+    document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
+}
 
 function showWaitingMsg() {
     document.getElementById('waitingMsg').style = "display: fixed;";
@@ -206,40 +228,60 @@ function hideWaitingMsg() {
 }
 
 socket.on('nextTurn', () => {
+    cards = document.getElementsByClassName('card');
     if (myTurn) {
         myTurn = false;
         showWaitingMsg();
+        for (let i=0; i<hand.length; i++) {
+            cards[i].removeAttribute("onclick");
+        }
     }
     else {
         myTurn = true;
         hideWaitingMsg();
+        for (let i=0; i<hand.length; i++) {
+            cards[i].setAttribute("onclick", "playCard(this)");
+        }
     }
 });
 
-let hidden = false;
+let handHiddenFlag = false;
+let handSelectedFlag = false;
+let cardSelectedFlag = false;
 function keyPressed(event) {
-    // Enter pressed
-    if (event.keyCode === 13) {
+    // Enter pressed and hand hasn't been selected
+    if (event.keyCode === 13 && !handSelectedFlag) {
+        handSelectedFlag = true;
         handSelected();
     }
     
-    // E pressed
-    if (event.keyCode === 69 && handChosen) {
-        if (hidden) {
+    // E pressed AND hand has been chosen AND card has not been selected
+    if (event.keyCode === 69 && handChosen && !cardSelectedFlag) {
+        if (handHiddenFlag) {
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip                                                        Turn`;
-            hidden = false;
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards                                                                    &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip                                                              Turn`;
+            handHiddenFlag = false;
         }
         else {
             document.getElementById('hand').style = "display: none;";           
             document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
-                                                                &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
-            hidden = true;
+                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
+            handHiddenFlag = true;
         }
     }
     
-    // Space pressed
-    if (event.keyCode===32 && myTurn) {
+    // Esc pressed AND a card has been selected
+    if (event.keyCode === 27 && cardSelectedFlag) {
+        cardSelectedFlag = false;
+
+        document.getElementById('cardSelected').style = "display: none;";
+        document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
+                                                             &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
+    }
+    
+    // Space pressed AND it is player's turn AND card is not selected
+    if (event.keyCode===32 && myTurn && !cardSelectedFlag) {
         socket.emit('skipTurn', SID);
     }
 }

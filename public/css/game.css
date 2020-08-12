@@ -235,6 +235,16 @@ p {
     transform: translateX(42px);
 }
 
+.cardSelected {
+    position: fixed;
+    display: none;
+    top: 5%;
+    left: 50%;
+    height: 180px;
+    width: 108px;
+    border-radius: 5px;
+}
+
 
 
 
