@@ -9,14 +9,14 @@ socket.emit('rejoinRequest', SID);
 socket.emit('getPlayerDeck', SID, player);
 socket.emit('startCheck', SID);
 
-// Initialises neutral and NR faction styles
+// Initialises player faction styles
 /*
     TODO change to be called styles
     and set the actual styles based 
     on faction rather than 4 different
     style objects. Call function for this around line 74
 */
-let styles= {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
+let styles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead1:"background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead2:"background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%; display: block;",
               lead3:"background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%; display: block;",
@@ -66,6 +66,82 @@ let styles= {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; disp
               faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
               faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
               faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
+
+let opStyles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
+                lead1:"background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%; display: block;",
+                lead2:"background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%; display: block;",
+                lead3:"background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%; display: block;",
+                lead4:"background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%; display: block;",
+                neutral1:"background: url(img/cards_01.jpg) 6.65% 6% / 455% 331%; display: block;",
+                neutral2:"background: url(img/cards_01.jpg) 35.5% 6% / 455% 331%; display: block;",
+                neutral3:"background: url(img/cards_01.jpg) 64.5% 6% / 455% 331%; display: block;",
+                neutral4:"background: url(img/cards_01.jpg) 93.4% 6% / 455% 331%; display: block;",
+                neutral5:"background: url(img/cards_01.jpg) 6.65% 50% / 455% 331%; display: block;",
+                neutral6:"background: url(img/cards_01.jpg) 35.5% 50% / 455% 331%; display: block;",
+                neutral7:"background: url(img/cards_01.jpg) 64.5% 50% / 455% 331%; display: block;",
+                neutral8:"background: url(img/cards_12.jpg) 35.5% 50% / 455% 331%; display: block;",
+                neutral9:"background: url(img/cards_12.jpg) 64.5% 50% / 455% 331%; display: block;",
+                neutral10:"background: url(img/cards_12.jpg) 93.4% 50% / 455% 331%; display: block;",
+                neutral11:"background: url(img/cards_12.jpg) 6.65% 94% / 455% 331%; display: block;",
+                neutral12:"background: url(img/cards_12.jpg) 35.5% 94% / 455% 331%; display: block;",
+                neutral13:"background: url(img/cards_01.jpg) 93.4% 50% / 455% 331%; display: block;",
+                neutral14:"background: url(img/cards_01.jpg) 6.65% 94% / 455% 331%; display: block;",
+                neutral15:"background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;",
+                neutral16:"background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;",
+                neutral17:"background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;",
+                faction1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
+                faction2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
+                faction3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
+                faction4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
+                faction5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
+                faction6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
+                faction7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
+                faction8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
+                faction9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
+                faction10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
+                faction11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
+                faction12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
+                faction13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
+                faction14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
+                faction15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
+                faction16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
+                faction17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
+                faction18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
+                faction19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
+                faction20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
+                faction21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
+                faction22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
+                faction23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
+                faction24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
+                faction25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
+                faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
+                faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
+                faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
+
+/* 
+    Like styles, these will need 
+    updating based on faction
+    using NR as default for now
+*/
+// Groups cards based on the divs that they can be placed in
+let combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", "faction1", "faction2", "faction3", "faction12", "faction13", "faction22", "faction23", "faction 25", "faction26", "faction27"];
+let rangedCards = ["neutral10", "faction4", "faction6", "faction14", "faction15", "faction17", "faction20", "faction21"];
+let siegeCards = ["faction5", "faction7", "faction8", "faction9", "faction10", "faction11", "faction18", "faction28"];
+let combatSpies = ["neutral12", "faction16", "faction19"];
+let siegeSpies = ["faction24"];
+/* 
+    Decoy can allow player cards to be selected (except heroes/ decoys) 
+    Commander's horn divs for neutral2 
+    All rows for Scorch and clear weather
+    Corresponding positional player/opponent rows for everything else
+*/
+// Decoy = neutral1
+// Commander's horn = neutral2
+// Scorch = neutral3
+// Biting Frost = neutral4
+// Impenetrable fog = neutral5
+// Torrential rain = neutral6
+// Clear weather = neutral7
 
 let faction;
 let leader;
@@ -207,17 +283,80 @@ socket.on('firstTurn', (PID) => {
     if (myTurn) {
         cards = document.getElementsByClassName('card');
         for (let i=0; i<hand.length; i++) {
-            cards[i].setAttribute("onclick", "playCard(this)");
+            cards[i].setAttribute("onclick", "selectCard(this)");
         }
     }
 });
 
-function playCard(card) {
+function selectCard(card) {
     cardSelectedFlag = true;
     document.getElementById('cardSelected').style = styles[card.id];
     document.getElementById('hand').style = "display: none;"; 
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
+    
+    // TODO
+    // Highlight divs which are available for the card to be placed in
+    // Add onclick to corresponding divs, this needs removing if card is deselected
+    // Need to check if card already present for commander's horn/ weather cards
+    if (combatCards.includes(card.id)) {
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
+    } 
+    else if (rangedCards.includes(card.id)) {
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    else if (siegeCards.includes(card.id)) {
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    else if (combatSpies.includes(card.id)) {
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    else if (siegeSpies.includes(card.id)) {
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    // Decoy
+    else if (card.id === "neutral1") {
+        // Special case, no divs highlighted
+    }
+    // Commander's Horn
+    else if (card.id === "neutral2") {
+        document.getElementById('combatHorn').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('rangedHorn').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('siegeHorn').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    // Biting Frost
+    else if (card.id === "neutral4") {
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
+
+    }
+    // Impenetrable Fog
+    else if (card.id === "neutral5") {
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    // Torrential Rain
+    else if (card.id === "neutral6") {
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    // Card must be Scorch or Clear Weather
+    else {
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+    }
+    
+/* 
+    Decoy can allow player cards to be selected (except heroes/ decoys) 
+    Commander's horn divs for neutral2 
+    All rows for Scorch and clear weather
+    Corresponding positional player/opponent rows for everything else
+*/
 }
+
 
 function showWaitingMsg() {
     document.getElementById('waitingMsg').style = "display: fixed;";
@@ -240,7 +379,7 @@ socket.on('nextTurn', () => {
         myTurn = true;
         hideWaitingMsg();
         for (let i=0; i<hand.length; i++) {
-            cards[i].setAttribute("onclick", "playCard(this)");
+            cards[i].setAttribute("onclick", "selectCard(this)");
         }
     }
 });
@@ -274,7 +413,21 @@ function keyPressed(event) {
     if (event.keyCode === 27 && cardSelectedFlag) {
         cardSelectedFlag = false;
 
+        // Remove card from placeholder at top
         document.getElementById('cardSelected').style = "display: none;";
+        
+        // Remove any div highlights for where card can be placed
+        document.getElementById('combatLane').style = "background: none;";
+        document.getElementById('opCombatLane').style = "background: none;";
+        document.getElementById('rangedLane').style = "background: none;";
+        document.getElementById('opRangedLane').style = "background: none;";
+        document.getElementById('siegeLane').style = "background: none;";
+        document.getElementById('opSiegeLane').style = "background: none;";
+        document.getElementById('combatHorn').style = "background: none;";
+        document.getElementById('rangedHorn').style = "background: none;";
+        document.getElementById('siegeHorn').style = "background: none;";
+        
+        // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
         document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
