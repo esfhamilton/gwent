@@ -226,9 +226,9 @@ function replaceCard(card) {
         replaceLimit += 1;
         document.getElementById('redrawMsg').innerHTML = `Choose a card to redraw. ${replaceLimit}/2`
         // Add card to deck
-        deck.push(card.id);
+        deck.push(selectedCard);
         // Remove card from hand
-        index = hand.indexOf(card.id);
+        index = hand.indexOf(selectedCard);
         if (index > -1) {
           hand.splice(index, 1);
         }
@@ -288,54 +288,63 @@ socket.on('firstTurn', (PID) => {
     }
 });
 
+let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
-    document.getElementById('cardSelected').style = styles[card.id];
+    selectedCard = card.id;
+    document.getElementById('cardSelected').style = styles[selectedCard];
     document.getElementById('hand').style = "display: none;"; 
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
-    // TODO
+    let positions = document.querySelectorAll("combatLane, rangedLane, siegeLane, opCombatLane, opRangedLane, opSiegeLane");
+    for (let i=0; i<positions.length; i++) {
+        positions[i].removeAttribute("onclick");
+    }
+
+    
     // Highlight divs which are available for the card to be placed in
-    // Add onclick to corresponding divs, this needs removing if card is deselected
-    // Need to check if card already present for commander's horn/ weather cards
-    if (combatCards.includes(card.id)) {
+    // TODO Add onclick to corresponding divs, this needs removing if card is deselected
+    // TODO Need to check if card already present for commander's horn/ weather cards
+    if (combatCards.includes(selectedCard)) {
         document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)')
     } 
-    else if (rangedCards.includes(card.id)) {
+    else if (rangedCards.includes(selectedCard)) {
         document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
-    else if (siegeCards.includes(card.id)) {
+    else if (siegeCards.includes(selectedCard)) {
         document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
-    else if (combatSpies.includes(card.id)) {
+    else if (combatSpies.includes(selectedCard)) {
         document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
-    else if (siegeSpies.includes(card.id)) {
+    else if (siegeSpies.includes(selectedCard)) {
         document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
     // Decoy
-    else if (card.id === "neutral1") {
-        // Special case, no divs highlighted
+    else if (selectedCard === "neutral1") {
+        // Special case, no divs highlighted 
+        // TODO add onclick to non-hero cards for decoy switch
     }
     // Commander's Horn
-    else if (card.id === "neutral2") {
+    else if (selectedCard === "neutral2") {
         document.getElementById('combatHorn').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('rangedHorn').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('siegeHorn').style = "background: rgba(255, 233, 0, 0.2);";
     }
     // Biting Frost
-    else if (card.id === "neutral4") {
+    else if (selectedCard === "neutral4") {
         document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
 
     }
     // Impenetrable Fog
-    else if (card.id === "neutral5") {
+    else if (selectedCard === "neutral5") {
         document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
     // Torrential Rain
-    else if (card.id === "neutral6") {
+    else if (selectedCard === "neutral6") {
         document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
@@ -348,15 +357,17 @@ function selectCard(card) {
         document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
         document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
     }
-    
-/* 
-    Decoy can allow player cards to be selected (except heroes/ decoys) 
-    Commander's horn divs for neutral2 
-    All rows for Scorch and clear weather
-    Corresponding positional player/opponent rows for everything else
-*/
 }
 
+function placeCard(boardPos) {
+    let card = document.createElement('div');
+    card.style = styles[selectedCard];
+    card.className = 'card';
+    card.setAttribute("id", selectedCard);
+    document.getElementById(boardPos.id).appendChild(card);
+    boardPos.id.push(selectedCard);
+    // Remove from hand, reshow hand as if esc pressed
+}
 
 function showWaitingMsg() {
     document.getElementById('waitingMsg').style = "display: fixed;";
