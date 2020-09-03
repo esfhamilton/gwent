@@ -11,8 +11,7 @@ socket.emit('startCheck', SID);
 
 // Initialises player faction styles
 /*
-    TODO change to be called styles
-    and set the actual styles based 
+    TODO Set the actual styles based 
     on faction rather than 4 different
     style objects. Call function for this around line 74
 */
@@ -147,6 +146,7 @@ let faction;
 let leader;
 let deck;
 let hand = [];
+let index;
 socket.on('playerAssigned', (FID, leaderID, cards) => {
     faction = FID;
     leader = 'lead'+leaderID;
@@ -226,11 +226,11 @@ function replaceCard(card) {
         replaceLimit += 1;
         document.getElementById('redrawMsg').innerHTML = `Choose a card to redraw. ${replaceLimit}/2`
         // Add card to deck
-        deck.push(selectedCard);
+        deck.push(card.id);
         // Remove card from hand
-        index = hand.indexOf(selectedCard);
+        index = hand.indexOf(card.id);
         if (index > -1) {
-          hand.splice(index, 1);
+            hand.splice(index, 1);
         }
         // Add new card to hand from deck
         card.style = styles[deck[0]];
@@ -250,7 +250,7 @@ function handSelected() {
     document.getElementById('redrawMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
-                                                        &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
+                                                        &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
     
     // Remove onclick functionality until opponent has reselected their cards
     cards = document.getElementsByClassName('card');
@@ -293,6 +293,10 @@ function selectCard(card) {
     cardSelectedFlag = true;
     selectedCard = card.id;
     document.getElementById('cardSelected').style = styles[selectedCard];
+    
+    // Remove card div from hand (this can be recreated if esc pressed)
+    card.parentNode.removeChild(card);
+    
     document.getElementById('hand').style = "display: none;"; 
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
@@ -301,25 +305,27 @@ function selectCard(card) {
         positions[i].removeAttribute("onclick");
     }
 
-    
     // Highlight divs which are available for the card to be placed in
-    // TODO Add onclick to corresponding divs, this needs removing if card is deselected
     // TODO Need to check if card already present for commander's horn/ weather cards
     if (combatCards.includes(selectedCard)) {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)')
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
     } 
     else if (rangedCards.includes(selectedCard)) {
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
     }
     else if (siegeCards.includes(selectedCard)) {
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
     }
     else if (combatSpies.includes(selectedCard)) {
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
     }
     else if (siegeSpies.includes(selectedCard)) {
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
     }
     // Decoy
     else if (selectedCard === "neutral1") {
@@ -328,45 +334,68 @@ function selectCard(card) {
     }
     // Commander's Horn
     else if (selectedCard === "neutral2") {
-        document.getElementById('combatHorn').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('rangedHorn').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('siegeHorn').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('combatHorn').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('rangedHorn').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('siegeHorn').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('combatHorn').setAttribute('onclick','placeCard(this)');
+        document.getElementById('rangedHorn').setAttribute('onclick','placeCard(this)');
+        document.getElementById('siegeHorn').setAttribute('onclick','placeCard(this)');
     }
     // Biting Frost
     else if (selectedCard === "neutral4") {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
 
     }
     // Impenetrable Fog
     else if (selectedCard === "neutral5") {
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opRangedLane').setAttribute('onclick','placeCard(this)');
     }
     // Torrential Rain
     else if (selectedCard === "neutral6") {
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
     }
     // Card must be Scorch or Clear Weather
     else {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.2);";
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.2);";
+        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
+        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opRangedLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
+        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
     }
 }
 
 function placeCard(boardPos) {
-    let card = document.createElement('div');
-    card.style = styles[selectedCard];
-    card.className = 'card';
-    card.setAttribute("id", selectedCard);
-    document.getElementById(boardPos.id).appendChild(card);
-    boardPos.id.push(selectedCard);
-    // Remove from hand, reshow hand as if esc pressed
+    putCardOnBoard(boardPos.id);
+    
+    cardSelectedFlag = false;
+    cancelCardSelection();
+    
+    // Remove card from hand
+    index = hand.indexOf(selectedCard);  
+    if (index > -1) {
+        hand.splice(index, 1);
+    }       
+
+    // Switch turn and pass data to opponent
+    let cardsInHand = document.getElementById("hand").childElementCount;
+    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    socket.emit('switchTurn', SID, selectedCard, boardPos.id, cardsInHand);
 }
 
 function showWaitingMsg() {
@@ -377,7 +406,23 @@ function hideWaitingMsg() {
     document.getElementById('waitingMsg').style = "display: none;";
 }
 
-socket.on('nextTurn', () => {
+// Switches turn after player has passed
+// TODO: Method of checking whether both players have passed their turn 
+socket.on('passedTurn', () => {
+    switchTurn();
+});
+
+// Switches turn after card has been played
+socket.on('nextTurn', (card, pos, opHandSize) => { 
+    selectedCard = card;
+    if (!myTurn){
+        putCardOnBoard(pos);
+        document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    }
+    switchTurn();
+});
+
+function switchTurn() {
     cards = document.getElementsByClassName('card');
     if (myTurn) {
         myTurn = false;
@@ -393,7 +438,15 @@ socket.on('nextTurn', () => {
             cards[i].setAttribute("onclick", "selectCard(this)");
         }
     }
-});
+}
+
+function putCardOnBoard(posID) {
+    let card = document.createElement('div');
+    card.style = styles[selectedCard];
+    card.className = 'cardSmall';
+    card.setAttribute("id", selectedCard);
+    document.getElementById(posID).appendChild(card);
+}
 
 let handHiddenFlag = false;
 let handSelectedFlag = false;
@@ -409,13 +462,14 @@ function keyPressed(event) {
     if (event.keyCode === 69 && handChosen && !cardSelectedFlag) {
         if (handHiddenFlag) {
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards                                                                    &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip                                                              Turn`;
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
             handHiddenFlag = false;
         }
         else {
             document.getElementById('hand').style = "display: none;";           
             document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
-                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
+                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
             handHiddenFlag = true;
         }
     }
@@ -423,7 +477,24 @@ function keyPressed(event) {
     // Esc pressed AND a card has been selected
     if (event.keyCode === 27 && cardSelectedFlag) {
         cardSelectedFlag = false;
+        cancelCardSelection();
+        
+        // Recreate card in hand
+        let card = document.createElement('div');
+        card.style = styles[selectedCard];
+        card.className = 'card';
+        card.setAttribute("id", selectedCard);
+        card.setAttribute("onclick", 'selectCard(this)');
+        document.getElementById('hand').appendChild(card);
+    }
+    
+    // Space pressed AND it is player's turn AND card is not selected
+    if (event.keyCode===32 && myTurn && !cardSelectedFlag) {
+        socket.emit('passTurn', SID);
+    }
+}
 
+function cancelCardSelection() {
         // Remove card from placeholder at top
         document.getElementById('cardSelected').style = "display: none;";
         
@@ -438,14 +509,19 @@ function keyPressed(event) {
         document.getElementById('rangedHorn').style = "background: none;";
         document.getElementById('siegeHorn').style = "background: none;";
         
+        // Remove any div onclicks
+        document.getElementById('combatLane').removeAttribute("onclick");
+        document.getElementById('opCombatLane').removeAttribute("onclick");
+        document.getElementById('rangedLane').removeAttribute("onclick");
+        document.getElementById('opRangedLane').removeAttribute("onclick");
+        document.getElementById('siegeLane').removeAttribute("onclick");
+        document.getElementById('opSiegeLane').removeAttribute("onclick");
+        document.getElementById('combatHorn').removeAttribute("onclick");
+        document.getElementById('rangedHorn').removeAttribute("onclick");
+        document.getElementById('siegeHorn').removeAttribute("onclick");
+        
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
         document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
-                                                             &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;Skip Turn`;
-    }
-    
-    // Space pressed AND it is player's turn AND card is not selected
-    if (event.keyCode===32 && myTurn && !cardSelectedFlag) {
-        socket.emit('skipTurn', SID);
-    }
+                                                             &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
 }

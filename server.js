@@ -138,8 +138,21 @@ io.on('connection', (socket) => {
     });
     
     // Informs both players to switch their myTurn variable
-    socket.on('skipTurn', (SID) => {
-        io.in(SID).emit('nextTurn');
+    socket.on('passTurn', (SID) => {
+        io.in(SID).emit('passedTurn');
+    });
+    
+    // Switches turn and passes on player choice to opponent 
+    socket.on('switchTurn', (SID, card, pos, cardsInHand) => {
+        let updatedPos;
+        // Amend capital and remove op if exists, else add op to string header
+        if (pos.substring(0,2) === 'op') {
+            updatedPos = pos.substring(2,3).toLowerCase()+pos.substring(3);
+        }
+        else {
+            updatedPos = 'op'+pos.substring(0,1).toUpperCase()+pos.substring(1);
+        }
+        io.in(SID).emit('nextTurn', card, updatedPos, cardsInHand);
     });
     
     socket.on('disconnect', () => {

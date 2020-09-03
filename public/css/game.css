@@ -44,6 +44,8 @@ p {
     font-size: 140%;  
 }
 
+
+
 /* ------ GAME COMPONENTS ------ */
 
 .board {
@@ -246,29 +248,39 @@ p {
 }
 
 
+
 /* CARDS IN PLAY */
+
+.cardSmall {
+    float: left;
+    /* TODO Margin needs to change depending on amount of cards */
+    margin-left: 5px;
+    height: 105px;
+    width: 63px;
+}
+
 /* one item */
-li:first-child:nth-last-child(1) {
+cardSmall:first-child:nth-last-child(1) {
 /* -or- li:only-child { */
-    width: 100%;
+    margin-left: 90px;
 }
 
 /* two items */
-li:first-child:nth-last-child(2),
-li:first-child:nth-last-child(2) ~ li {
-    width: 50%;
+cardSmall:first-child:nth-last-child(2),
+cardSmall:first-child:nth-last-child(2) ~ cardSmall {
+    margin-left: 70px;
 }
 
 /* three items */
-li:first-child:nth-last-child(3),
-li:first-child:nth-last-child(3) ~ li {
-    width: 33.3333%;
+cardSmall:first-child:nth-last-child(3),
+cardSmall:first-child:nth-last-child(3) ~ cardSmall {
+    margin-left: 50px;
 }
 
 /* four items */
-li:first-child:nth-last-child(4),
-li:first-child:nth-last-child(4) ~ li {
-    width: 25%;
+cardSmall:first-child:nth-last-child(4),
+cardSmall:first-child:nth-last-child(4) ~ cardSmall {
+    margin-left: 20px;
 }
 
 
