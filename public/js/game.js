@@ -12,7 +12,7 @@ socket.emit('startCheck', SID);
 // Initialises player faction styles
 /*
     TODO Set the actual styles based 
-    on faction rather than 4 different
+    on faction rather than 8 different
     style objects. Call function for this around line 74
 */
 let styles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
@@ -117,6 +117,46 @@ let opStyles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; d
                 faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
                 faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
 
+// Uses an array for each card showing: Base power, current power & hero flag
+let cardPower = {neutral8:[15,15,1],
+                neutral9:[15,15,1],
+                neutral10:[7,7,1],
+                neutral11:[7,7,1],
+                neutral12:[0,0,1],
+                neutral13:[7,7,0],
+                neutral14:[6,6,0],
+                neutral15:[5,5,0],
+                neutral16:[5,5,0],
+                neutral17:[2,2,0],
+                faction1:[10,10,1],
+                faction2:[10,10,1],
+                faction3:[10,10,1],
+                faction4:[10,10,1],
+                faction5:[8,8,0],
+                faction6:[6,6,0],
+                faction7:[6,6,0],
+                faction8:[6,6,0],
+                faction9:[6,6,0],
+                faction10:[6,6,0],
+                faction11:[6,6,0],
+                faction12:[5,5,0],
+                faction13:[5,5,0],
+                faction14:[5,5,0],
+                faction15:[5,5,0],
+                faction16:[5,5,0],
+                faction17:[5,5,0],
+                faction18:[5,5,0],
+                faction19:[4,4,0],
+                faction20:[4,4,0],
+                faction21:[4,4,0],
+                faction22:[4,4,0],
+                faction23:[2,2,0],
+                faction24:[1,1,0],
+                faction25:[1,1,0],
+                faction26:[1,1,0],
+                faction27:[1,1,0],
+                faction28:[1,1,0]};
+
 /* 
     Like styles, these will need 
     updating based on faction
@@ -153,21 +193,6 @@ socket.on('playerAssigned', (FID, leaderID, cards) => {
     deck = shuffle(cards);
 });
 
-let opponentFaction;
-let opponentLeader;
-let opponentDeckSize;
-socket.on('opponentDeck', (opponentFID, opponentLID, opDeckSize) => {
-    opponentFaction = opponentFID;
-    opponentLeader = 'lead'+opponentLID;
-    opponentDeckSize = opDeckSize;
-    setup()
-});
-
-socket.on('startGame', () => {
-    document.getElementById('waitingMsg').innerHTML = "Starting game...";
-    socket.emit('getOpponentDeck', SID, player);
-});
-
 function shuffle(deck) {
   var currentIndex = deck.length, temporaryValue, randomIndex;
 
@@ -185,16 +210,41 @@ function shuffle(deck) {
   return deck;
 }
 
+socket.on('startGame', () => {
+    document.getElementById('waitingMsg').innerHTML = "Starting game...";
+    socket.emit('getOpponentDeck', SID, player);
+});
+
+let opponentFaction;
+let opponentLeader;
+let opponentDeckSize;
+socket.on('opponentDeck', (opponentFID, opponentLID, opDeckSize) => {
+    opponentFaction = opponentFID;
+    opponentLeader = 'lead'+opponentLID;
+    opponentDeckSize = opDeckSize-10;
+    setup();
+});
+
+
+
 // The amount of cards the player draws at the start
 let initDraw = 10;
 function setup() {
     document.addEventListener("keydown",keyPressed);
     document.getElementById('redrawMsg').style = "display: fixed;";
     document.getElementById('redrawMsg2').style = "display: fixed;";
-    document.getElementById('pDeckSize').innerHTML = deck.length;
+    document.getElementById('pDeckSize').innerHTML = deck.length-10;
     document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
+    document.getElementById('opTotalPower').innerHTML = 0;
+    document.getElementById('opSiegePower').innerHTML = 0;
+    document.getElementById('opRangedPower').innerHTML = 0;
+    document.getElementById('opCombatPower').innerHTML = 0;
+    document.getElementById('combatPower').innerHTML = 0;
+    document.getElementById('rangedPower').innerHTML = 0;
+    document.getElementById('siegePower').innerHTML = 0;
+    document.getElementById('totalPower').innerHTML = 0;
     document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     document.getElementById('opponentStats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     
@@ -381,21 +431,41 @@ function selectCard(card) {
 }
 
 function placeCard(boardPos) {
-    putCardOnBoard(boardPos.id);
-    
+    let boardPosID = boardPos.id;
     cardSelectedFlag = false;
     cancelCardSelection();
+    // TODO: Special cards need to go in corresponding positions
+    // Displays card in corresponding location
+    putCardOnBoard(boardPosID);
+    // Updates power values for corresponding lane(s)
+    updatePowerValues(boardPosID);
     
     // Remove card from hand
     index = hand.indexOf(selectedCard);  
     if (index > -1) {
         hand.splice(index, 1);
     }       
-
+    
+    // Draw 2 cards if card placed was a spy
+    if (combatSpies.includes(selectedCard) || siegeSpies.includes(selectedCard)) {
+        for (let i=0;i<2;i++){
+            if (deck.length != 0) {
+                let card = document.createElement('div');
+                card.style = styles[deck[0]];
+                card.className = 'card';
+                card.setAttribute("id", deck[0]);
+                document.getElementById('hand').appendChild(card);
+                hand.push(deck[0]);
+                deck.shift();
+                document.getElementById('pDeckSize').innerHTML = deck.length;
+            }
+        }
+    }
+    
     // Switch turn and pass data to opponent
     let cardsInHand = document.getElementById("hand").childElementCount;
     document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-    socket.emit('switchTurn', SID, selectedCard, boardPos.id, cardsInHand);
+    socket.emit('switchTurn', SID, selectedCard, boardPosID, cardsInHand);
 }
 
 function showWaitingMsg() {
@@ -407,7 +477,6 @@ function hideWaitingMsg() {
 }
 
 // Switches turn after player has passed
-// TODO: Method of checking whether both players have passed their turn 
 socket.on('passedTurn', () => {
     switchTurn();
 });
@@ -421,6 +490,17 @@ socket.on('nextTurn', (card, pos, opHandSize) => {
     }
     switchTurn();
 });
+
+// No turn switch after card has been played
+socket.on('returnTurn', (card, pos, opHandSize) => { 
+    // TODO
+});
+     
+// Decide who round winner is based on total values and run any faction rules
+socket.on('endRound', () => { 
+    // TODO
+});
+          
 
 function switchTurn() {
     cards = document.getElementsByClassName('card');
@@ -440,12 +520,32 @@ function switchTurn() {
     }
 }
 
+// TODO: Either work with the ul elements in the html or remove these
 function putCardOnBoard(posID) {
     let card = document.createElement('div');
     card.style = styles[selectedCard];
     card.className = 'cardSmall';
     card.setAttribute("id", selectedCard);
     document.getElementById(posID).appendChild(card);
+}
+
+let powerLevels = {"opSiegePower":0,
+                  "opRangedPower":0,
+                  "opCombatPower":0,
+                  "opTotalPower":0,    
+                  "combatPower":0,
+                  "rangedPower":0,
+                  "siegePower":0,
+                  "totalPower":0};
+function updatePowerValues(posID) {
+    // String to identify the corresponding power level to update
+    let powerStr = posID.substring(0,posID.length-4)+"Power";
+    powerLevels[powerStr] += cardPower[selectedCard][1];
+    document.getElementById(powerStr).innerHTML = powerLevels[powerStr];
+    powerLevels["totalPower"] = powerLevels["combatPower"] + powerLevels["rangedPower"] + powerLevels["siegePower"];
+    powerLevels["opTotalPower"] = powerLevels["opCombatPower"] + powerLevels["opRangedPower"] + powerLevels["opSiegePower"];
+    document.getElementById("opTotalPower").innerHTML = powerLevels["opTotalPower"];
+    document.getElementById("totalPower").innerHTML = powerLevels["totalPower"];
 }
 
 let handHiddenFlag = false;

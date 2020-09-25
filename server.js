@@ -13,6 +13,7 @@ let openRooms = [];
 let startCheck = {};
 let gameData = {};
 let redrawnCheck = {};
+let roomPassCount = {};
 
 io.on('connection', (socket) => {
     socket.on('joinRequest', (SID) => {                
@@ -51,7 +52,7 @@ io.on('connection', (socket) => {
         // Join room and add corresponding SID to openRooms
         socket.join(SID);
         socket.emit('validRoom', SID);
-        console.log(`Room: ${SID} successfully created`);
+        console.log(`Room: ${SID} successfully created`); // LOGGING
         openRooms.push(SID);     
     });
     
@@ -59,13 +60,13 @@ io.on('connection', (socket) => {
     socket.on('rejoinRequest', (SID) => {         
         if (openRooms.includes(SID)){
             socket.join(SID);    
-            console.log(`Room: ${SID} successfully rejoined`);
+            console.log(`Room: ${SID} successfully rejoined`); // LOGGING
         } 
         else {
             // Room needs recreating (pushing to openRooms)
             socket.join(SID);
             openRooms.push(SID);   
-            console.log(`Room: ${SID} successfully recreated`);
+            console.log(`Room: ${SID} successfully recreated`); // LOGGING
         }           
     });
     
@@ -108,8 +109,7 @@ io.on('connection', (socket) => {
         }
         else {
             OID = SID + 'A';
-            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length);
-            
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length); 
         }
     });
     
@@ -118,6 +118,7 @@ io.on('connection', (socket) => {
         if ((SID+'A') in startCheck && (SID+'B') in startCheck) {
             delete startCheck[SID+'A'];
             delete startCheck[SID+'B'];
+            roomPassCount[SID] = 0;
             io.in(SID).emit('startGame');
         } 
     });
@@ -137,9 +138,26 @@ io.on('connection', (socket) => {
         }
     });
     
-    // Informs both players to switch their myTurn variable
+    /* 
+        - Increments value in roomPassCount
+        - if this value === 1 when playing card
+          then turn is returned to the player
+          (implemented in switchTurn)                   TODO
+        - if value === 2 then check total points
+          and decide round winner. Revert to 0.
+        - if no lives left decide game winner.
+        
+    */
+    // TODO: SOMETHING TO SHOW PLAYER HAS PASSED i.e. "PASS" over leader card
     socket.on('passTurn', (SID) => {
-        io.in(SID).emit('passedTurn');
+        roomPassCount[SID] += 1;
+        if (roomPassCount[SID] === 2) {
+            roomPassCount[SID] = 0;
+            io.in(SID).emit('endRound');
+        }
+        else {
+            io.in(SID).emit('passedTurn');
+        }
     });
     
     // Switches turn and passes on player choice to opponent 
@@ -152,7 +170,14 @@ io.on('connection', (socket) => {
         else {
             updatedPos = 'op'+pos.substring(0,1).toUpperCase()+pos.substring(1);
         }
-        io.in(SID).emit('nextTurn', card, updatedPos, cardsInHand);
+        
+        // Return turn to player if opponent has passed their turn, else switch turn
+        if (roomPassCount[SID] === 1){
+            io.in(SID).emit('returnTurn', card, updatedPos, cardsInHand);
+        }
+        else {
+            io.in(SID).emit('nextTurn', card, updatedPos, cardsInHand);
+        }
     });
     
     socket.on('disconnect', () => {
@@ -163,6 +188,9 @@ io.on('connection', (socket) => {
             if (numClients === undefined){
                 if (index > -1) {
                     openRooms.splice(index, 1);
+                }
+                if (roomPassCount.contains(SID)) {
+                    delete roomPassCount[SID];
                 }
             }
         });

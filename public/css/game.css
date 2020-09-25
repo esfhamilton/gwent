@@ -53,7 +53,6 @@ p {
     background-position: center;
 	background-repeat:no-repeat;
     background-size: 95%;
-    /*background-size: 1500px 715px;*/
     height: 100%;
     width: auto;
 }
@@ -61,7 +60,6 @@ p {
 .hand {
     position: fixed;
     bottom: 30%;
-    /*bottom: 20px for after reselection*/
     left: 50%;
     margin-left: -400px;
 }
@@ -80,8 +78,6 @@ p {
 
 .playerLeader {
     position: fixed;   
-    /*height: 180px;
-    width: 108px;*/
     height: 132px;
     width: 88px;
     bottom: 11%;
@@ -90,8 +86,6 @@ p {
 
 .opponentLeader {
     position: fixed;   
-    /*height: 180px;
-    width: 108px;*/
     height: 132px;
     width: 88px;
     top: 11%;
@@ -116,7 +110,7 @@ p {
     right: 155px;
 }
 
-/* 12 LANE AND HORN PLACEHOLDERS */
+/* 12 LANE, HORN & POWER PLACEHOLDERS */
 .opSiegeLane {
     position: fixed;   
     height: 105px;
@@ -131,6 +125,12 @@ p {
     top: 1.2%;
     left: 29%;
 }
+.opSiegePower {
+    position: fixed; 
+    top: 7%;
+    left: 25%;
+}
+
 .opRangedLane {
     position: fixed;   
     height: 105px;
@@ -145,6 +145,12 @@ p {
     top: 18%;
     left: 29%;
 }
+.opRangedPower {
+    position: fixed; 
+    top: 23.8%;
+    left: 25%;
+}
+
 .opCombatLane {
     position: fixed;   
     height: 105px;
@@ -159,6 +165,12 @@ p {
     top: 34%;
     left: 29%;
 }
+.opCombatPower {
+    position: fixed; 
+    top: 39.8%;
+    left: 25%;
+}
+
 .combatLane {
     position: fixed;   
     height: 105px;
@@ -173,6 +185,12 @@ p {
     bottom: 34%;
     left: 29%;
 }
+.combatPower {
+    position: fixed; 
+    bottom: 39.8%;
+    left: 25%;
+}
+
 .rangedLane {
     position: fixed;   
     height: 105px;
@@ -187,6 +205,12 @@ p {
     bottom: 18%;
     left: 29%;
 }
+.rangedPower {
+    position: fixed; 
+    bottom: 23.8%;
+    left: 25%;
+}
+
 .siegeLane {
     position: fixed;   
     height: 105px;
@@ -200,6 +224,39 @@ p {
     width: 115px;
     bottom: 1.2%;
     left: 29%;
+}
+.siegePower {
+    position: fixed; 
+    bottom: 7%;
+    left: 25%;
+}
+
+.opCombatPower,
+.opRangedPower,
+.opSiegePower {
+    font-size: 130%;
+    color: #aaefff;
+}
+.combatPower,
+.rangedPower,
+.siegePower {
+    font-size: 130%;
+    color: #ffff87;
+}
+
+.opTotalPower {
+    position: fixed;
+    left: 270px;
+    top: 33%;
+    font-size: 200%;
+    color: #aaefff;
+}
+.totalPower {
+    position: fixed;
+    left: 270px;
+    bottom: 33%;
+    font-size: 200%;
+    color: #ffff87;
 }
 
 .instructions {
