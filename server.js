@@ -189,9 +189,6 @@ io.on('connection', (socket) => {
                 if (index > -1) {
                     openRooms.splice(index, 1);
                 }
-                if (roomPassCount.includes(SID)) {
-                    delete roomPassCount[SID];
-                }
             }
         });
     });
