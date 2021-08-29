@@ -139,10 +139,11 @@ io.on('connection', (socket) => {
     });
     
     /* 
+        TODO
         - Increments value in roomPassCount
         - if this value === 1 when playing card
           then turn is returned to the player
-          (implemented in switchTurn)                   TODO
+          (implemented in switchTurn)                   
         - if value === 2 then check total points
           and decide round winner. Revert to 0.
         - if no lives left decide game winner.

@@ -436,22 +436,14 @@ function updateAvailableCards(id,availabilityID) {
     }
 }
 
-/*
-    NEXT STEPS
-    Add array to store deck/ faction/ leader/ everything needed...
-    Add Next button to transition to game.html
-    socket emit all chosen cards/ leader
-    server side will store user deck under player x and SID
-    on game.html load this data will be retrieved from server
-*/
-
 function submit() {
     if (leader===0) {
         document.getElementById('info').innerHTML = "You need to select a leader first.";
     }
     else {
-        if (deck.length<0) {
-            document.getElementById('info').innerHTML = "Your deck is too weak. Add at least 20 cards before proceeding.";
+        // TODO: Add function which counts total unit cards instead of all cards
+        if (deck.length<23) {
+            document.getElementById('info').innerHTML = "Your deck is weak. Add at least 22 unit cards before proceeding.";
         }
         else {
             // Send player's deck, leader and SID info to server
@@ -463,5 +455,5 @@ function submit() {
 socket.on('playerAssignment', (PID) => {
     // TESTING: localhost:5000
     // LIVE: gwent-io.herokuapp.com
-    location.replace(`http://gwent-io.herokuapp.com/game.html?SID=${SID}&player=${PID}`);
+    location.replace(`http://localhost:5000/game.html?SID=${SID}&player=${PID}`);
 });

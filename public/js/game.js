@@ -484,23 +484,104 @@ socket.on('passedTurn', () => {
 // Switches turn after card has been played
 socket.on('nextTurn', (card, pos, opHandSize) => { 
     selectedCard = card;
+    
+        
     if (!myTurn){
+        if (pos[0] != 'o'){
+            opponentDeckSize -= 2;
+            console.log(opponentDeckSize);
+            document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
+        }
         putCardOnBoard(pos);
         document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+        updatePowerValues(pos);
     }
     switchTurn();
 });
 
 // No turn switch after card has been played
 socket.on('returnTurn', (card, pos, opHandSize) => { 
-    // TODO
+    selectedCard = card;
+    if (!myTurn){
+        putCardOnBoard(pos);
+        document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+        updatePowerValues(pos);
+    }
 });
      
 // Decide who round winner is based on total values and run any faction rules
+let pLife = 2;
+let oLife = 2;
 socket.on('endRound', () => { 
-    // TODO
+    // Remove all cards from table and put into discard pile
+    // Do this after adding extra arrays for cards in each lane
+    
+    // Adjust lives for players
+    removeLife();
+    
+    // Reset Scores
+    for (let key in powerLevels){
+        powerLevels[key] = 0;
+        document.getElementById(key).innerHTML = 0;
+    }
+    
+    // Move cards into discard arrays and remove from board
+    clearCards();
+    
+    
+    
+    // Create Discard Piles
 });
-          
+
+function removeLife() {
+    // Player has won
+    if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
+        document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
+        oLife -= 1;
+    }
+    // Tie
+    else if(powerLevels["totalPower"] == powerLevels["opTotalPower"]) {
+        document.getElementById('heart'+String(pLife)).style = "color:grey;";
+        document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
+        pLife -= 1;
+        oLife -= 1;
+    }
+    // Player has lost 
+    else {
+        document.getElementById('heart'+String(pLife)).style = "color:grey;";
+        pLife -= 1;
+    }
+    
+    // TODO Check if game is over
+    if(pLife == 0){
+        // TODO
+        socket.emit('', SID, selectedCard, boardPosID, cardsInHand);
+    }
+}
+
+const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"]
+let discardRows = {"opSiegeLaneDs":[],
+                  "opRangedLaneDs":[],
+                  "opCombatLaneDs":[],
+                  "opTotalDs":[],    
+                  "combatLaneDs":[],
+                  "rangedLaneDs":[],
+                  "siegeLaneDs":[],
+                  "totalDs":[]};
+function clearCards() {
+    // Move cards into corresponding discardRows
+    rowIDs.forEach((row) => {
+                   let len = $("."+row).find('.cardSmall')["length"];
+                   for (let i=0; i<len; i++) {
+                       discardRows[row+'Ds'].push($("."+row).find('.cardSmall')[i]['id']);
+                   }
+                });
+    discardRows["opTotalDs"] = discardRows["opCombatLaneDs"].concat(discardRows["opRangedLaneDs"], discardRows["opSiegeLaneDs"]);    
+    discardRows["totalDs"] = discardRows["combatLaneDs"].concat(discardRows["rangedLaneDs"], discardRows["siegeLaneDs"]);    
+    
+    // Remove Cards from Board
+    $('.cardSmall').remove();
+}
 
 function switchTurn() {
     cards = document.getElementsByClassName('card');
@@ -520,7 +601,6 @@ function switchTurn() {
     }
 }
 
-// TODO: Either work with the ul elements in the html or remove these
 function putCardOnBoard(posID) {
     let card = document.createElement('div');
     card.style = styles[selectedCard];
@@ -622,6 +702,6 @@ function cancelCardSelection() {
         
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
-        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
+        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
 }

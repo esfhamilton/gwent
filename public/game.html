@@ -17,14 +17,13 @@
             <!--Stats contain info regarding hand size & lives-->
             <div class="pStats" id="pStats" style="display: none;">
                 <p id="stats" style="color: gold"><span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
-                <!--for lost lives: data-icon="ion:heart-dislike" -->
-                <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
-                <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
+                <span id="heart1" class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
+                <span id="heart2" class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
             </div>
             <div class="oStats" id="oStats" style="display: none;">
                 <p id="opponentStats" style="color: gold"><span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>
-                <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
-                <span class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
+                <span id="oHeart1" class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
+                <span id="oHeart2" class="iconify" data-icon="ion:heart" data-inline="false" style="color: red"></span>
             </div>
             <div class="playerLeader" id="playerLeader"></div>
             <div class="opponentLeader" id="opponentLeader"></div>
@@ -35,24 +34,23 @@
                 <p class="deckSize" id="oDeckSize"></p>
             </div>
             
-            <!--Lanes display cards like hand div-->
-            <div class="opSiegeLane" id="opSiegeLane"><ul id="OSL"></ul></div>
+            <div class="opSiegeLane" id="opSiegeLane"></div>
             <div class="opSiegeHorn" id="opSiegeHorn"></div>
             <div class="opSiegePower" id="opSiegePower"></div>
-            <div class="opRangedLane" id="opRangedLane"><ul id="ORL"></ul></div>
+            <div class="opRangedLane" id="opRangedLane"></div>
             <div class="opRangedHorn" id="opRangedHorn"></div>
             <div class="opRangedPower" id="opRangedPower"></div>
-            <div class="opCombatLane" id="opCombatLane"><ul id="OCL"></ul></div>
+            <div class="opCombatLane" id="opCombatLane"></div>
             <div class="opCombatHorn" id="opCombatHorn"></div>
             <div class="opCombatPower" id="opCombatPower"></div>
             <div class="opTotalPower" id="opTotalPower"></div>
-            <div class="combatLane" id="combatLane"><ul id="CL"></ul></div>
+            <div class="combatLane" id="combatLane"></div>
             <div class="combatHorn" id="combatHorn"></div>
             <div class="combatPower" id="combatPower"></div>
-            <div class="rangedLane" id="rangedLane"><ul id="RL"></ul></div>
+            <div class="rangedLane" id="rangedLane"></div>
             <div class="rangedHorn" id="rangedHorn"></div>
             <div class="rangedPower" id="rangedPower"></div>
-            <div class="siegeLane" id="siegeLane"><ul id="SL"></ul></div>
+            <div class="siegeLane" id="siegeLane"></div>
             <div class="siegeHorn" id="siegeHorn"></div>
             <div class="siegePower" id="siegePower"></div>
             <div class="totalPower" id="totalPower"></div>
@@ -65,6 +63,7 @@
                 integrity="sha256-ijqLssetA1NMNjZ+w1zaUafQQLm4IW5OoM8O+4tatME=" 
                 crossorigin="anonymous">
         </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script src="js/game.js"></script>        
     </body>

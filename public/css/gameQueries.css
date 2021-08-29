@@ -1,24 +1,14 @@
-@media only screen and (max-width: 480px) {
-
-}
-
-@media only screen and (max-width: 618px) { 
-
-}
-
-@media only screen and (max-width: 767px) {
-
-}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 @media only screen and (max-width: 1023px) {
+    /* Display message to increase screensize */
+}
+
+@media only screen and (min-width: 1023px) and (max-width: 1200px) {
 
 }
 
-@media only screen and (max-width: 1200px) {
-
-}
-
-@media only screen and (max-width: 1366px) {
+@media only screen and (min-width: 1200px) and (max-width: 1366px) {
     
     .hand {
         left: 50%;
@@ -135,4 +125,77 @@
         height: 144px;
         width: 86px;
     }
+}
+
+
+@media only screen and (min-width: 1366px) and (max-width: 1440px) {
+    .playerLeader,
+    .opponentLeader,
+    .playerDeck,
+    .opponentDeck {
+        height: 123px;
+        width: 85px;
+    }
+    
+    .playerLeader,
+    .opponentLeader {
+        left: 130px;
+    }
+    
+    .playerLeader{
+        bottom: 15%;
+    }
+    
+    .opponentLeader {
+        top: 15%;
+    }
+
+    .playerDeck,
+    .opponentDeck {
+        right: 145px;
+    }
+    
+    .playerDeck{
+        bottom: 27%;
+    }
+    
+    .opponentDeck{
+        top: 27%;
+    }
+}
+
+/* TODO and update higher res */
+@media only screen and (min-width: 1440px) and (max-width: 1600px) {
+
+}
+
+
+@media only screen and (min-width: 1441px) and (max-width: 1920px) {
+    .playerLeader,
+    .opponentLeader,
+    .playerDeck,
+    .opponentDeck {
+        height: 163px;
+        width: 112px;
+    }
+    
+    .playerLeader,
+    .opponentLeader {
+        left: 167px;
+    }
+    
+    .playerLeader{
+        bottom: 12%;
+    }
+    
+    .opponentLeader {
+        top: 12%;
+    }
+
+    .playerDeck,
+    .opponentDeck {
+        right: 195px;
+    }
+    
+
 }

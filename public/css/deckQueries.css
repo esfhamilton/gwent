@@ -29,3 +29,15 @@
         width: 115px;
     }
 }
+
+@media only screen and (max-width: 1980px) {
+    .leaderCard {
+        height: 192px;
+        width: 115px;
+    }
+
+    .card {
+        height: 192px;
+        width: 115px;
+    }
+}
