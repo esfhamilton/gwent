@@ -25,21 +25,25 @@
         left: 140px;
     }
     
-    .playerLeader,
-    .opponentLeader,
-    .playerDeck,
-    .opponentDeck {
+    .pLeader,
+    .oLeader,
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc {
         height: 107px;
         width: 71px;
     }
 
-    .playerLeader,
-    .opponentLeader {
+    .pLeader,
+    .oLeader {
         left: 127px;
     }
 
-    .playerDeck,
-    .opponentDeck {
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc {
         right: 144px;
     }
     
@@ -129,37 +133,41 @@
 
 
 @media only screen and (min-width: 1366px) and (max-width: 1440px) {
-    .playerLeader,
-    .opponentLeader,
-    .playerDeck,
-    .opponentDeck {
+    .pLeader,
+    .oLeader,
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc {
         height: 123px;
         width: 85px;
     }
     
-    .playerLeader,
-    .opponentLeader {
+    .pLeader,
+    .oLeader {
         left: 130px;
     }
     
-    .playerLeader{
+    .pLeader{
         bottom: 15%;
     }
     
-    .opponentLeader {
+    .oLeader {
         top: 15%;
     }
 
-    .playerDeck,
-    .opponentDeck {
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc {
         right: 145px;
     }
     
-    .playerDeck{
+    .pDeck{
         bottom: 27%;
     }
     
-    .opponentDeck{
+    .oDeck{
         top: 27%;
     }
 }
@@ -171,29 +179,33 @@
 
 
 @media only screen and (min-width: 1441px) and (max-width: 1920px) {
-    .playerLeader,
-    .opponentLeader,
-    .playerDeck,
-    .opponentDeck {
+    .pLeader,
+    .oLeader,
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc {
         height: 163px;
         width: 112px;
     }
     
-    .playerLeader,
-    .opponentLeader {
+    .pLeader,
+    .oLeader {
         left: 167px;
     }
     
-    .playerLeader{
+    .pLeader{
         bottom: 12%;
     }
     
-    .opponentLeader {
+    .oLeader {
         top: 12%;
     }
 
-    .playerDeck,
-    .opponentDeck {
+    .pDeck,
+    .oDeck,
+    .pDisc,
+    .oDisc { {
         right: 195px;
     }
     

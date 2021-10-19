@@ -58,22 +58,32 @@ io.on('connection', (socket) => {
     
     // Reconnects user to room with each new page
     socket.on('rejoinRequest', (SID) => {         
-        if (openRooms.includes(SID)){
-            socket.join(SID);    
-            console.log(`Room: ${SID} successfully rejoined`); // LOGGING
-        } 
-        else {
-            // Room needs recreating (pushing to openRooms)
+        var numClients = io.sockets.adapter.rooms[''+SID];
+        // Room needs to be recreated
+        if (!openRooms.includes(SID)){
             socket.join(SID);
             openRooms.push(SID);   
             console.log(`Room: ${SID} successfully recreated`); // LOGGING
-        }           
+        }
+        if (numClients != undefined){
+            if (numClients.length<2){
+                // Authorise join request
+                socket.join(SID);
+                console.log(`Room: ${SID} successfully rejoined`);                
+            } 
+            else {
+                // Room is full, only 2 people can enter a room at a time
+                console.log(`Room: ${SID} is full.`);
+                socket.emit('full', SID);
+            }
+        }       
     });
     
     // Gets player details from client and stores them on server
     socket.on('playerDeck', (SID, leader, deck, faction) => {
         let playerA = SID +'A';
         let playerB = SID +'B'; 
+        
         // Check if first player has already been added
         if (playerA in gameData) {
             // Add data under player B
@@ -92,12 +102,18 @@ io.on('connection', (socket) => {
     // Returns corresponding deck to the player
     socket.on('getPlayerDeck', (SID, player) => {
         let PID = SID + player;
-        startCheck[PID] = "Added";
-        if (player === 'A') { 
-            socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]);
-        }
-        else {
-            socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]); 
+        // Catch if game has been entered without a deck
+        if(gameData[PID] != undefined){
+            startCheck[PID] = "Added";
+            if (player === 'A') { 
+                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]);
+            }
+            else {
+                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]); 
+            }
+        } 
+        else{
+            socket.emit('noDeck');
         }
     });
     
@@ -149,7 +165,7 @@ io.on('connection', (socket) => {
         - if no lives left decide game winner.
         
     */
-    // TODO: SOMETHING TO SHOW PLAYER HAS PASSED i.e. "PASS" over leader card
+
     socket.on('passTurn', (SID) => {
         roomPassCount[SID] += 1;
         if (roomPassCount[SID] === 2) {
@@ -162,23 +178,32 @@ io.on('connection', (socket) => {
     });
     
     // Switches turn and passes on player choice to opponent 
-    socket.on('switchTurn', (SID, card, pos, cardsInHand) => {
-        let updatedPos;
-        // Amend capital and remove op if exists, else add op to string header
-        if (pos.substring(0,2) === 'op') {
-            updatedPos = pos.substring(2,3).toLowerCase()+pos.substring(3);
-        }
-        else {
-            updatedPos = 'op'+pos.substring(0,1).toUpperCase()+pos.substring(1);
+    socket.on('switchTurn', (SID, cardIDs, posIDs, cardsInHand) => {
+        let switchedPosIDs = [];
+        for (let i=0; i<posIDs.length; i++){
+            // Amend capital and remove op if exists, else add op to string header
+            if (posIDs[i].substring(0,2) === 'op') {
+                switchedPosIDs.push(posIDs[i].substring(2,3).toLowerCase()+posIDs[i].substring(3));
+            }
+            else {
+                switchedPosIDs.push('op'+posIDs[i].substring(0,1).toUpperCase()+posIDs[i].substring(1));
+            }
         }
         
         // Return turn to player if opponent has passed their turn, else switch turn
         if (roomPassCount[SID] === 1){
-            io.in(SID).emit('returnTurn', card, updatedPos, cardsInHand);
+            io.in(SID).emit('returnTurn', cardIDs, switchedPosIDs, cardsInHand);
         }
         else {
-            io.in(SID).emit('nextTurn', card, updatedPos, cardsInHand);
+            io.in(SID).emit('nextTurn', cardIDs, switchedPosIDs, cardsInHand);
         }
+    });
+    
+    socket.on('endGame', (SID, player) => {
+        // Call only needs to be emit once to room
+        if(player == 'A'){
+            io.in(SID).emit('results');
+        }   
     });
     
     socket.on('disconnect', () => {

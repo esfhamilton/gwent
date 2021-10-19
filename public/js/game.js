@@ -9,12 +9,17 @@ socket.emit('rejoinRequest', SID);
 socket.emit('getPlayerDeck', SID, player);
 socket.emit('startCheck', SID);
 
+// Room full error
+socket.on('full', (SID) => {
+    document.getElementById('topMsg').innerHTML = `Error: Room ${SID} is full, please create a new room.`;
+});
+
+// No deck error
+socket.on('noDeck', (SID) => {
+    document.getElementById('topMsg').innerHTML = `Error: No Deck has been Built.`;
+});
+
 // Initialises player faction styles
-/*
-    TODO Set the actual styles based 
-    on faction rather than 8 different
-    style objects. Call function for this around line 74
-*/
 let styles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead1:"background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%; display: block;",
               lead2:"background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%; display: block;",
@@ -37,34 +42,34 @@ let styles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; dis
               neutral15:"background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;",
               neutral16:"background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;",
               neutral17:"background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;",
-              faction1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
-              faction2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
-              faction3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
-              faction4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
-              faction5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
-              faction6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
-              faction7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
-              faction8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
-              faction9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
-              faction10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
-              faction11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
-              faction12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
-              faction13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
-              faction14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
-              faction15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
-              faction16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
-              faction17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
-              faction18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
-              faction19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
-              faction20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
-              faction21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
-              faction22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
-              faction23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
-              faction24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
-              faction25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
-              faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
-              faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
-              faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
+              NR1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
+              NR2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
+              NR3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
+              NR4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
+              NR5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
+              NR6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
+              NR7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
+              NR8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
+              NR9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
+              NR10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
+              NR11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
+              NR12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
+              NR13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
+              NR14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
+              NR15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
+              NR16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
+              NR17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
+              NR18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
+              NR19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
+              NR20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
+              NR21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
+              NR22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
+              NR23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
+              NR24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
+              NR25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
+              NR26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
+              NR27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
+              NR28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
 
 let opStyles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; display: block;",
                 lead1:"background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%; display: block;",
@@ -88,74 +93,75 @@ let opStyles = {deck:"background: url(img/cards_16.jpg) 64.5% 94% / 455% 331%; d
                 neutral15:"background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;",
                 neutral16:"background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;",
                 neutral17:"background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;",
-                faction1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
-                faction2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
-                faction3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
-                faction4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
-                faction5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
-                faction6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
-                faction7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
-                faction8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
-                faction9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
-                faction10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
-                faction11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
-                faction12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
-                faction13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
-                faction14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
-                faction15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
-                faction16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
-                faction17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
-                faction18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
-                faction19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
-                faction20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
-                faction21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
-                faction22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
-                faction23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
-                faction24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
-                faction25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
-                faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
-                faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
-                faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
+                NR1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
+                NR2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
+                NR3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
+                NR4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
+                NR5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
+                NR6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
+                NR7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
+                NR8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
+                NR9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
+                NR10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
+                NR11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
+                NR12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
+                NR13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
+                NR14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
+                NR15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
+                NR16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
+                NR17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
+                NR18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
+                NR19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
+                NR20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
+                NR21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
+                NR22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
+                NR23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
+                NR24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
+                NR25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
+                NR26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
+                NR27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
+                NR28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
 
-// Uses an array for each card showing: Base power, current power & hero flag
-let cardPower = {neutral8:[15,15,1],
-                neutral9:[15,15,1],
-                neutral10:[7,7,1],
-                neutral11:[7,7,1],
-                neutral12:[0,0,1],
-                neutral13:[7,7,0],
-                neutral14:[6,6,0],
-                neutral15:[5,5,0],
-                neutral16:[5,5,0],
-                neutral17:[2,2,0],
-                faction1:[10,10,1],
-                faction2:[10,10,1],
-                faction3:[10,10,1],
-                faction4:[10,10,1],
-                faction5:[8,8,0],
-                faction6:[6,6,0],
-                faction7:[6,6,0],
-                faction8:[6,6,0],
-                faction9:[6,6,0],
-                faction10:[6,6,0],
-                faction11:[6,6,0],
-                faction12:[5,5,0],
-                faction13:[5,5,0],
-                faction14:[5,5,0],
-                faction15:[5,5,0],
-                faction16:[5,5,0],
-                faction17:[5,5,0],
-                faction18:[5,5,0],
-                faction19:[4,4,0],
-                faction20:[4,4,0],
-                faction21:[4,4,0],
-                faction22:[4,4,0],
-                faction23:[2,2,0],
-                faction24:[1,1,0],
-                faction25:[1,1,0],
-                faction26:[1,1,0],
-                faction27:[1,1,0],
-                faction28:[1,1,0]};
+// Base power levels of every unit card (and decoy)
+let cardPowers = {neutral1:0,
+                neutral8:15,
+                neutral9:15,
+                neutral10:7,
+                neutral11:7,
+                neutral12:0,
+                neutral13:7,
+                neutral14:6,
+                neutral15:5,
+                neutral16:5,
+                neutral17:2,
+                NR1:10,
+                NR2:10,
+                NR3:10,
+                NR4:10,
+                NR5:8,
+                NR6:6,
+                NR7:6,
+                NR8:6,
+                NR9:6,
+                NR10:6,
+                NR11:6,
+                NR12:5,
+                NR13:5,
+                NR14:5,
+                NR15:5,
+                NR16:5,
+                NR17:5,
+                NR18:5,
+                NR19:4,
+                NR20:4,
+                NR21:4,
+                NR22:4,
+                NR23:2,
+                NR24:1,
+                NR25:1,
+                NR26:1,
+                NR27:1,
+                NR28:1};
 
 /* 
     Like styles, these will need 
@@ -163,13 +169,19 @@ let cardPower = {neutral8:[15,15,1],
     using NR as default for now
 */
 // Groups cards based on the divs that they can be placed in
-let combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", "faction1", "faction2", "faction3", "faction12", "faction13", "faction22", "faction23", "faction 25", "faction26", "faction27"];
-let rangedCards = ["neutral10", "faction4", "faction6", "faction14", "faction15", "faction17", "faction20", "faction21"];
-let siegeCards = ["faction5", "faction7", "faction8", "faction9", "faction10", "faction11", "faction18", "faction28"];
-let combatSpies = ["neutral12", "faction16", "faction19"];
-let siegeSpies = ["faction24"];
+let combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
+                   "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR 25", "NR26", "NR27"];
+let rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", "NR21"];
+let siegeCards = ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28"];
+let combatSpies = ["neutral12", "NR16", "NR19"];
+let siegeSpies = ["NR24"];
+let heroes = ["neutral1","neutral8", "neutral9", "neutral10", "neutral11", "neutral12","NR1","NR2","NR3","NR4"];
+let medics = ["neutral10","NR18"];
+let tightBonds = [];
+let moraleBoosters = [];
+
 /* 
-    Decoy can allow player cards to be selected (except heroes/ decoys) 
+    Decoy can allow player cards to be selected (except heroes) 
     Commander's horn divs for neutral2 
     All rows for Scorch and clear weather
     Corresponding positional player/opponent rows for everything else
@@ -186,6 +198,7 @@ let faction;
 let leader;
 let deck;
 let hand = [];
+let cards;
 let index;
 socket.on('playerAssigned', (FID, leaderID, cards) => {
     faction = FID;
@@ -211,7 +224,7 @@ function shuffle(deck) {
 }
 
 socket.on('startGame', () => {
-    document.getElementById('waitingMsg').innerHTML = "Starting game...";
+    document.getElementById('topMsg').innerHTML = "Starting game...";
     socket.emit('getOpponentDeck', SID, player);
 });
 
@@ -227,12 +240,13 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeckSize) => {
 
 
 
-// The amount of cards the player draws at the start
+// Amount of cards player draws at the start
 let initDraw = 10;
+// Sets up mulligan phase after both players have created their decks
 function setup() {
     document.addEventListener("keydown",keyPressed);
-    document.getElementById('redrawMsg').style = "display: fixed;";
-    document.getElementById('redrawMsg2').style = "display: fixed;";
+    document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
+    document.getElementById('topMsg2').style = "display: fixed;";
     document.getElementById('pDeckSize').innerHTML = deck.length-10;
     document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     document.getElementById('pStats').style = "display: fixed;";
@@ -260,21 +274,23 @@ function setup() {
         hand.push(deck[0]);
         deck.shift();
     }
-    document.getElementById('playerLeader').style = styles[leader];
-    document.getElementById('playerDeck').style = styles["deck"];
+    document.getElementById('pLeader').style = styles[leader];
+    document.getElementById('pDeck').style = styles["deck"];
+    
     
     // This will require opponent's faction to change styles appropriately
-    document.getElementById('opponentLeader').style = styles[opponentLeader];
-    document.getElementById('opponentDeck').style = styles["deck"];
-    hideWaitingMsg();
+    document.getElementById('oLeader').style = styles[opponentLeader];
+    document.getElementById('oDeck').style = styles["deck"]; 
 }
 
-let replaceLimit = 0;
+// Counter for how many cards have been replaced
+let replaceCount = 0;
+// Allows up to 2 replacements of initial draw
 function replaceCard(card) {
-    if (replaceLimit < 2) {
+    if (replaceCount < 2) {
         // Update limit counter and display to user
-        replaceLimit += 1;
-        document.getElementById('redrawMsg').innerHTML = `Choose a card to redraw. ${replaceLimit}/2`
+        replaceCount += 1;
+        document.getElementById('topMsg').innerHTML = `Choose a card to redraw. ${replaceCount}/2`
         // Add card to deck
         deck.push(card.id);
         // Remove card from hand
@@ -288,16 +304,17 @@ function replaceCard(card) {
         hand.push(deck[0]);
         deck.shift();
     }
-    if (replaceLimit >= 2) {
+    if (replaceCount >= 2) {
         handSelected();
     }
 }
 
+// Flag to check if starting hand has been confirmed
 let handChosen = false;
+// Second setup for after player has confirmed their starting hand
 function handSelected() {
     handChosen = true;
-    document.getElementById('redrawMsg').style = "display: none;";
-    document.getElementById('redrawMsg2').style = "display: none;";
+    document.getElementById('topMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
                                                         &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
@@ -312,21 +329,21 @@ function handSelected() {
 
 // Informs player that their opponent still needs to confirm starting hand
 socket.on('waiting', () => {
-    document.getElementById('waitingMsg').innerHTML = "Waiting for opponent...";
-    showWaitingMsg();
+    document.getElementById('topMsg').innerHTML = "Waiting for opponent...";
 });
 
 // Refers to the turn of the client running this script
 let myTurn = false;
+let hadFirst = false;
 socket.on('firstTurn', (PID) => {
-    // Inform player if they need to wait for opponent
-    document.getElementById('waitingMsg').innerHTML = "Opponent's turn...";
-    if (player != PID){
-        showWaitingMsg();
+    // Inform players who's turn it is
+    if (player != PID){    
+        document.getElementById('topMsg').innerHTML = "Opponent's Turn";
     }
     else {
-        hideWaitingMsg();
+        document.getElementById('topMsg').innerHTML = "Your Turn";
         myTurn = true;
+        hadFirst = true;
     }
     
     // Adds new onclick functionality for player whos turn it is
@@ -338,25 +355,74 @@ socket.on('firstTurn', (PID) => {
     }
 });
 
+// Put Decoy on lane and put selected card back in hand
+function decoyCard(card) {
+    cardSelectedFlag = false;
+    cancelCardSelection();
+    
+    let cardToHand = document.createElement('div');
+    cardToHand.style = styles[card.id];
+    cardToHand.className = 'card';
+    cardToHand.setAttribute("id", card.id);
+    cardToHand.setAttribute("onclick", "selectCard(this)");
+    document.getElementById('hand').appendChild(cardToHand);
+    hand.push(card.id);
+        
+    // Remove card from hand - As long as it's not from discard
+    index = hand.indexOf(selectedCard);  
+    if (index > -1) {
+        hand.splice(index, 1);
+    } 
+
+    let boardPosID;
+    
+    // Put Decoy on corresponding row
+    if(combatCards.includes(card.id) || combatSpies.includes(card.id)){
+        boardPosID = 'combatLane';
+    }
+    else if (rangedCards.includes(card.id)){
+        boardPosID = 'rangedLane';
+    }
+    else{
+        boardPosID = 'siegeLane';
+    }
+    
+    putCardOnBoard(boardPosID);
+    
+    let cardsInHand = document.getElementById("hand").childElementCount;
+    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+        
+    socket.emit('switchTurn', SID, [selectedCard,card.id], [boardPosID], cardsInHand);
+    card.remove();
+}
+
+const pRows = ["combatLane", "rangedLane", "siegeLane"];
+const opRows = ["opCombatLane", "opRangedLane", "opSiegeLane"];
 let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
     selectedCard = card.id;
     document.getElementById('cardSelected').style = styles[selectedCard];
-    
-    // Remove card div from hand (this can be recreated if esc pressed)
-    card.parentNode.removeChild(card);
-    
     document.getElementById('hand').style = "display: none;"; 
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
+    if(medicFlag){
+        document.getElementById('discCards').innerHTML = "";
+        document.getElementById('instructions').innerHTML = "";
+    }
+    else{
+        // Remove card div from hand (this can be recreated if esc pressed)
+        card.parentNode.removeChild(card);
+    }
+    
+    // TODO - Check if the loop following code block is redundant
+    // Resets available lanes (might be redundant due to this being in (cancelCardSelection()))
     let positions = document.querySelectorAll("combatLane, rangedLane, siegeLane, opCombatLane, opRangedLane, opSiegeLane");
     for (let i=0; i<positions.length; i++) {
         positions[i].removeAttribute("onclick");
     }
 
     // Highlight divs which are available for the card to be placed in
-    // TODO Need to check if card already present for commander's horn/ weather cards
     if (combatCards.includes(selectedCard)) {
         document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
         document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
@@ -379,8 +445,17 @@ function selectCard(card) {
     }
     // Decoy
     else if (selectedCard === "neutral1") {
-        // Special case, no divs highlighted 
-        // TODO add onclick to non-hero cards for decoy switch
+        // Add functionality/ highlights to cards which can be decoyed
+        pRows.forEach((row) => {
+                    // Number of cards in each row
+                    let len = $("."+row).find('.cardSmall')["length"];
+                    for (let i=0; i<len; i++) {
+                        if(!heroes.includes($("."+row).find('.cardSmall')[i]['id'])){
+                            $("."+row).find('.cardSmall')[i].setAttribute("onclick","decoyCard(this)");    
+                            $("."+row).find('.cardSmall')[i].style.border = "solid #0000FF";
+                        }
+                    }
+        });
     }
     // Commander's Horn
     else if (selectedCard === "neutral2") {
@@ -430,30 +505,49 @@ function selectCard(card) {
     }
 }
 
+let medicFlag = false;
+let revivedFlag = false;
+let medicCards = []; // Placeholder for card IDs if medic is used
+let medicPosIDs = []; // Placeholder for pos IDs if medic is used
 function placeCard(boardPos) {
     let boardPosID = boardPos.id;
     cardSelectedFlag = false;
     cancelCardSelection();
-    // TODO: Special cards need to go in corresponding positions
+    
+    // Both medic and revived card have been placed
+    if (medicFlag){
+        medicCards.push(selectedCard);
+        medicPosIDs.push(boardPosID);    
+        medicFlag = false;
+        revivedFlag = true;
+        document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+        document.getElementById('pDisc').setAttribute("onclick", "showDiscard(this.id)");
+        document.getElementById('oDisc').setAttribute("onclick", "showDiscard(this.id)");
+        
+        // Remove card from discard pile
+        index = discardPiles["pDiscPile"].indexOf(selectedCard);  
+        if (index > -1) {
+            discardPiles["pDiscPile"].splice(index, 1);
+        }   
+    }
+
     // Displays card in corresponding location
     putCardOnBoard(boardPosID);
-    // Updates power values for corresponding lane(s)
-    updatePowerValues(boardPosID);
     
-    // Remove card from hand
-    index = hand.indexOf(selectedCard);  
-    if (index > -1) {
-        hand.splice(index, 1);
-    }       
-    
-    // Draw 2 cards if card placed was a spy
-    if (combatSpies.includes(selectedCard) || siegeSpies.includes(selectedCard)) {
+    // Updates power values on the board
+    updatePowerValues();
+            
+    // Spy - Draw 2 cards from Deck
+    if (combatSpies.concat(siegeSpies).includes(selectedCard)){
         for (let i=0;i<2;i++){
             if (deck.length != 0) {
                 let card = document.createElement('div');
                 card.style = styles[deck[0]];
                 card.className = 'card';
                 card.setAttribute("id", deck[0]);
+                card.setAttribute("onclick", "selectCard(this)");
                 document.getElementById('hand').appendChild(card);
                 hand.push(deck[0]);
                 deck.shift();
@@ -462,61 +556,180 @@ function placeCard(boardPos) {
         }
     }
     
-    // Switch turn and pass data to opponent
+    // Medic - Choose a non-hero card from discard to play 
+    else if(medics.includes(selectedCard)){
+        let discPile = discardPiles["pDiscPile"];
+        
+        // Check if there are non-hero cards in the discard pile
+        for (let i=0; i<discPile.length; i++){
+                if(!heroes.includes(discPile[i])){
+                    medicFlag = true;
+                }
+        }
+                    
+        // Can only use medic ability if there are non-hero cards in the discard pile
+        if (medicFlag){
+            // Prevents duplicate medic bug when chain reviving
+            if(medicCards[medicCards.length-1] != selectedCard){
+                medicCards.push(selectedCard);
+                medicPosIDs.push(boardPosID);    
+            }
+            
+            discSelectedFlag = true;
+            revivedFlag = false;
+            
+            // Hide hand and instructions
+            document.getElementById('hand').style = "display: none;"; 
+            document.getElementById('instructions').innerHTML = "";
+            
+            // Prevent discards being opened while reviving
+            document.getElementById('pDisc').removeAttribute("onclick");
+            document.getElementById('oDisc').removeAttribute("onclick");
+            
+            // Show revivable unit cards
+            document.getElementById('discCards').innerHTML = "";
+            document.getElementById('topMsg').innerHTML = "Choose a card to revive";
+            for (let i=0; i<discPile.length; i++){
+                if(!heroes.includes(discPile[i])){
+                    let card = document.createElement('div');
+                    card.style = styles[discPile[i]];
+                    card.className = 'card';
+                    card.setAttribute("id", discPile[i]);
+                    card.setAttribute("onclick","selectCard(this)")
+                    document.getElementById('discCards').appendChild(card);   
+                }
+            }
+        }
+    }
+    
     let cardsInHand = document.getElementById("hand").childElementCount;
     document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-    socket.emit('switchTurn', SID, selectedCard, boardPosID, cardsInHand);
+    
+    // Prevents turn switch if medic has been played and player needs to revive a card
+    if (!medicFlag && !revivedFlag){
+        
+        // Remove card from hand - As long as it's not from discard
+        index = hand.indexOf(selectedCard);  
+        if (index > -1) {
+            hand.splice(index, 1);
+        } 
+        
+        // Switch turn and pass data to opponent
+        socket.emit('switchTurn', SID, [selectedCard], [boardPosID], cardsInHand);
+    }
+    
+    // If a medic has been played, emit multiple cards played to the server
+    else if (revivedFlag){
+        revivedFlag = false;
+        index = hand.indexOf(medicCards[0]);  
+        if (index > -1) {
+            hand.splice(index, 1);
+        }   
+        // Emit special switch turn with medicCards and positions and cardsinHand
+        socket.emit('switchTurn', SID, medicCards, medicPosIDs, cardsInHand);
+        
+        medicCards = [];
+        medicPosIDs = [];
+    }
 }
 
-function showWaitingMsg() {
-    document.getElementById('waitingMsg').style = "display: fixed;";
-}
-
-function hideWaitingMsg() {
-    document.getElementById('waitingMsg').style = "display: none;";
+function switchWaitingMsg() {
+    document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
 }
 
 // Switches turn after player has passed
 socket.on('passedTurn', () => {
+    if(!passedTurn){
+        document.getElementById('oPass').innerHTML = "<p>Passed</p>";
+    }
     switchTurn();
 });
+
+function updateOpDiscard(discCardID) {
+    let discInd = discardPiles["opDiscPile"].indexOf(discCardID);
+    discardPiles["opDiscPile"].splice(discInd,1);
+    if(discardPiles["opDiscPile"].length==0){
+        discEmpty("oDisc"); 
+    }
+    else{
+        discNotEmpty(discardPiles["opDiscPile"],"oDisc");
+    }
+    document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
+}
 
 // Switches turn after card has been played
-socket.on('nextTurn', (card, pos, opHandSize) => { 
-    selectedCard = card;
-    
-        
+socket.on('nextTurn', (cardArr, posArr, opHandSize) => {         
     if (!myTurn){
-        if (pos[0] != 'o'){
-            opponentDeckSize -= 2;
-            console.log(opponentDeckSize);
-            document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
+        // neutral1 is the only decoy card
+        if (cardArr[0] == 'neutral1'){
+            selectedCard = cardArr[0];
+            putCardOnBoard(posArr[0]);
+            cardsInRow = $('.'+posArr[0]).find('.cardSmall').length;
+            for(let i=0; i<cardsInRow; i++){
+                if($('.'+posArr[0]).find('.cardSmall')[i].id == cardArr[1]){
+                    $('.'+posArr[0]).find('.cardSmall')[i].remove()
+                    break;
+                }
+            }
         }
-        putCardOnBoard(pos);
-        document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-        updatePowerValues(pos);
+        else{
+            for (let i=0; i<cardArr.length; i++){
+                if (combatSpies.concat(siegeSpies).includes(cardArr[i])){
+                    opponentDeckSize -= 2;
+                    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
+                }
+                selectedCard = cardArr[i];
+                putCardOnBoard(posArr[i]);
+                document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
+                if (i>0){
+                    updateOpDiscard(cardArr[i]);
+                }
+            }    
+        }
+        
     }
+    updatePowerValues();  
+    document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
+    document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
     switchTurn();
 });
 
-// No turn switch after card has been played
-socket.on('returnTurn', (card, pos, opHandSize) => { 
-    selectedCard = card;
+// Holds turn after card has been played
+socket.on('returnTurn', (cardArr, posArr, opHandSize) => { 
     if (!myTurn){
-        putCardOnBoard(pos);
-        document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-        updatePowerValues(pos);
+        // neutral1 is the only decoy card
+        if (cardArr[0] == 'neutral1'){
+            selectedCard = cardArr[0];
+            putCardOnBoard(posArr[0]);
+            cardsInRow = $('.'+posArr[0]).find('.cardSmall').length;
+            for(let i=0; i<cardsInRow; i++){
+                if($('.'+posArr[0]).find('.cardSmall')[i].id == cardArr[1]){
+                    $('.'+posArr[0]).find('.cardSmall')[i].remove()
+                    break;
+                }
+            }
+        }
+        else{
+            for (let i=0; i<cardArr.length; i++){
+                selectedCard = cardArr[i];
+                putCardOnBoard(posArr[i]);
+                document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+                if (i>0){
+                    updateOpDiscard(cardArr[i]);
+                }
+            }
+        }
     }
+    updatePowerValues();  
+    document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
+    document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
 });
      
 // Decide who round winner is based on total values and run any faction rules
 let pLife = 2;
 let oLife = 2;
 socket.on('endRound', () => { 
-    // Remove all cards from table and put into discard pile
-    // Do this after adding extra arrays for cards in each lane
-    
-    // Adjust lives for players
+    // Adjust lives for players and decide next turn
     removeLife();
     
     // Reset Scores
@@ -525,12 +738,29 @@ socket.on('endRound', () => {
         document.getElementById(key).innerHTML = 0;
     }
     
+    document.getElementById('pPass').innerHTML = '';
+    document.getElementById('oPass').innerHTML = '';
+    passedTurn = false;
+    
     // Move cards into discard arrays and remove from board
     clearCards();
+});
+
+socket.on('results', () => {
+    document.getElementById('pDisc').removeAttribute("onclick");
+    document.getElementById('oDisc').removeAttribute("onclick");
+    document.getElementById('topMsg2').innerHTML = "Press F5 to play again";
+    document.getElementById('topMsg2').style = "display:fixed;";
     
-    
-    
-    // Create Discard Piles
+    if (pLife == 0 && oLife == 0){
+        document.getElementById('topMsg').innerHTML = "Game is a Draw!";
+    }
+    else if(pLife > 0){
+        document.getElementById('topMsg').innerHTML = "You Win!";
+    }
+    else{
+        document.getElementById('topMsg').innerHTML = "You Lose!";
+    }    
 });
 
 function removeLife() {
@@ -538,66 +768,124 @@ function removeLife() {
     if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
         document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
         oLife -= 1;
+        playersTurn(); // Player gets next turn if they win
     }
     // Tie
     else if(powerLevels["totalPower"] == powerLevels["opTotalPower"]) {
         document.getElementById('heart'+String(pLife)).style = "color:grey;";
         document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
-        pLife -= 1;
         oLife -= 1;
+        pLife -= 1;
+        // Player gets next turn if opponent had first turn initially
+        if(hadFirst){
+            opponentsTurn();
+        }
+        else{
+            playersTurn();
+        }
     }
     // Player has lost 
     else {
         document.getElementById('heart'+String(pLife)).style = "color:grey;";
         pLife -= 1;
+        opponentsTurn(); // Opponent gets next turn if player loses round
     }
     
-    // TODO Check if game is over
-    if(pLife == 0){
-        // TODO
-        socket.emit('', SID, selectedCard, boardPosID, cardsInHand);
+    // End game if a player has lost all their lives
+    if(pLife == 0 || oLife == 0){
+        socket.emit('endGame', SID, player);
     }
 }
 
-const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"]
-let discardRows = {"opSiegeLaneDs":[],
-                  "opRangedLaneDs":[],
-                  "opCombatLaneDs":[],
-                  "opTotalDs":[],    
-                  "combatLaneDs":[],
-                  "rangedLaneDs":[],
-                  "siegeLaneDs":[],
-                  "totalDs":[]};
+// Show cards in the discard pile
+function showDiscard(pileID) {
+    discSelectedFlag = true;
+    document.getElementById('discCards').innerHTML = "";
+    document.getElementById('topMsg').innerHTML = "Press Esc to Cancel";
+    
+    let discPile = pileID == "oDisc" ? discardPiles["opDiscPile"] : discardPiles["pDiscPile"];
+    
+    // Styles based on player's faction
+    for (let i=0; i<discPile.length; i++){
+        let card = document.createElement('div');
+        card.style = styles[discPile[i]];
+        card.className = 'card';
+        card.setAttribute("id", discPile[i]);
+        document.getElementById('discCards').appendChild(card);
+    }
+}
+
+// Remove any attributes/ visuals 
+function discEmpty(pileID) {
+    document.getElementById(pileID).style = "display: none;";
+    document.getElementById(pileID).removeAttribute("onclick");
+}
+
+// Add necessary attributes/ visuals
+function discNotEmpty(discPile,pileID) {
+    document.getElementById(pileID).style = styles[discPile[0]];
+    document.getElementById(pileID).setAttribute("onclick","showDiscard(this.id)");
+}
+
+const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
+let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
-    // Move cards into corresponding discardRows
+    // Move cards into corresponding discard pile
     rowIDs.forEach((row) => {
                    let len = $("."+row).find('.cardSmall')["length"];
-                   for (let i=0; i<len; i++) {
-                       discardRows[row+'Ds'].push($("."+row).find('.cardSmall')[i]['id']);
+                   for (let i=0; i<len; i++){
+                       if(row[0] == 'o'){
+                           discardPiles["opDiscPile"].push($("."+row).find('.cardSmall')[i]['id']);
+                       }
+                       else{
+                           discardPiles["pDiscPile"].push($("."+row).find('.cardSmall')[i]['id']);
+                       }
                    }
                 });
-    discardRows["opTotalDs"] = discardRows["opCombatLaneDs"].concat(discardRows["opRangedLaneDs"], discardRows["opSiegeLaneDs"]);    
-    discardRows["totalDs"] = discardRows["combatLaneDs"].concat(discardRows["rangedLaneDs"], discardRows["siegeLaneDs"]);    
+    
+    if (discardPiles["pDiscPile"].length == 0){
+        discEmpty("pDisc");
+    }
+    else{
+        discNotEmpty(discardPiles["pDiscPile"],"pDisc");
+    }
+    
+    if (discardPiles["opDiscPile"].length == 0){
+        discEmpty("oDisc");
+    }
+    else{
+        discNotEmpty(discardPiles["opDiscPile"],"oDisc");
+    }
+    document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
+    document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
     
     // Remove Cards from Board
     $('.cardSmall').remove();
 }
 
+function playersTurn() {
+    myTurn = true;
+    switchWaitingMsg();
+    for (let i=0; i<hand.length; i++) {
+        cards[i].setAttribute("onclick", "selectCard(this)");
+    }
+}
+
+function opponentsTurn() {
+    myTurn = false;
+    switchWaitingMsg();
+    for (let i=0; i<hand.length; i++) {
+        cards[i].removeAttribute("onclick");
+    }
+}
+
 function switchTurn() {
     cards = document.getElementsByClassName('card');
     if (myTurn) {
-        myTurn = false;
-        showWaitingMsg();
-        for (let i=0; i<hand.length; i++) {
-            cards[i].removeAttribute("onclick");
-        }
+        opponentsTurn();
     }
     else {
-        myTurn = true;
-        hideWaitingMsg();
-        for (let i=0; i<hand.length; i++) {
-            cards[i].setAttribute("onclick", "selectCard(this)");
-        }
+        playersTurn();
     }
 }
 
@@ -609,6 +897,61 @@ function putCardOnBoard(posID) {
     document.getElementById(posID).appendChild(card);
 }
 
+// Dictionaries for storing amount of twin/ morale cards and dandelion
+let powMods = {};
+let opPowMods = {};
+// Array for storing rowIDs affected by commander's horns
+let horns = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCTION
+// Array storing rowIDs affected by weather
+let weatherMods = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCTION
+function getPowerModifiers() {
+    /* 
+        Iterate through all cards on board
+        Get which weather cards are in effect
+        Get which/ how many twin cards are in player and opponent lanes
+        Get which commander's horn/ dandelion cards are down
+        Get which/ how many morale cards are down
+    */
+    
+    // Reset modifier placeholders
+    powMods = {};
+    opPowMods = {};
+    
+    // Iterate through each of the player's rows
+    let cardID;
+    let cardsInRow;
+    pRows.forEach((row) =>{
+        cardsInRow = $('.'+row).find('.cardSmall').length;
+        for(let i=0; i<cardsInRow; i++){
+            cardID = $('.'+row).find('.cardSmall')[i].id;
+            if(tightBonds.includes(cardID) || moraleBoosters.includes(cardID)){
+                if(powMods[cardID] == undefined){
+                    powMods[cardID] = 1;
+                }
+                else{
+                    powMods[cardID] += 1;
+                }
+            }
+        }
+    });
+    
+    opRows.forEach((row) =>{
+        cardsInRow = $('.'+row).find('.cardSmall').length;
+        for(let i=0; i<cardsInRow; i++){
+            cardID = $('.'+row).find('.cardSmall')[i].id;
+            if(tightBonds.includes(cardID) || moraleBoosters.includes(cardID)){
+                if(opPowMods[cardID] == undefined){
+                    opPowMods[cardID] = 1;
+                }
+                else{
+                    opPowMods[cardID] += 1;
+                }
+            }
+        }
+    }); 
+}
+                   
+
 let powerLevels = {"opSiegePower":0,
                   "opRangedPower":0,
                   "opCombatPower":0,
@@ -617,36 +960,57 @@ let powerLevels = {"opSiegePower":0,
                   "rangedPower":0,
                   "siegePower":0,
                   "totalPower":0};
-function updatePowerValues(posID) {
-    // String to identify the corresponding power level to update
-    let powerStr = posID.substring(0,posID.length-4)+"Power";
-    powerLevels[powerStr] += cardPower[selectedCard][1];
-    document.getElementById(powerStr).innerHTML = powerLevels[powerStr];
+function updatePowerValues() {  
+    // Reset powerLevels with each update
+    powerLevels = {"opSiegePower":0,
+                  "opRangedPower":0,
+                  "opCombatPower":0,
+                  "opTotalPower":0,    
+                  "combatPower":0,
+                  "rangedPower":0,
+                  "siegePower":0,
+                  "totalPower":0};
+
+    // Calculate power values for each row
+    rowIDs.forEach((row) =>{
+        let powerStr = row.substring(0,row.length-4)+"Power";
+        let cardsInRow = $('.'+row).find('.cardSmall').length;
+        for(let i=0; i<cardsInRow; i++){
+            powerLevels[powerStr] += cardPowers[$('.'+row).find('.cardSmall')[i].id];
+        }
+        
+        // Display power value for each row
+        document.getElementById(powerStr).innerHTML = powerLevels[powerStr];
+    });
+    
+    // Calculate total power values
     powerLevels["totalPower"] = powerLevels["combatPower"] + powerLevels["rangedPower"] + powerLevels["siegePower"];
     powerLevels["opTotalPower"] = powerLevels["opCombatPower"] + powerLevels["opRangedPower"] + powerLevels["opSiegePower"];
+    
+    // Display total power values
     document.getElementById("opTotalPower").innerHTML = powerLevels["opTotalPower"];
     document.getElementById("totalPower").innerHTML = powerLevels["totalPower"];
 }
 
 let handHiddenFlag = false;
-let handSelectedFlag = false;
 let cardSelectedFlag = false;
+let discSelectedFlag = false;
+let passedTurn = false;
 function keyPressed(event) {
-    // Enter pressed and hand hasn't been selected
-    if (event.keyCode === 13 && !handSelectedFlag) {
-        handSelectedFlag = true;
+    // Enter pressed and hand hasn't been selected AND card is not being revived
+    if (event.keyCode === 13 && !handChosen){
         handSelected();
     }
     
-    // E pressed AND hand has been chosen AND card has not been selected
-    if (event.keyCode === 69 && handChosen && !cardSelectedFlag) {
-        if (handHiddenFlag) {
+    // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
+    if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
+        if (handHiddenFlag){
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
             document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
                                                                  &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
             handHiddenFlag = false;
         }
-        else {
+        else{
             document.getElementById('hand').style = "display: none;";           
             document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
                                                                  &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
@@ -654,8 +1018,8 @@ function keyPressed(event) {
         }
     }
     
-    // Esc pressed AND a card has been selected
-    if (event.keyCode === 27 && cardSelectedFlag) {
+    // Esc pressed AND a card has been selected AND card is not being revived
+    if (event.keyCode === 27 && cardSelectedFlag && !medicFlag){
         cardSelectedFlag = false;
         cancelCardSelection();
         
@@ -666,10 +1030,28 @@ function keyPressed(event) {
         card.setAttribute("id", selectedCard);
         card.setAttribute("onclick", 'selectCard(this)');
         document.getElementById('hand').appendChild(card);
+        
+        // Remove any borders around cards (used for decoy card)
+        pRows.forEach((row) => {
+            // Number of cards in each row
+            let len = $("."+row).find('.cardSmall')["length"];
+            for (let i=0; i<len; i++) {
+                $("."+row).find('.cardSmall')[i].style.border = '';
+            }
+        });
     }
     
-    // Space pressed AND it is player's turn AND card is not selected
-    if (event.keyCode===32 && myTurn && !cardSelectedFlag) {
+    // Esc pressed AND discard is showing AND card is not being revived
+    if (event.keyCode === 27 && discSelectedFlag && !medicFlag){
+        discSelectedFlag = false;
+        document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
+        document.getElementById('discCards').innerHTML = "";
+    }
+    
+    // Space pressed AND player's turn AND card is not selected AND card is not being revived
+    if (event.keyCode===32 && myTurn && !cardSelectedFlag && !medicFlag){
+        document.getElementById('pPass').innerHTML = "<p>Passed</p>";
+        passedTurn = true;
         socket.emit('passTurn', SID);
     }
 }
@@ -678,30 +1060,26 @@ function cancelCardSelection() {
         // Remove card from placeholder at top
         document.getElementById('cardSelected').style = "display: none;";
         
-        // Remove any div highlights for where card can be placed
-        document.getElementById('combatLane').style = "background: none;";
-        document.getElementById('opCombatLane').style = "background: none;";
-        document.getElementById('rangedLane').style = "background: none;";
-        document.getElementById('opRangedLane').style = "background: none;";
-        document.getElementById('siegeLane').style = "background: none;";
-        document.getElementById('opSiegeLane').style = "background: none;";
-        document.getElementById('combatHorn').style = "background: none;";
-        document.getElementById('rangedHorn').style = "background: none;";
-        document.getElementById('siegeHorn').style = "background: none;";
+        const boardIDs = ['combatLane','opCombatLane','rangedLane','opRangedLane','siegeLane','opSiegeLane','combatHorn','rangedHorn','siegeHorn'];
         
-        // Remove any div onclicks
-        document.getElementById('combatLane').removeAttribute("onclick");
-        document.getElementById('opCombatLane').removeAttribute("onclick");
-        document.getElementById('rangedLane').removeAttribute("onclick");
-        document.getElementById('opRangedLane').removeAttribute("onclick");
-        document.getElementById('siegeLane').removeAttribute("onclick");
-        document.getElementById('opSiegeLane').removeAttribute("onclick");
-        document.getElementById('combatHorn').removeAttribute("onclick");
-        document.getElementById('rangedHorn').removeAttribute("onclick");
-        document.getElementById('siegeHorn').removeAttribute("onclick");
-        
+        // Remove any div highlights for where card can be placed and onclick attributes
+        boardIDs.forEach((id) =>{
+            document.getElementById(id).style = "background: none;";    
+            document.getElementById(id).removeAttribute("onclick");
+        });
+    
+        // Remove any borders around cards (used for decoy card)
+        pRows.forEach((row) => {
+            // Number of cards in each row
+            let len = $("."+row).find('.cardSmall')["length"];
+            for (let i=0; i<len; i++) {
+                $("."+row).find('.cardSmall')[i].style.border = '';
+            }
+        });
+    
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
         document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
 }
+

@@ -78,7 +78,7 @@ p {
     top: 32%;
 }
 
-.playerLeader {
+.pLeader {
     position: fixed;   
     height: 132px;
     width: 88px;
@@ -86,7 +86,7 @@ p {
     left: 137px;
 }
 
-.opponentLeader {
+.oLeader {
     position: fixed;   
     height: 132px;
     width: 88px;
@@ -94,7 +94,21 @@ p {
     left: 137px;
 }
 
-.playerDeck {
+.pPass {
+    position: fixed;
+    left: 17%;
+    bottom: 27%;
+    z-index: 100;
+}
+
+.oPass {
+    position: fixed;
+    left: 17%;
+    top: 27%;
+    z-index: 100;
+}
+
+.pDeck {
     position: fixed;   
     height: 132px;
     width: 88px;
@@ -103,12 +117,30 @@ p {
     right: 155px;
 }
 
-.opponentDeck {
+.oDeck {
     position: fixed;   
     height: 132px;
     width: 88px;
     border-radius: 5px;
     top: 25%;
+    right: 155px;
+}
+
+.pDisc {
+    position: fixed;   
+    height: 132px;
+    width: 88px;
+    border-radius: 5px;
+    bottom: 10%;
+    right: 155px;
+}
+
+.oDisc {
+    position: fixed;   
+    height: 132px;
+    width: 88px;
+    border-radius: 5px;
+    top: 10%;
     right: 155px;
 }
 
@@ -306,7 +338,10 @@ p {
     border-radius: 5px;
 }
 
-
+.pDisc:hover,
+.oDisc:hover {
+    border: solid gold;
+}
 
 /* CARDS IN PLAY */
 

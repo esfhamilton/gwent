@@ -25,7 +25,7 @@ for (let i=1; i<29; i++) {
     if (i<=17) {
         allCards.push("neutral"+i);
     }
-    allCards.push("faction"+i);
+    allCards.push("NR"+i);
 }
 
 // Object to store each cards style parameters
@@ -83,12 +83,12 @@ if (faction === 'NR'){
     
     // Initialises availability of cards
     threeAvailable = ["neutral1","neutral2","neutral3","neutral4","neutral5","neutral6","neutral7",
-                      "faction17","faction22","faction25","faction28"];
-    twoAvailable = ["faction5"];
+                      "NR17","NR22","NR25","NR28"];
+    twoAvailable = ["NR5"];
     oneAvailable = ["neutral8","neutral9","neutral10","neutral11","neutral12","neutral13","neutral14","neutral15","neutral16","neutral17",
-                    "faction1","faction2","faction3","faction4","faction6","faction7","faction8","faction9","faction10",
-                    "faction11","faction12","faction13","faction14","faction15","faction16","faction17","faction18","faction19",
-                    "faction20","faction21","faction23","faction24","faction26","faction27"];
+                    "NR1","NR2","NR3","NR4","NR6","NR7","NR8","NR9","NR10",
+                    "NR11","NR12","NR13","NR14","NR15","NR16","NR17","NR18","NR19",
+                    "NR20","NR21","NR23","NR24","NR26","NR27"];
     zeroAdded = allCards;
     
     /*
@@ -98,11 +98,21 @@ if (faction === 'NR'){
     */
     allCards.forEach(id => {
         let availabilityID;
-        if(id.length===8){
-            availabilityID = id[0]+id[id.length-1];
+        if(id.length<5){
+            if(id.length===3){
+                availabilityID = 'NRAmount'+id[id.length-1];
+            }
+            else {
+                availabilityID = 'NRAmount'+id[id.length-2]+id[id.length-1];
+            }    
         }
-        else {
-            availabilityID = id[0]+id[id.length-2]+id[id.length-1];
+        else{
+            if(id.length===8){
+                availabilityID = 'n'+id[id.length-1];
+            }
+            else {
+                availabilityID = 'n'+id[id.length-2]+id[id.length-1];
+            }    
         }
         
         if (threeAvailable.includes(id)) {
@@ -134,34 +144,34 @@ if (faction === 'NR'){
              neutral15:"background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;",
              neutral16:"background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;",
              neutral17:"background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;",
-             faction1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
-             faction2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
-             faction3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
-             faction4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
-             faction5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
-             faction6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
-             faction7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
-             faction8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
-             faction9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
-             faction10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
-             faction11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
-             faction12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
-             faction13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
-             faction14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
-             faction15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
-             faction16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
-             faction17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
-             faction18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
-             faction19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
-             faction20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
-             faction21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
-             faction22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
-             faction23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
-             faction24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
-             faction25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
-             faction26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
-             faction27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
-             faction28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
+             NR1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
+             NR2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
+             NR3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
+             NR4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
+             NR5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
+             NR6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
+             NR7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
+             NR8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
+             NR9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
+             NR10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
+             NR11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
+             NR12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
+             NR13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
+             NR14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
+             NR15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
+             NR16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
+             NR17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
+             NR18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
+             NR19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
+             NR20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
+             NR21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
+             NR22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
+             NR23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
+             NR24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
+             NR25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
+             NR26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
+             NR27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
+             NR28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
     
     // Leader cards
     document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
@@ -170,61 +180,61 @@ if (faction === 'NR'){
     document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
     // Faction cards
     // Vernon Roche
-    document.getElementById('faction1').style = "background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;";
+    document.getElementById('NR1').style = "background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;";
     // John Natalis
-    document.getElementById('faction2').style = "background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;";
+    document.getElementById('NR2').style = "background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;";
     // Esterad Thyssen
-    document.getElementById('faction3').style = "background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;";
+    document.getElementById('NR3').style = "background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;";
     // Philippa Eilhart
-    document.getElementById('faction4').style = "background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;";
+    document.getElementById('NR4').style = "background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;";
     // Catapult
-    document.getElementById('faction5').style = "background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;";
+    document.getElementById('NR5').style = "background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;";
     // Dethmold
-    document.getElementById('faction6').style = "background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;";
+    document.getElementById('NR6').style = "background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;";
     // Trebuchet
-    document.getElementById('faction7').style = "background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;";
+    document.getElementById('NR7').style = "background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;";
     // Trebuchet
-    document.getElementById('faction8').style = "background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;";
+    document.getElementById('NR8').style = "background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;";
     // Ballista
-    document.getElementById('faction9').style = "background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;";
+    document.getElementById('NR9').style = "background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;";
     // Ballista
-    document.getElementById('faction10').style = "background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;";
+    document.getElementById('NR10').style = "background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;";
     // Siege Tower
-    document.getElementById('faction11').style = "background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;";
+    document.getElementById('NR11').style = "background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;";
     // Ves
-    document.getElementById('faction12').style = "background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;";
+    document.getElementById('NR12').style = "background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;";
     // Siegfried of Denesle
-    document.getElementById('faction13').style = "background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;";
+    document.getElementById('NR13').style = "background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;";
     // Kiera Metz
-    document.getElementById('faction14').style = "background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;";
+    document.getElementById('NR14').style = "background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;";
     // Sile de Tansarville
-    document.getElementById('faction15').style = "background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;";
+    document.getElementById('NR15').style = "background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;";
     // Prince Stennis
-    document.getElementById('faction16').style = "background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;";
+    document.getElementById('NR16').style = "background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;";
     // Crimson Reavers Dragon Hunter
-    document.getElementById('faction17').style = "background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;";
+    document.getElementById('NR17').style = "background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;";
     // Dun Banner Medic
-    document.getElementById('faction18').style = "background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;";
+    document.getElementById('NR18').style = "background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;";
     // Sigismund Dijkstra
-    document.getElementById('faction19').style = "background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;";
+    document.getElementById('NR19').style = "background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;";
     // Sabrina Glevissig
-    document.getElementById('faction20').style = "background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;";
+    document.getElementById('NR20').style = "background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;";
     // Sheldon Skaggs
-    document.getElementById('faction21').style = "background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;";
+    document.getElementById('NR21').style = "background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;";
     // Blue Stripes Commando
-    document.getElementById('faction22').style = "background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;";
+    document.getElementById('NR22').style = "background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;";
     // Yarpen Zigrin
-    document.getElementById('faction23').style = "background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;";
+    document.getElementById('NR23').style = "background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;";
     // Thaler
-    document.getElementById('faction24').style = "background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;";
+    document.getElementById('NR24').style = "background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;";
     // Poor Fucking Infantry
-    document.getElementById('faction25').style = "background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;";
+    document.getElementById('NR25').style = "background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;";
     // Redanian Foot Soldier
-    document.getElementById('faction26').style = "background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;";
+    document.getElementById('NR26').style = "background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;";
     // Redanian Foot Soldier
-    document.getElementById('faction27').style = "background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;";
+    document.getElementById('NR27').style = "background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;";
     // Kaedweni Siege Expert
-    document.getElementById('faction28').style = "background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;";
+    document.getElementById('NR28').style = "background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;";
 }
 /*
     Currently only northern realms is in use,
@@ -252,12 +262,23 @@ let deck = [];
 function cardSelected(id) {
     let index;
     let availabilityID;
-    if (id.length===8) {
-        availabilityID = id[0]+id[id.length-1];
+    if(id.length<5){
+        if (id.length===3) {
+            availabilityID = 'NRAmount'+id[id.length-1];
+        }
+        else {
+            availabilityID = 'NRAmount'+id[id.length-2]+id[id.length-1];
+        }
     }
-    else {
-        availabilityID = id[0]+id[id.length-2]+id[id.length-1];
+    else{
+        if (id.length===8) {
+            availabilityID = 'n'+id[id.length-1];
+        }
+        else {
+            availabilityID = 'n'+id[id.length-2]+id[id.length-1];
+        }
     }
+    
     const deckID = id+'CD';
     const addedID = availabilityID + "CD"; 
     
