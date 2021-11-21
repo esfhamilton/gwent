@@ -163,6 +163,7 @@ let cardPowers = {neutral1:0,
                 NR27:1,
                 NR28:1};
 
+
 /* 
     Like styles, these will need 
     updating based on faction
@@ -170,25 +171,26 @@ let cardPowers = {neutral1:0,
 */
 // Groups cards based on the divs that they can be placed in
 let combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
-                   "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR 25", "NR26", "NR27"];
+                   "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR25", "NR26", "NR27"];
 let rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", "NR21"];
 let siegeCards = ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28"];
 let combatSpies = ["neutral12", "NR16", "NR19"];
 let siegeSpies = ["NR24"];
-let heroes = ["neutral1","neutral8", "neutral9", "neutral10", "neutral11", "neutral12","NR1","NR2","NR3","NR4"];
+let heroes = ["neutral1","neutral3","neutral8","neutral9","neutral10","neutral11","neutral12","NR1","NR2","NR3","NR4"];
 let medics = ["neutral10","NR18"];
-let tightBonds = [];
-let moraleBoosters = [];
+let tightBonds = ["NR5","NR17","NR22","NR25"];
+let moraleBoosters = ["NR28"];
+let scorchers = ["neutral3"];
+let combatScorchers = ["neutral13"];
+// Create special case of scorch for villentretenmerth
+
 
 /* 
-    Decoy can allow player cards to be selected (except heroes) 
     Commander's horn divs for neutral2 
-    All rows for Scorch and clear weather
+    Any row for Scorch and clear weather
     Corresponding positional player/opponent rows for everything else
 */
-// Decoy = neutral1
 // Commander's horn = neutral2
-// Scorch = neutral3
 // Biting Frost = neutral4
 // Impenetrable fog = neutral5
 // Torrential rain = neutral6
@@ -534,7 +536,10 @@ function placeCard(boardPos) {
     }
 
     // Displays card in corresponding location
-    putCardOnBoard(boardPosID);
+    if(!scorchers.includes(selectedCard)){
+        putCardOnBoard(boardPosID);    
+    }
+    
     
     // Updates power values on the board
     updatePowerValues();
@@ -554,6 +559,12 @@ function placeCard(boardPos) {
                 document.getElementById('pDeckSize').innerHTML = deck.length;
             }
         }
+    }
+    
+    else if(scorchers.includes(selectedCard)){
+        scorch();
+        
+        // TODO send this information to opponent AND correct processing on receival of info i.e., just call scorch()
     }
     
     // Medic - Choose a non-hero card from discard to play 
@@ -633,6 +644,71 @@ function placeCard(boardPos) {
     }
 }
 
+
+
+function scorch(){
+    // TODO - Add removed cards to corresponding discard piles
+    // TODO - After horns/ dandy, will need second dic of rows to flag if horn is in row
+    
+    // Get current power modifiers
+    getPowerModifiers();
+    
+    let topRowVals = {}; // Dictionary of strongest cards per row
+    let strongestCards = {}; // Dictionary of rows/ strongest cards
+    let moraleRowCount = {}; // Dictionary of morale boosters in each row
+    
+    // Iterate through each of the player's rows
+    let cardID;
+    let cardsInRow;
+    let rowIndex = 0;
+    rowIDs.forEach((row) => {
+        cardsInRow = $('.'+row).find('.cardSmall').length;
+        topRowVals[row] = 0;
+        moraleRowCount[row] = 0;
+        moraleBoosters.forEach((moraleCard) => {
+            if (powMods[row][moraleCard] !== undefined){
+                moraleRowCount[row] = powMods[row][moraleCard];
+            }
+        });
+        
+        for(let i=0; i<cardsInRow; i++){
+            cardID = $('.'+row).find('.cardSmall')[i].id;
+            if(heroes.includes(cardID)){
+                continue;
+            }
+            else {
+                if(cardPowers[cardID]*(powMods[row][cardID]===undefined?1:powMods[row][cardID])+moraleRowCount[row]>topRowVals[row]){
+                    topRowVals[row] = cardPowers[cardID]*(powMods[row][cardID]===undefined?1:powMods[row][cardID])+moraleRowCount[row];
+                    strongestCards[row] = cardID;
+                }                
+            }
+        }
+    });
+    
+    
+    let maxVal = Object.keys(topRowVals).map(function(key){
+        return topRowVals[key];
+    });
+    maxVal = Math.max(...maxVal);
+    
+    rowIDs.forEach((row) => { 
+        cardsInRow = $('.'+row).find('.cardSmall').length;
+        for(let i=cardsInRow-1; i>=0; i--){
+            cardID = $('.'+row).find('.cardSmall')[i].id;
+            if (cardPowers[strongestCards[row]]*(powMods[row][cardID]===undefined?1:powMods[row][cardID])+moraleRowCount[row]===maxVal && strongestCards[row]===cardID){
+                $('.'+row).find('.cardSmall')[i].remove();
+            
+                // Add cardID to corresponding discard pile
+                opRows.includes(row) ? discardPiles["opDiscPile"].push(cardID) : discardPiles["pDiscPile"].push(cardID);
+            }
+        }
+    });
+    if(discardPiles["opDiscPile"].length!==0){discNotEmpty(discardPiles["opDiscPile"],"oDisc")}
+    document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
+    if(discardPiles["pDiscPile"].length!==0){discNotEmpty(discardPiles["pDiscPile"],"pDisc")}
+    document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
+}
+
 function switchWaitingMsg() {
     document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
 }
@@ -648,12 +724,7 @@ socket.on('passedTurn', () => {
 function updateOpDiscard(discCardID) {
     let discInd = discardPiles["opDiscPile"].indexOf(discCardID);
     discardPiles["opDiscPile"].splice(discInd,1);
-    if(discardPiles["opDiscPile"].length==0){
-        discEmpty("oDisc"); 
-    }
-    else{
-        discNotEmpty(discardPiles["opDiscPile"],"oDisc");
-    }
+    discardPiles["opDiscPile"].length === 0 ? discEmpty("oDisc") : discNotEmpty(discardPiles["opDiscPile"],"oDisc");
     document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
 }
 
@@ -671,6 +742,9 @@ socket.on('nextTurn', (cardArr, posArr, opHandSize) => {
                     break;
                 }
             }
+        }
+        else if (scorchers.includes(cardArr[0])){
+            scorch();
         }
         else{
             for (let i=0; i<cardArr.length; i++){
@@ -708,6 +782,9 @@ socket.on('returnTurn', (cardArr, posArr, opHandSize) => {
                     break;
                 }
             }
+        }
+        else if (scorchers.includes(cardArr[0])){
+            scorch();
         }
         else{
             for (let i=0; i<cardArr.length; i++){
@@ -834,28 +911,15 @@ function clearCards() {
     rowIDs.forEach((row) => {
                    let len = $("."+row).find('.cardSmall')["length"];
                    for (let i=0; i<len; i++){
-                       if(row[0] == 'o'){
-                           discardPiles["opDiscPile"].push($("."+row).find('.cardSmall')[i]['id']);
-                       }
-                       else{
-                           discardPiles["pDiscPile"].push($("."+row).find('.cardSmall')[i]['id']);
-                       }
+                       opRows.includes(row) ? 
+                         discardPiles["opDiscPile"].push($("."+row).find('.cardSmall')[i]['id']) 
+                       : discardPiles["pDiscPile"].push($("."+row).find('.cardSmall')[i]['id']); 
                    }
                 });
     
-    if (discardPiles["pDiscPile"].length == 0){
-        discEmpty("pDisc");
-    }
-    else{
-        discNotEmpty(discardPiles["pDiscPile"],"pDisc");
-    }
+    discardPiles["pDiscPile"].length === 0 ? discEmpty("pDisc") : discNotEmpty(discardPiles["pDiscPile"],"pDisc");
+    discardPiles["opDiscPile"].length === 0 ? discEmpty("oDisc") : discNotEmpty(discardPiles["opDiscPile"],"oDisc");
     
-    if (discardPiles["opDiscPile"].length == 0){
-        discEmpty("oDisc");
-    }
-    else{
-        discNotEmpty(discardPiles["opDiscPile"],"oDisc");
-    }
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
     document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
     
@@ -899,7 +963,8 @@ function putCardOnBoard(posID) {
 
 // Dictionaries for storing amount of twin/ morale cards and dandelion
 let powMods = {};
-let opPowMods = {};
+// Counts nonhero cards in each row for moralebooster
+let nonHeroes;
 // Array for storing rowIDs affected by commander's horns
 let horns = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCTION
 // Array storing rowIDs affected by weather
@@ -907,51 +972,42 @@ let weatherMods = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCT
 function getPowerModifiers() {
     /* 
         Iterate through all cards on board
-        Get which weather cards are in effect
+        Get which weather cards are in effect? (See above)
         Get which/ how many twin cards are in player and opponent lanes
-        Get which commander's horn/ dandelion cards are down
+        Get which commander's horn/ dandelion cards are down? (See above)
         Get which/ how many morale cards are down
     */
     
     // Reset modifier placeholders
     powMods = {};
-    opPowMods = {};
+    nonHeroes = [0,0,0,0,0,0];
     
     // Iterate through each of the player's rows
     let cardID;
     let cardsInRow;
-    pRows.forEach((row) =>{
+    let rowIndex = 0;
+    rowIDs.forEach((row) =>{
+        powMods[row] = {};
         cardsInRow = $('.'+row).find('.cardSmall').length;
         for(let i=0; i<cardsInRow; i++){
             cardID = $('.'+row).find('.cardSmall')[i].id;
             if(tightBonds.includes(cardID) || moraleBoosters.includes(cardID)){
-                if(powMods[cardID] == undefined){
-                    powMods[cardID] = 1;
+                if(powMods[row][cardID] == undefined){
+                    powMods[row][cardID] = 1;
                 }
                 else{
-                    powMods[cardID] += 1;
+                    powMods[row][cardID] += 1;
                 }
             }
+            
+            if(!heroes.includes(cardID) && cardID !== "neutral1"){
+                nonHeroes[rowIndex] += 1;
+            }
         }
+        rowIndex += 1;
     });
-    
-    opRows.forEach((row) =>{
-        cardsInRow = $('.'+row).find('.cardSmall').length;
-        for(let i=0; i<cardsInRow; i++){
-            cardID = $('.'+row).find('.cardSmall')[i].id;
-            if(tightBonds.includes(cardID) || moraleBoosters.includes(cardID)){
-                if(opPowMods[cardID] == undefined){
-                    opPowMods[cardID] = 1;
-                }
-                else{
-                    opPowMods[cardID] += 1;
-                }
-            }
-        }
-    }); 
 }
                    
-
 let powerLevels = {"opSiegePower":0,
                   "opRangedPower":0,
                   "opCombatPower":0,
@@ -970,17 +1026,32 @@ function updatePowerValues() {
                   "rangedPower":0,
                   "siegePower":0,
                   "totalPower":0};
+    
+    // Update powMods
+    getPowerModifiers();
 
     // Calculate power values for each row
+    let rowIndex = 0;
     rowIDs.forEach((row) =>{
         let powerStr = row.substring(0,row.length-4)+"Power";
         let cardsInRow = $('.'+row).find('.cardSmall').length;
         for(let i=0; i<cardsInRow; i++){
-            powerLevels[powerStr] += cardPowers[$('.'+row).find('.cardSmall')[i].id];
+            let cardID = $('.'+row).find('.cardSmall')[i].id;
+            if(tightBonds.includes(cardID)){
+                powerLevels[powerStr] += (cardPowers[cardID]*powMods[row][cardID]);
+            }
+            else if(moraleBoosters.includes(cardID)){ 
+                console.log(powMods[row][cardID]);
+                powerLevels[powerStr] += (cardPowers[cardID] + (powMods[row][cardID]*nonHeroes[rowIndex]) - powMods[row][cardID]);
+            }
+            else{
+                powerLevels[powerStr] += cardPowers[cardID];    
+            }    
         }
         
         // Display power value for each row
         document.getElementById(powerStr).innerHTML = powerLevels[powerStr];
+        rowIndex += 1;
     });
     
     // Calculate total power values

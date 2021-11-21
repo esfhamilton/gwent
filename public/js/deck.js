@@ -476,5 +476,5 @@ function submit() {
 socket.on('playerAssignment', (PID) => {
     // TESTING: localhost:5000
     // LIVE: gwent-io.herokuapp.com
-    location.replace(`http://gwent-io.herokuapp.com/game.html?SID=${SID}&player=${PID}`);
+    location.replace(`http://localhost:5000/game.html?SID=${SID}&player=${PID}`);
 });
