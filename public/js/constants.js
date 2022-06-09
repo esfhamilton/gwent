@@ -159,25 +159,25 @@ const cardPowers = {neutral1:0,
 let initDraw = 10;
 
 // Groups cards based on the divs that they can be placed in
-let combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
+const combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
                    "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR25", "NR26", "NR27"];
-let rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", "NR21"];
-let siegeCards = ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28"];
-let combatSpies = ["neutral12", "NR16", "NR19"];
-let siegeSpies = ["NR24"];
-let heroes = ["neutral1","neutral3","neutral8","neutral9","neutral10","neutral11","neutral12","NR1","NR2","NR3","NR4"];
-let medics = ["neutral10","NR18"];
-let tightBonds = ["NR5","NR17","NR22","NR25"];
-let moraleBoosters = ["NR28"];
-let scorchId = ["neutral3"];
-let villentretenmerth = ["neutral13"];
+const rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", "NR21"];
+const siegeCards = ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28"];
+const combatSpies = ["neutral12", "NR16", "NR19"];
+const siegeSpies = ["NR24"];
+const heroes = ["neutral1","neutral3","neutral8","neutral9","neutral10","neutral11","neutral12","NR1","NR2","NR3","NR4"];
+const medics = ["neutral10","NR18"];
+const tightBonds = ["NR5","NR17","NR22","NR25"];
+const moraleBoosters = ["NR28"];
+const scorchId = ["neutral3"];
+const villentretenmerth = ["neutral13"];
+const horns = ["neutral2", "neutral17"]
 
-/* 
-    Commander's horn divs for neutral2 
-    Any row for Scorch and clear weather
-    Corresponding positional player/opponent rows for everything else
-*/
-// Commander's horn = neutral2
+const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
+const hornIDs = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];
+const boardIDs = rowIDs.concat(hornIDs);
+const powerIDs = ["opSiegePower","opRangedPower","opCombatPower","opTotalPower","combatPower","rangedPower","siegePower","totalPower"];
+
 // Biting Frost = neutral4
 // Impenetrable fog = neutral5
 // Torrential rain = neutral6

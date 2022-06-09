@@ -1,4 +1,3 @@
-//import {styles, opStyles, cardPowers} from './constants';
 const socket = io();
 
 // Get SID and faction ID from URL
@@ -73,14 +72,11 @@ function setup() {
     document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
-    document.getElementById('opTotalPower').innerHTML = 0;
-    document.getElementById('opSiegePower').innerHTML = 0;
-    document.getElementById('opRangedPower').innerHTML = 0;
-    document.getElementById('opCombatPower').innerHTML = 0;
-    document.getElementById('combatPower').innerHTML = 0;
-    document.getElementById('rangedPower').innerHTML = 0;
-    document.getElementById('siegePower').innerHTML = 0;
-    document.getElementById('totalPower').innerHTML = 0;
+    
+    powerIDs.forEach((id) => {
+        document.getElementById(id).innerHTML = 0;
+    });
+    
     document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     document.getElementById('opponentStats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     
@@ -218,8 +214,13 @@ function decoyCard(card) {
     card.remove();
 }
 
-const pRows = ["combatLane", "rangedLane", "siegeLane"];
-const opRows = ["opCombatLane", "opRangedLane", "opSiegeLane"];
+const activateValidPositions = ((id) => {
+    document.getElementById(id).style = "background: rgba(255, 233, 0, 0.15);";
+    document.getElementById(id).setAttribute('onclick','placeCard(this)');
+})
+
+const pRows = rowIDs.slice(0,3);
+const opRows = rowIDs.slice(3);
 let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
@@ -237,7 +238,6 @@ function selectCard(card) {
         card.parentNode.removeChild(card);
     }
     
-    // TODO - Check if the loop following code block is redundant
     // Resets available lanes (might be redundant due to this being in (cancelCardSelection()))
     let positions = document.querySelectorAll("combatLane, rangedLane, siegeLane, opCombatLane, opRangedLane, opSiegeLane");
     for (let i=0; i<positions.length; i++) {
@@ -246,24 +246,19 @@ function selectCard(card) {
 
     // Highlight divs which are available for the card to be placed in
     if (combatCards.includes(selectedCard)) {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('combatLane');
     } 
     else if (rangedCards.includes(selectedCard)) {
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('rangedLane');
     }
     else if (siegeCards.includes(selectedCard)) {
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('siegeLane');
     }
     else if (combatSpies.includes(selectedCard)) {
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('opCombatLane');
     }
     else if (siegeSpies.includes(selectedCard)) {
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('opSiegeLane');
     }
     // Decoy
     else if (selectedCard === "neutral1") {
@@ -281,49 +276,31 @@ function selectCard(card) {
     }
     // Commander's Horn
     else if (selectedCard === "neutral2") {
-        document.getElementById('combatHorn').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('rangedHorn').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('siegeHorn').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('combatHorn').setAttribute('onclick','placeCard(this)');
-        document.getElementById('rangedHorn').setAttribute('onclick','placeCard(this)');
-        document.getElementById('siegeHorn').setAttribute('onclick','placeCard(this)');
+        hornIDs.slice(0,3).forEach((id) => {
+            activateValidPositions(id);
+        })
     }
     // Biting Frost
     else if (selectedCard === "neutral4") {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('combatLane');
+        activateValidPositions('opCombatLane');
 
     }
     // Impenetrable Fog
     else if (selectedCard === "neutral5") {
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opRangedLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('rangedLane');
+        activateValidPositions('opRangedLane');
     }
     // Torrential Rain
     else if (selectedCard === "neutral6") {
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
+        activateValidPositions('siegeLane');
+        activateValidPositions('opSiegeLane');
     }
     // Card must be Scorch or Clear Weather
     else {
-        document.getElementById('combatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opCombatLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('rangedLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opRangedLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('siegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('opSiegeLane').style = "background: rgba(255, 233, 0, 0.15);";
-        document.getElementById('combatLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opCombatLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('rangedLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opRangedLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('siegeLane').setAttribute('onclick','placeCard(this)');
-        document.getElementById('opSiegeLane').setAttribute('onclick','placeCard(this)');
+        rowIDs.forEach((id) => {
+            activateValidPositions(id);
+        });
     }
 }
 
@@ -331,8 +308,10 @@ let medicFlag = false;
 let revivedFlag = false;
 let medicCards = []; // Placeholder for card IDs if medic is used
 let medicPosIDs = []; // Placeholder for pos IDs if medic is used
+let doubledRows = []; // Contains rows which need values doubling
+
 function placeCard(boardPos) {
-    let boardPosID = boardPos.id;
+    const boardPosID = boardPos.id;
     cardSelectedFlag = false;
     cancelCardSelection();
     
@@ -360,7 +339,6 @@ function placeCard(boardPos) {
         putCardOnBoard(boardPosID);    
     }
     
-    
     // Updates power values on the board
     updatePowerValues();
             
@@ -386,8 +364,15 @@ function placeCard(boardPos) {
     }
     
     else if(villentretenmerth.includes(selectedCard)){
-        // TODO - Check total damage in opCombatLane >= 10
-        scorch(targetRows=["opCombatLane"]);
+        updatePowerValues();
+        if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["opCombatLane"]);
+    }
+    
+    else if(horns.includes(selectedCard)){
+        selectedCard === "neutral17" 
+            ?   doubledRows.push("combatLane")
+            :   doubledRows.push(rowIDs[hornIDs.indexOf(boardPosID)]);
+        // x.splice(x.indexOf(2),1) splice for removing dandelion if scorched
     }
     
     // Medic - Choose a non-hero card from discard to play 
@@ -396,9 +381,7 @@ function placeCard(boardPos) {
         
         // Check if there are non-hero cards in the discard pile
         for (let i=0; i<discPile.length; i++){
-                if(!heroes.includes(discPile[i])){
-                    medicFlag = true;
-                }
+            if(!heroes.includes(discPile[i])) medicFlag = true;           
         }
                     
         // Can only use medic ability if there are non-hero cards in the discard pile
@@ -468,8 +451,7 @@ function placeCard(boardPos) {
 }
 
 function scorch(targetRows = []){
-    // TODO - After horns/ dandy, will need second dic of rows to flag if horn is in row
-    
+    // TODO - consider horn/ dandy in here
     // Get current power modifiers
     getPowerModifiers();
     
@@ -598,7 +580,7 @@ socket.on('nextTurn', (cardArr, posArr, opHandSize) => {
             scorch(targetRows=rowIDs);
         }
         else if (villentretenmerth.includes(cardArr[0])){
-            scorch(targetRows=["combatLane"]);
+            if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["combatLane"]);
             selectedCard = cardArr[0];
             putCardOnBoard(posArr[0]);
         }
@@ -643,7 +625,7 @@ socket.on('returnTurn', (cardArr, posArr, opHandSize) => {
             scorch(targetRows=rowIDs);
         }
         else if (villentretenmerth.includes(cardArr[0])){
-            scorch(targetRows=["combatLane"]);
+            if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["combatLane"]);
         }
         else{
             for (let i=0; i<cardArr.length; i++){
@@ -763,7 +745,7 @@ function discNotEmpty(discPile,pileID) {
     document.getElementById(pileID).setAttribute("onclick","showDiscard(this.id)");
 }
 
-const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
+
 let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
     // Move cards into corresponding discard pile
@@ -824,16 +806,12 @@ function putCardOnBoard(posID) {
 let powMods = {};
 // Counts nonhero cards in each row for moralebooster
 let nonHeroes;
-// Array for storing rowIDs affected by commander's horns
-let horns = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCTION
-// Array storing rowIDs affected by weather
-let weatherMods = []; // DO ELSEWHERE: THIS CAN BE ADDED TO IN "placeCard" FUNCTION
 function getPowerModifiers() {
     /* 
         Iterate through all cards on board
-        Get which weather cards are in effect? (See above)
+        Get which weather cards are in effect? 
         Get which/ how many twin cards are in player and opponent lanes
-        Get which commander's horn/ dandelion cards are down? (See above)
+        Get which commander's horn/ dandelion cards are down?
         Get which/ how many morale cards are down
     */
     
@@ -866,25 +844,16 @@ function getPowerModifiers() {
         rowIndex += 1;
     });
 }
-                   
-let powerLevels = {"opSiegePower":0,
-                  "opRangedPower":0,
-                  "opCombatPower":0,
-                  "opTotalPower":0,    
-                  "combatPower":0,
-                  "rangedPower":0,
-                  "siegePower":0,
-                  "totalPower":0};
+
+let powerLevels = {};
+const resetPowerLevels = (() => {
+    powerIDs.forEach((id) => {
+        powerLevels[id] = 0;
+    })
+})
 function updatePowerValues() {  
     // Reset powerLevels with each update
-    powerLevels = {"opSiegePower":0,
-                  "opRangedPower":0,
-                  "opCombatPower":0,
-                  "opTotalPower":0,    
-                  "combatPower":0,
-                  "rangedPower":0,
-                  "siegePower":0,
-                  "totalPower":0};
+    resetPowerLevels();
     
     // Update powMods
     getPowerModifiers();
@@ -988,8 +957,6 @@ function keyPressed(event) {
 function cancelCardSelection() {
         // Remove card from placeholder at top
         document.getElementById('cardSelected').style = "display: none;";
-        
-        const boardIDs = ['combatLane','opCombatLane','rangedLane','opRangedLane','siegeLane','opSiegeLane','combatHorn','rangedHorn','siegeHorn'];
         
         // Remove any div highlights for where card can be placed and onclick attributes
         boardIDs.forEach((id) =>{
