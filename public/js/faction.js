@@ -10,9 +10,7 @@ socket.emit('rejoinRequest', SID);
 
 function submit() {
     let faction = document.getElementById('faction').value;
-    // TESTING: localhost:5000
-    // LIVE: gwent-io.herokuapp.com
-    location.replace(`http://localhost:5000/deck.html?SID=${SID}&faction=${faction}`);
+    location.replace(`http://${env}/deck.html?SID=${SID}&faction=${faction}`);
 }
 
 

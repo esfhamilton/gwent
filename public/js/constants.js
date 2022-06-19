@@ -1,12 +1,16 @@
-/* 
-    Like styles, these may need 
-    updating based on faction
-    using NR as default for now
-    Could have an append based on faction chosen 
-    this would allow for only 4 different faction style 
-    constants and a constant for neutrals to be made
-    then styles/ powers would be created in game.js as
-    a concat of neutral and faction
+const dev = "localhost:5000";
+const live = "gwent-io.herokuapp.com";
+const env = dev;
+
+/*  
+    6.65% First column
+    35.5% Second column
+    64.5% Third column
+    93.4% Final column
+    6% Top row
+    50% Second row
+    94% Final row
+    455% 331% height width 
 */
 
 // Initialises player faction styles

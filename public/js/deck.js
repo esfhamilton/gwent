@@ -28,59 +28,12 @@ for (let i=1; i<29; i++) {
     allCards.push("NR"+i);
 }
 
-// Object to store each cards style parameters
-let styles = {};
-
-/*  
-    6.65% First column
-    35.5% Second column
-    64.5% Third column
-    93.4% Final column
-    6% Top row
-    50% Second row
-    94% Final row
-    455% 331% height width 
-*/
-
-/* NEUTRAL CARDS (accessible to each faction) */
-// Decoy
-document.getElementById('neutral1').style = "background: url(img/cards_01.jpg) 6.65% 6% / 455% 331%; display: block;";
-// Commander's Horn
-document.getElementById('neutral2').style = "background: url(img/cards_01.jpg) 35.5% 6% / 455% 331%; display: block;";
-// Scorch
-document.getElementById('neutral3').style = "background: url(img/cards_01.jpg) 64.5% 6% / 455% 331%; display: block;";
-// Biting Frost
-document.getElementById('neutral4').style = "background: url(img/cards_01.jpg) 93.4% 6% / 455% 331%; display: block;";
-// Impenetrable Fog
-document.getElementById('neutral5').style = "background: url(img/cards_01.jpg) 6.65% 50% / 455% 331%; display: block;";
-// Torrential Rain
-document.getElementById('neutral6').style = "background: url(img/cards_01.jpg) 35.5% 50% / 455% 331%; display: block;";
-// Clear Weather
-document.getElementById('neutral7').style = "background: url(img/cards_01.jpg) 64.5% 50% / 455% 331%; display: block;";
-// Geralt of Rivia
-document.getElementById('neutral8').style = "background: url(img/cards_12.jpg) 35.5% 50% / 455% 331%; display: block;";
-// Cirilla Fiona Elen Riannon
-document.getElementById('neutral9').style = "background: url(img/cards_12.jpg) 64.5% 50% / 455% 331%; display: block;";
-// Yennefer of Vengerberg
-document.getElementById('neutral10').style = "background: url(img/cards_12.jpg) 93.4% 50% / 455% 331%; display: block;";
-// Triss Merigold
-document.getElementById('neutral11').style = "background: url(img/cards_12.jpg) 6.65% 94% / 455% 331%; display: block;";
-// Avallac'h
-document.getElementById('neutral12').style = "background: url(img/cards_12.jpg) 35.5% 94% / 455% 331%; display: block;";
-// Villentretenmerth
-document.getElementById('neutral13').style = "background: url(img/cards_01.jpg) 93.4% 50% / 455% 331%; display: block;";
-// Vesemir
-document.getElementById('neutral14').style = "background: url(img/cards_01.jpg) 6.65% 94% / 455% 331%; display: block;";
-// Zoltan Chivay
-document.getElementById('neutral15').style = "background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;";
-// Emiel Regis Rohellec Terzieff
-document.getElementById('neutral16').style = "background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;"; 
-// Dandelion
-document.getElementById('neutral17').style = "background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;"; 
-
+// Set styles - Faction styles can be separated in conditional 
+for (let id in styles){
+    if(id !== 'deck') document.getElementById(id).style = styles[id];
+}
 
 if (faction === 'NR'){
-    
     // Initialises availability of cards
     threeAvailable = ["neutral1","neutral2","neutral3","neutral4","neutral5","neutral6","neutral7",
                       "NR17","NR22","NR25","NR28"];
@@ -125,135 +78,20 @@ if (faction === 'NR'){
             document.getElementById(availabilityID).innerHTML = "x1";
         }
     });
-    
-    // Initialises neutral and faction styles
-    styles ={neutral1:"background: url(img/cards_01.jpg) 6.65% 6% / 455% 331%; display: block;",
-             neutral2:"background: url(img/cards_01.jpg) 35.5% 6% / 455% 331%; display: block;",
-             neutral3:"background: url(img/cards_01.jpg) 64.5% 6% / 455% 331%; display: block;",
-             neutral4:"background: url(img/cards_01.jpg) 93.4% 6% / 455% 331%; display: block;",
-             neutral5:"background: url(img/cards_01.jpg) 6.65% 50% / 455% 331%; display: block;",
-             neutral6:"background: url(img/cards_01.jpg) 35.5% 50% / 455% 331%; display: block;",
-             neutral7:"background: url(img/cards_01.jpg) 64.5% 50% / 455% 331%; display: block;",
-             neutral8:"background: url(img/cards_12.jpg) 35.5% 50% / 455% 331%; display: block;",
-             neutral9:"background: url(img/cards_12.jpg) 64.5% 50% / 455% 331%; display: block;",
-             neutral10:"background: url(img/cards_12.jpg) 93.4% 50% / 455% 331%; display: block;",
-             neutral11:"background: url(img/cards_12.jpg) 6.65% 94% / 455% 331%; display: block;",
-             neutral12:"background: url(img/cards_12.jpg) 35.5% 94% / 455% 331%; display: block;",
-             neutral13:"background: url(img/cards_01.jpg) 93.4% 50% / 455% 331%; display: block;",
-             neutral14:"background: url(img/cards_01.jpg) 6.65% 94% / 455% 331%; display: block;",
-             neutral15:"background: url(img/cards_01.jpg) 35.5% 94% / 455% 331%; display: block;",
-             neutral16:"background: url(img/cards_15.jpg) 64.5% 6% / 455% 331%; display: block;",
-             neutral17:"background: url(img/cards_01.jpg) 64.5% 94% / 455% 331%; display: block;",
-             NR1:"background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;",
-             NR2:"background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;",
-             NR3:"background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;",
-             NR4:"background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;",
-             NR5:"background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;",
-             NR6:"background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;",
-             NR7:"background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;",
-             NR8:"background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;",
-             NR9:"background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;",
-             NR10:"background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;",
-             NR11:"background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;",
-             NR12:"background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;",
-             NR13:"background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;",
-             NR14:"background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;",
-             NR15:"background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;",
-             NR16:"background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;",
-             NR17:"background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;",
-             NR18:"background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;",
-             NR19:"background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;",
-             NR20:"background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;",
-             NR21:"background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;",
-             NR22:"background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;",
-             NR23:"background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;",
-             NR24:"background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;",
-             NR25:"background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;",
-             NR26:"background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;",
-             NR27:"background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;",
-             NR28:"background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;"};
-    
-    // Leader cards
-    document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
-    document.getElementById('Lead2').style = "background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%;";
-    document.getElementById('Lead3').style = "background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%;";
-    document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
-    // Faction cards
-    // Vernon Roche
-    document.getElementById('NR1').style = "background: url(img/cards_14.jpg) 64.5% 6% / 455% 331%; display: block;";
-    // John Natalis
-    document.getElementById('NR2').style = "background: url(img/cards_14.jpg) 93.4% 6% / 455% 331%; display: block;";
-    // Esterad Thyssen
-    document.getElementById('NR3').style = "background: url(img/cards_14.jpg) 6.65% 50% / 455% 331%; display: block;";
-    // Philippa Eilhart
-    document.getElementById('NR4').style = "background: url(img/cards_14.jpg) 35.5% 50% / 455% 331%; display: block;";
-    // Catapult
-    document.getElementById('NR5').style = "background: url(img/cards_07.jpg) 64.5% 6% / 455% 331%; display: block;";
-    // Dethmold
-    document.getElementById('NR6').style = "background: url(img/cards_07.jpg) 93.4% 6% / 455% 331%; display: block;";
-    // Trebuchet
-    document.getElementById('NR7').style = "background: url(img/cards_07.jpg) 6.65% 50% / 455% 331%; display: block;";
-    // Trebuchet
-    document.getElementById('NR8').style = "background: url(img/cards_07.jpg) 35.5% 50% / 455% 331%; display: block;";
-    // Ballista
-    document.getElementById('NR9').style = "background: url(img/cards_07.jpg) 64.5% 50% / 455% 331%; display: block;";
-    // Ballista
-    document.getElementById('NR10').style = "background: url(img/cards_07.jpg) 93.4% 50% / 455% 331%; display: block;";
-    // Siege Tower
-    document.getElementById('NR11').style = "background: url(img/cards_07.jpg) 6.65% 94% / 455% 331%; display: block;";
-    // Ves
-    document.getElementById('NR12').style = "background: url(img/cards_07.jpg) 35.5% 94% / 455% 331%; display: block;";
-    // Siegfried of Denesle
-    document.getElementById('NR13').style = "background: url(img/cards_07.jpg) 64.5% 94% / 455% 331%; display: block;";
-    // Kiera Metz
-    document.getElementById('NR14').style = "background: url(img/cards_07.jpg) 93.4% 94% / 455% 331%; display: block;";
-    // Sile de Tansarville
-    document.getElementById('NR15').style = "background: url(img/cards_08.jpg) 6.65% 6% / 455% 331%; display: block;";
-    // Prince Stennis
-    document.getElementById('NR16').style = "background: url(img/cards_08.jpg) 35.5% 6% / 455% 331%; display: block;";
-    // Crimson Reavers Dragon Hunter
-    document.getElementById('NR17').style = "background: url(img/cards_08.jpg) 64.5% 6% / 455% 331%; display: block;";
-    // Dun Banner Medic
-    document.getElementById('NR18').style = "background: url(img/cards_08.jpg) 93.4% 6% / 455% 331%; display: block;";
-    // Sigismund Dijkstra
-    document.getElementById('NR19').style = "background: url(img/cards_08.jpg) 6.65% 50% / 455% 331%; display: block;";
-    // Sabrina Glevissig
-    document.getElementById('NR20').style = "background: url(img/cards_08.jpg) 35.5% 50% / 455% 331%; display: block;";
-    // Sheldon Skaggs
-    document.getElementById('NR21').style = "background: url(img/cards_08.jpg) 64.5% 50% / 455% 331%; display: block;";
-    // Blue Stripes Commando
-    document.getElementById('NR22').style = "background: url(img/cards_08.jpg) 93.4% 50% / 455% 331%; display: block;";
-    // Yarpen Zigrin
-    document.getElementById('NR23').style = "background: url(img/cards_08.jpg) 6.65% 94% / 455% 331%; display: block;";
-    // Thaler
-    document.getElementById('NR24').style = "background: url(img/cards_08.jpg) 35.5% 94% / 455% 331%; display: block;";
-    // Poor Fucking Infantry
-    document.getElementById('NR25').style = "background: url(img/cards_08.jpg) 64.5% 94% / 455% 331%; display: block;";
-    // Redanian Foot Soldier
-    document.getElementById('NR26').style = "background: url(img/cards_08.jpg) 93.4% 94% / 455% 331%; display: block;";
-    // Redanian Foot Soldier
-    document.getElementById('NR27').style = "background: url(img/cards_09.jpg) 6.65% 6% / 455% 331%; display: block;";
-    // Kaedweni Siege Expert
-    document.getElementById('NR28').style = "background: url(img/cards_09.jpg) 35.5% 6% / 455% 331%; display: block;";
 }
 /*
     Currently only northern realms is in use,
     other faction decks can be added in else ifs here
 */
-else{
-    document.getElementById('Lead1').style = "background: url(img/cards_13.jpg) 64.5% 94% / 455% 331%;";
-    document.getElementById('Lead2').style = "background: url(img/cards_13.jpg) 93.4% 94% / 455% 331%;";
-    document.getElementById('Lead3').style = "background: url(img/cards_14.jpg) 6.65% 6% / 455% 331%;";
-    document.getElementById('Lead4').style = "background: url(img/cards_14.jpg) 35.5% 6% / 455% 331%;";
-}
+
 
 let leader = 0;
 function leaderSelected(id) {
     leader = +id[id.length-1];
-    document.getElementById('Lead1').style.border = "none";
-    document.getElementById('Lead2').style.border = "none";
-    document.getElementById('Lead3').style.border = "none";
-    document.getElementById('Lead4').style.border = "none";
+    document.getElementById('lead1').style.border = "none";
+    document.getElementById('lead2').style.border = "none";
+    document.getElementById('lead3').style.border = "none";
+    document.getElementById('lead4').style.border = "none";
     document.getElementById(id).style.borderStyle = "solid";
     document.getElementById(id).style.borderColor = "gold";
 }

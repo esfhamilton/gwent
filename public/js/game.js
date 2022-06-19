@@ -134,7 +134,7 @@ function handSelected() {
     handChosen = true;
     document.getElementById('topMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
-    document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+    document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
                                                         &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
     
     // Remove onclick functionality until opponent has reselected their cards
@@ -277,7 +277,7 @@ function selectCard(card) {
     // Commander's Horn
     else if (selectedCard === "neutral2") {
         hornIDs.slice(0,3).forEach((id) => {
-            activateValidPositions(id);
+            if(!doubledRows.includes(id)) activateValidPositions(id);
         })
     }
     // Biting Frost
@@ -370,8 +370,8 @@ function placeCard(boardPos) {
     
     else if(horns.includes(selectedCard)){
         selectedCard === "neutral17" 
-            ?   doubledRows.push("combatLane")
-            :   doubledRows.push(rowIDs[hornIDs.indexOf(boardPosID)]);
+            ?   doubledRows.push("combatHorn")
+            :   doubledRows.push(boardPosID);
         // x.splice(x.indexOf(2),1) splice for removing dandelion if scorched
     }
     
@@ -904,13 +904,13 @@ function keyPressed(event) {
     if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
         if (handHiddenFlag){
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
                                                                  &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
             handHiddenFlag = false;
         }
         else{
             document.getElementById('hand').style = "display: none;";           
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Show Cards
+            document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Show Cards
                                                                  &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
             handHiddenFlag = true;
         }
@@ -975,7 +975,7 @@ function cancelCardSelection() {
     
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
-        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
+        document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
                                                              &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
 }
 
