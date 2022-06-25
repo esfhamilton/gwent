@@ -1,7 +1,3 @@
-const dev = "localhost:5000";
-const live = "gwent-io.herokuapp.com";
-const env = dev;
-
 /*  
     6.65% First column
     35.5% Second column
@@ -175,6 +171,7 @@ const tightBonds = ["NR5","NR17","NR22","NR25"];
 const moraleBoosters = ["NR28"];
 const scorchId = ["neutral3"];
 const villentretenmerth = ["neutral13"];
+const dandelion = ["neutral17"];
 const horns = ["neutral2", "neutral17"]
 
 const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
@@ -182,6 +179,8 @@ const hornIDs = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRange
 const boardIDs = rowIDs.concat(hornIDs);
 const powerIDs = ["opSiegePower","opRangedPower","opCombatPower","opTotalPower","combatPower","rangedPower","siegePower","totalPower"];
 
+const modBase = {combatLane:{}, rangedLane:{}, siegeLane:{}, opCombatLane:{}, opRangedLane:{}, opSiegeLane:{}};
+let tightBondMods = moraleMods = $.extend(true,{},modBase);
 // Biting Frost = neutral4
 // Impenetrable fog = neutral5
 // Torrential rain = neutral6
