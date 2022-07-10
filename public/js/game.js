@@ -68,10 +68,10 @@ function setup() {
     document.addEventListener("keydown",keyPressed);
     document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
     document.getElementById('topMsg2').style = "display: fixed;";
-    document.getElementById('pDeckSize').innerHTML = deck.length-10;
-    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
+    document.getElementById('pDeckSize').innerHTML = deck.length-10;
+    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
     
     powerIDs.forEach((id) => {
         document.getElementById(id).innerHTML = 0;
@@ -134,8 +134,7 @@ function handSelected() {
     handChosen = true;
     document.getElementById('topMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
-    document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
-                                                        &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+    document.getElementById('instructions').innerHTML = instructionTextHide;
     
     // Remove onclick functionality until opponent has reselected their cards
     cards = document.getElementsByClassName('card');
@@ -185,16 +184,8 @@ function decoyCard(card) {
     cardToHand.setAttribute("onclick", "selectCard(this)");
     document.getElementById('hand').appendChild(cardToHand);
     hand.push(card.id);
-        
-    // Remove card from hand - As long as it's not from discard
-    index = hand.indexOf(selectedCard);  
-    if (index > -1) {
-        hand.splice(index, 1);
-    } 
 
     let boardPosID;
-    
-    // Put Decoy on corresponding row
     if(combatCards.includes(card.id) || combatSpies.includes(card.id)){
         boardPosID = 'combatLane';
     }
@@ -206,11 +197,7 @@ function decoyCard(card) {
     }
     
     putCardOnBoard(boardPosID);
-    
-    let cardsInHand = document.getElementById("hand").childElementCount;
-    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-        
-    socket.emit('switchTurn', SID, [selectedCard,card.id], [boardPosID], cardsInHand);
+    cardsPlaced([selectedCard,card.id], [boardPosID]);
     card.remove();
 }
 
@@ -260,8 +247,7 @@ function selectCard(card) {
     else if (siegeSpies.includes(selectedCard)) {
         activateValidPositions('opSiegeLane');
     }
-    // Decoy
-    else if (selectedCard === "neutral1") {
+    else if (selectedCard === decoy) {
         // Add functionality/ highlights to cards which can be decoyed
         pRows.forEach((row) => {
                     // Number of cards in each row
@@ -274,28 +260,24 @@ function selectCard(card) {
                     }
         });
     }
-    // Commander's Horn
-    else if (selectedCard === "neutral2") {
+    else if (selectedCard === commandersHorn) {
         hornIDs.slice(0,3).forEach((id) => {
             if(!doubledRows.includes(id)) activateValidPositions(id);
         })
     }
-    // Biting Frost
-    else if (selectedCard === "neutral4") {
+    else if (selectedCard === bitingFrost) {
         activateValidPositions('combatLane');
         activateValidPositions('opCombatLane');
-
     }
-    // Impenetrable Fog
-    else if (selectedCard === "neutral5") {
+    else if (selectedCard === impenetrableFog) {
         activateValidPositions('rangedLane');
         activateValidPositions('opRangedLane');
     }
-    // Torrential Rain
-    else if (selectedCard === "neutral6") {
+    else if (selectedCard === torrentialRain) {
         activateValidPositions('siegeLane');
         activateValidPositions('opSiegeLane');
     }
+
     // Card must be Scorch or Clear Weather
     else {
         rowIDs.forEach((id) => {
@@ -308,7 +290,7 @@ let medicFlag = false;
 let revivedFlag = false;
 let medicCards = []; // Placeholder for card IDs if medic is used
 let medicPosIDs = []; // Placeholder for pos IDs if medic is used
-let doubledRows = []; // Rows with Commander's Horn
+let doubledRows = []; // Positions with horns placed
 
 function placeCard(boardPos) {
     const boardPosID = boardPos.id;
@@ -322,8 +304,7 @@ function placeCard(boardPos) {
         medicFlag = false;
         revivedFlag = true;
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-        document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">E</button>&nbsp;&nbsp;Hide Cards
-                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+        document.getElementById('instructions').innerHTML = instructionTextHide;
         document.getElementById('pDisc').setAttribute("onclick", "showDiscard(this.id)");
         document.getElementById('oDisc').setAttribute("onclick", "showDiscard(this.id)");
         
@@ -334,8 +315,23 @@ function placeCard(boardPos) {
         }   
     }
 
+    if(weatherCards.includes(selectedCard)){
+        if(!weatherEffects.includes(selectedCard)){
+            weatherEffects.push(selectedCard);
+            putCardOnBoard(boardPosID);
+        }
+        cardsPlaced([selectedCard], [boardPosID]);
+        return;
+    }
+
+    if (selectedCard === clearWeather){
+        resetWeather();
+        cardsPlaced([selectedCard], [boardPosID]);
+        return;
+    }
+
     // Displays card in corresponding location
-    if(!scorchId.includes(selectedCard)){
+    if(selectedCard !== scorchId){
         putCardOnBoard(boardPosID);    
     }
     
@@ -359,18 +355,17 @@ function placeCard(boardPos) {
         }
     }
     
-    else if(scorchId.includes(selectedCard)){
+    else if(selectedCard === scorchId){
         scorch(targetRows=rowIDs);
     }
     
-    else if(villentretenmerth.includes(selectedCard)){
+    else if(selectedCard === villentretenmerth){
         updatePowerValues();
-        if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["opCombatLane"]);
+        if(powerLevels["opCombatPower"] >= 10) scorch(targetRows=["opCombatLane"]);
     }
     
     else if(horns.includes(selectedCard)){
         doubledRows.push(boardPosID);
-        // x.splice(x.indexOf(2),1) splice for removing dandelion if scorched
     }
     
     // Medic - Choose a non-hero card from discard to play 
@@ -417,39 +412,32 @@ function placeCard(boardPos) {
         }
     }
     
-    let cardsInHand = document.getElementById("hand").childElementCount;
-    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-    
     // Prevents turn switch if medic has been played and player needs to revive a card
     if (!medicFlag && !revivedFlag){
-        
-        // Remove card from hand - As long as it's not from discard
-        index = hand.indexOf(selectedCard);  
-        if (index > -1) {
-            hand.splice(index, 1);
-        } 
-        
-        // Switch turn and pass data to opponent
-        socket.emit('switchTurn', SID, [selectedCard], [boardPosID], cardsInHand);
+        cardsPlaced([selectedCard], [boardPosID]);
     }
     
     // If a medic has been played, emit multiple cards played to the server
     else if (revivedFlag){
-        revivedFlag = false;
-        index = hand.indexOf(medicCards[0]);  
-        if (index > -1) {
-            hand.splice(index, 1);
-        }   
-        // Emit special switch turn with medicCards and positions and cardsinHand
-        socket.emit('switchTurn', SID, medicCards, medicPosIDs, cardsInHand);
-        
+        cardsPlaced(medicCards, medicPosIDs);
+
         medicCards = [];
         medicPosIDs = [];
+        revivedFlag = false;
     }
 }
 
+function cardsPlaced(cards, positions){
+    index = hand.indexOf(selectedCard);  
+    if (index > -1) hand.splice(index, 1); // Remove card from hand - If not in discard
+    
+    const cardsInHand = document.getElementById("hand").childElementCount;
+    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+    
+    socket.emit('switchTurn', SID, cards, positions, cardsInHand);
+}
+
 function scorch(targetRows = []){
-    // TODO - consider horn/ dandy in here
     // Get current power modifiers
     resetPowerLevels();
     getPowerModifiers();
@@ -475,12 +463,11 @@ function scorch(targetRows = []){
         hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             cardID = $('.'+row).find('.cardSmall')[i].id;
-            if(heroes.includes(cardID)){
-                continue;
-            }
-            else {
-                let cardPow = cardPowers[cardID] * (tightBondMods[row][cardID] ?? 1 ) + moraleRowCount[row];
-                if(hornInRow !== undefined) cardPow *= 2;
+            basePower = getBasePower(cardID);
+            if(!heroes.includes(cardID)){
+                let cardPow = basePower * (tightBondMods[row][cardID] ?? 1 ) + moraleRowCount[row];
+                if(hornInRow !== undefined || dandelion === cardID) cardPow *= 2;
+                if(hornInRow === undefined && doubledRows.includes(row)) cardPow -= basePower; 
                 if(moraleBoosters.includes(cardID)) cardPow -= 1;
                 
                 if(cardPow>=topRowVals[row]){
@@ -508,20 +495,21 @@ function scorch(targetRows = []){
         hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             cardID = uniqueCardIdList[i];
+            basePower = getBasePower(cardID);
             if(strongestCards[row] !== undefined){
                 if(!strongestCards[row].includes(cardID)){
                     continue;
                 }
                 else{
                     strongestCards[row].forEach((sCard) => {
-                        let cardPow = cardPowers[sCard] * (tightBondMods[row][sCard] ?? 1) + moraleRowCount[row]; 
-                        if (hornInRow !== undefined) cardPow *= 2;
-                        if (moraleBoosters.includes(sCard)) cardPow -= 1;
+                        let cardPow = basePower * (tightBondMods[row][sCard] ?? 1) + moraleRowCount[row]; 
+                        if(hornInRow !== undefined || dandelion === sCard) cardPow *= 2;
+                        if(hornInRow === undefined && doubledRows.includes(row)) cardPow -= basePower;
+                        if(moraleBoosters.includes(sCard)) cardPow -= 1;
 
                         if (cardPow === maxVal && sCard === cardID){
+                            if(cardID === dandelion) doubledRows.splice(doubledRows.indexOf(row),1); 
                             $('.'+row).find('#'+sCard).remove();
-
-                            // Add cardID to corresponding discard pile
                             opRows.includes(row) ? discardPiles["opDiscPile"].push(cardID) : discardPiles["pDiscPile"].push(cardID);
                         }
                     })
@@ -554,11 +542,22 @@ function updateOpDiscard(discCardID) {
     document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
 }
 
-// Switches turn after card has been played
 socket.on('nextTurn', (cardArr, posArr, opHandSize) => {         
+    syncWithOpponent(cardArr, posArr, opHandSize)
+    switchTurn();
+});
+
+socket.on('returnTurn', (cardArr, posArr, opHandSize) => { 
+    syncWithOpponent(cardArr, posArr, opHandSize)
+});
+
+function syncWithOpponent(cardArr, posArr, opHandSize) {
     if (!myTurn){
-        // neutral1 is the only decoy card
-        if (cardArr[0] == 'neutral1'){
+        if (cardArr[0] === dandelion){
+            doubledRows.push(posArr[0]);
+        }
+
+        if (cardArr[0] === decoy){
             selectedCard = cardArr[0];
             putCardOnBoard(posArr[0]);
             cardsInRow = $('.'+posArr[0]).find('.cardSmall').length;
@@ -569,13 +568,23 @@ socket.on('nextTurn', (cardArr, posArr, opHandSize) => {
                 }
             }
         }
-        else if (scorchId.includes(cardArr[0])){
+        else if (scorchId === cardArr[0]){
             scorch(targetRows=rowIDs);
         }
-        else if (villentretenmerth.includes(cardArr[0])){
-            if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["combatLane"]);
+        else if (villentretenmerth === cardArr[0]){
+            if(powerLevels["combatPower"] >= 10) scorch(targetRows=["combatLane"]);
             selectedCard = cardArr[0];
             putCardOnBoard(posArr[0]);
+        }
+        else if(weatherCards.includes(cardArr[0])) {
+            if(!weatherEffects.includes(cardArr[0])){
+                selectedCard = cardArr[0];
+                weatherEffects.push(selectedCard);
+                putCardOnBoard(selectedCard);
+            }
+        }
+        else if (cardArr[0] === clearWeather){
+            resetWeather();
         }
         else{
             for (let i=0; i<cardArr.length; i++){
@@ -596,53 +605,15 @@ socket.on('nextTurn', (cardArr, posArr, opHandSize) => {
     updatePowerValues();  
     document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
-    switchTurn();
-});
-
-// Holds turn after card has been played
-socket.on('returnTurn', (cardArr, posArr, opHandSize) => { 
-    if (!myTurn){
-        // neutral1 is the only decoy card
-        if (cardArr[0] == 'neutral1'){
-            selectedCard = cardArr[0];
-            putCardOnBoard(posArr[0]);
-            cardsInRow = $('.'+posArr[0]).find('.cardSmall').length;
-            for(let i=0; i<cardsInRow; i++){
-                if($('.'+posArr[0]).find('.cardSmall')[i].id == cardArr[1]){
-                    $('.'+posArr[0]).find('.cardSmall')[i].remove()
-                    break;
-                }
-            }
-        }
-        else if (scorchId.includes(cardArr[0])){
-            scorch(targetRows=rowIDs);
-        }
-        else if (villentretenmerth.includes(cardArr[0])){
-            if(powerLevels["opCombatPower"] > 10) scorch(targetRows=["combatLane"]);
-        }
-        else{
-            for (let i=0; i<cardArr.length; i++){
-                selectedCard = cardArr[i];
-                putCardOnBoard(posArr[i]);
-                document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-                if (i>0){
-                    updateOpDiscard(cardArr[i]);
-                }
-            }
-        }
-    }
-    updatePowerValues();  
-    document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
-    document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
-});
+}
      
 // Decide who round winner is based on total values and run any faction rules
 let pLife = 2;
 let oLife = 2;
 socket.on('endRound', () => { 
-    // Adjust lives for players and decide next turn
-    removeLife();
-    
+    updateLife();
+    resetWeather();
+
     // Reset Scores
     for (let key in powerLevels){
         powerLevels[key] = 0;
@@ -674,7 +645,8 @@ socket.on('results', () => {
     }    
 });
 
-function removeLife() {
+// Adjust lives for players and decide next turn
+function updateLife() {
     // Player has won
     if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
         document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
@@ -706,6 +678,11 @@ function removeLife() {
     if(pLife == 0 || oLife == 0){
         socket.emit('endGame', SID, player);
     }
+}
+
+function resetWeather(){
+    weatherEffects = [];
+    $('.weatherStats').find('.cardSmall').remove();
 }
 
 // Show cards in the discard pile
@@ -787,7 +764,8 @@ function switchTurn() {
     }
 }
 
-function putCardOnBoard(posID) {
+function putCardOnBoard(boardPosID) {
+    const posID = weatherCards.includes(selectedCard) ? "weatherStats" : boardPosID;
     let card = document.createElement('div');
     card.style = styles[selectedCard];
     card.className = 'cardSmall';
@@ -819,7 +797,7 @@ function getPowerModifiers() {
                 moraleMods[row][cardID] ??= 0;
                 moraleMods[row][cardID] += 1;
             }
-            if(!heroes.includes(cardID) && cardID !== "neutral1"){
+            if(!heroes.includes(cardID) && cardID !== decoy){
                 nonHeroes[rowIndex] += 1;
             }
         }
@@ -848,18 +826,19 @@ function updatePowerValues() {
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             let cardID = $('.'+row).find('.cardSmall')[i].id;
-            if(!heroes.includes(cardID) && hornInRow !== undefined){
-                powerLevels[powerStr] += cardPowers[cardID] * (tightBondMods[row][cardID] ?? 1);
-                if(moraleBoosters.includes(cardID)){ 
-                    powerLevels[powerStr] += (nonHeroes[rowIndex]-1);
-                }
+            let basePower = getBasePower(cardID);
+            if(!heroes.includes(cardID) && (hornInRow !== undefined || doubledRows.includes(row))){
+                powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);
+
+                if(moraleBoosters.includes(cardID)) powerLevels[powerStr] += (nonHeroes[rowIndex]-1);
+                if(dandelion === cardID && hornInRow === undefined) powerLevels[powerStr] -= basePower;
             }
             
             if(moraleBoosters.includes(cardID)){ 
                 powerLevels[powerStr] += (nonHeroes[rowIndex]-1);
             }
 
-            powerLevels[powerStr] += cardPowers[cardID] * (tightBondMods[row][cardID] ?? 1);    
+            powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);    
         }
         
         // Display power value for each row
@@ -876,6 +855,14 @@ function updatePowerValues() {
     document.getElementById("totalPower").innerHTML = powerLevels["totalPower"];
 }
 
+let weatherEffects = [];
+function getBasePower(cardID){
+    if (combatCards.concat(combatSpies).includes(cardID) && weatherEffects.includes(bitingFrost) && !heroes.includes(cardID)) return 1;
+    else if (rangedCards.includes(cardID) && weatherEffects.includes(impenetrableFog) && !heroes.includes(cardID)) return 1;
+    else if (siegeCards.concat(siegeSpies).includes(cardID) && weatherEffects.includes(torrentialRain) && !heroes.includes(cardID)) return 1;
+    else return cardPowers[cardID];
+}
+
 let handHiddenFlag = false;
 let cardSelectedFlag = false;
 let discSelectedFlag = false;
@@ -890,14 +877,12 @@ function keyPressed(event) {
     if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
         if (handHiddenFlag){
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
-                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+            document.getElementById('instructions').innerHTML = instructionTextHide;
             handHiddenFlag = false;
         }
         else{
             document.getElementById('hand').style = "display: none;";           
-            document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Show Cards
-                                                                 &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+            document.getElementById('instructions').innerHTML = instructionTextShow;
             handHiddenFlag = true;
         }
     }
@@ -961,7 +946,6 @@ function cancelCardSelection() {
     
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
-        document.getElementById('instructions').innerHTML = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
-                                                             &nbsp;&nbsp;<button style="font-size: 70%;">⌴</button>&nbsp;&nbsp;End Turn`;
+        document.getElementById('instructions').innerHTML = instructionTextHide;
 }
 

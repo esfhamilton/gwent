@@ -110,7 +110,7 @@
     .combatHorn {
         bottom: 33.3%;
     }
-    
+         
     .rangedHorn {
         bottom: 17.7%;
     }
@@ -205,9 +205,7 @@
     .pDeck,
     .oDeck,
     .pDisc,
-    .oDisc { {
+    .oDisc { 
         right: 195px;
     }
-    
-
 }

@@ -1,3 +1,9 @@
+const instructionTextShow = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Show Cards
+&nbsp;&nbsp;<button style="font-size: 90%;">Space</button>&nbsp;&nbsp;End Turn`;
+const instructionTextHide = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
+&nbsp;&nbsp;<button style="font-size: 90%;">Space</button>&nbsp;&nbsp;End Turn`;
+
+
 /*  
     6.65% First column
     35.5% Second column
@@ -154,11 +160,8 @@ const cardPowers = {neutral1:0,
                 NR28:1};
 
 
+const initDraw = 10;
 
-// Amount of cards player draws at the start
-let initDraw = 10;
-
-// Groups cards based on the divs that they can be placed in
 const combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
                    "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR25", "NR26", "NR27"];
 const rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", "NR21"];
@@ -169,10 +172,17 @@ const heroes = ["neutral1","neutral3","neutral8","neutral9","neutral10","neutral
 const medics = ["neutral10","NR18"];
 const tightBonds = ["NR5","NR17","NR22","NR25"];
 const moraleBoosters = ["NR28"];
-const scorchId = ["neutral3"];
-const villentretenmerth = ["neutral13"];
-const dandelion = ["neutral17"];
-const horns = ["neutral2", "neutral17"]
+const horns = ["neutral2", "neutral17"];
+const weatherCards = ["neutral4","neutral5","neutral6"];
+const decoy = "neutral1";
+const commandersHorn = "neutral2";
+const scorchId = "neutral3";
+const bitingFrost = "neutral4";
+const impenetrableFog = "neutral5";
+const torrentialRain = "neutral6";
+const clearWeather = "neutral7";
+const villentretenmerth = "neutral13";
+const dandelion = "neutral17";
 
 const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
 const hornIDs = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];
@@ -180,8 +190,4 @@ const boardIDs = rowIDs.concat(hornIDs);
 const powerIDs = ["opSiegePower","opRangedPower","opCombatPower","opTotalPower","combatPower","rangedPower","siegePower","totalPower"];
 
 const modBase = {combatLane:{}, rangedLane:{}, siegeLane:{}, opCombatLane:{}, opRangedLane:{}, opSiegeLane:{}};
-let tightBondMods = moraleMods = $.extend(true,{},modBase);
-// Biting Frost = neutral4
-// Impenetrable fog = neutral5
-// Torrential rain = neutral6
-// Clear weather = neutral7
+let tightBondMods = moraleMods = $.extend(true,{},modBase); // Deep clone
