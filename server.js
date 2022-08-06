@@ -15,6 +15,23 @@ let gameData = {};
 let redrawnCheck = {};
 let roomPassCount = {};
 
+function shuffle(deck) {
+    var currentIndex = deck.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle
+    while (0 !== currentIndex) {
+      // Pick a remaining element
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // Swap remaining element with the current element.
+      temporaryValue = deck[currentIndex];
+      deck[currentIndex] = deck[randomIndex];
+      deck[randomIndex] = temporaryValue;
+    }
+    return deck;
+}
+
 io.on('connection', (socket) => {
     socket.on('joinRequest', (SID) => {                
         var numClients = io.sockets.adapter.rooms[''+SID];
@@ -83,17 +100,17 @@ io.on('connection', (socket) => {
     socket.on('playerDeck', (SID, leader, deck, faction) => {
         let playerA = SID +'A';
         let playerB = SID +'B'; 
-        
+
         // Check if first player has already been added
         if (playerA in gameData) {
             // Add data under player B
-            gameData[playerB] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[]};
+            gameData[playerB] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[], "fullDeck": deck};
             // Inform client which identifier their data is stored under
             socket.emit('playerAssignment', 'B');
         }
         else {
             // Add data under player A
-            gameData[playerA] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[]};
+            gameData[playerA] = {"faction":faction,"leader":leader,"deck":deck,"hand":[],"discarded":[], "fullDeck": deck};
             // Inform client which identifier their data is stored under
             socket.emit('playerAssignment', 'A');
         }
@@ -106,10 +123,10 @@ io.on('connection', (socket) => {
         if(gameData[PID] != undefined){
             startCheck[PID] = "Added";
             if (player === 'A') { 
-                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]);
+                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], shuffle(gameData[PID]["fullDeck"]));
             }
             else {
-                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], gameData[PID]["deck"]); 
+                socket.emit('playerAssigned', gameData[PID]["faction"], gameData[PID]["leader"], shuffle(gameData[PID]["fullDeck"])); 
             }
         } 
         else{
@@ -121,11 +138,11 @@ io.on('connection', (socket) => {
         let OID;
         if (player === 'A') {
             OID = SID + 'B';
-            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length);
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"]);
         }
         else {
             OID = SID + 'A';
-            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"].length); 
+            socket.emit('opponentDeck', gameData[OID]["faction"], gameData[OID]["leader"], gameData[OID]["deck"]); 
         }
     });
     
@@ -140,7 +157,8 @@ io.on('connection', (socket) => {
     });
     
     // Checks if players have redrawn the starting hand
-    socket.on('cardsRedrawn', (SID, player) => {
+    socket.on('cardsRedrawn', (SID, player, deck) => {
+        gameData[SID + player]["deck"] = deck;
         if(SID in redrawnCheck) {
             // Prevents crash from page refresh, should be true
             if (redrawnCheck[SID] != player) {
@@ -153,18 +171,6 @@ io.on('connection', (socket) => {
             socket.emit('waiting');
         }
     });
-    
-    /* 
-        TODO
-        - Increments value in roomPassCount
-        - if this value === 1 when playing card
-          then turn is returned to the player
-          (implemented in switchTurn)                   
-        - if value === 2 then check total points
-          and decide round winner. Revert to 0.
-        - if no lives left decide game winner.
-        
-    */
 
     socket.on('passTurn', (SID) => {
         roomPassCount[SID] += 1;
@@ -178,7 +184,7 @@ io.on('connection', (socket) => {
     });
     
     // Switches turn and passes on player choice to opponent 
-    socket.on('switchTurn', (SID, cardIDs, posIDs, cardsInHand) => {
+    socket.on('switchTurn', (SID, cardIDs, posIDs, cardsInHand, abilityUsed) => {
         let switchedPosIDs = [];
         for (let i=0; i<posIDs.length; i++){
             // Amend capital and remove op if exists, else add op to string header
@@ -192,10 +198,10 @@ io.on('connection', (socket) => {
         
         // Return turn to player if opponent has passed their turn, else switch turn
         if (roomPassCount[SID] === 1){
-            io.in(SID).emit('returnTurn', cardIDs, switchedPosIDs, cardsInHand);
+            io.in(SID).emit('returnTurn', cardIDs, switchedPosIDs, cardsInHand, abilityUsed);
         }
         else {
-            io.in(SID).emit('nextTurn', cardIDs, switchedPosIDs, cardsInHand);
+            io.in(SID).emit('nextTurn', cardIDs, switchedPosIDs, cardsInHand, abilityUsed);
         }
     });
     

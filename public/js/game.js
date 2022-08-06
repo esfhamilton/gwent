@@ -23,30 +23,12 @@ let faction;
 let leader;
 let deck;
 let hand = [];
-let cards;
 let index;
 socket.on('playerAssigned', (FID, leaderID, cards) => {
     faction = FID;
     leader = 'lead'+leaderID;
-    deck = shuffle(cards);
+    deck = cards;
 });
-
-function shuffle(deck) {
-  var currentIndex = deck.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle
-  while (0 !== currentIndex) {
-    // Pick a remaining element
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // Swap remaining element with the current element.
-    temporaryValue = deck[currentIndex];
-    deck[currentIndex] = deck[randomIndex];
-    deck[randomIndex] = temporaryValue;
-  }
-  return deck;
-}
 
 socket.on('startGame', () => {
     document.getElementById('topMsg').innerHTML = "Starting game...";
@@ -55,12 +37,17 @@ socket.on('startGame', () => {
 
 let opponentFaction;
 let opponentLeader;
-let opponentDeckSize;
-socket.on('opponentDeck', (opponentFID, opponentLID, opDeckSize) => {
-    opponentFaction = opponentFID;
-    opponentLeader = 'lead'+opponentLID;
-    opponentDeckSize = opDeckSize-10;
-    setup();
+let opponentDeck = [];
+socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
+    if(opponentDeck.length === 0){
+        opponentFaction = opponentFID;
+        opponentLeader = 'lead'+opponentLID;
+        opponentDeck = opDeck;
+        setup();
+    }
+    else{
+        opponentDeck = opDeck;
+    }
 });
 
 // Sets up mulligan phase after both players have created their decks
@@ -71,7 +58,7 @@ function setup() {
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
     document.getElementById('pDeckSize').innerHTML = deck.length-10;
-    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
+    document.getElementById('oDeckSize').innerHTML = opponentDeck.length-10;
     
     powerIDs.forEach((id) => {
         document.getElementById(id).innerHTML = 0;
@@ -129,19 +116,21 @@ function replaceCard(card) {
 
 // Flag to check if starting hand has been confirmed
 let handChosen = false;
+let cardElements;
 // Second setup for after player has confirmed their starting hand
 function handSelected() {
     handChosen = true;
     document.getElementById('topMsg2').style = "display: none;";
     document.getElementById('hand').style = "bottom: 0%;";
+    document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
     
     // Remove onclick functionality until opponent has reselected their cards
-    cards = document.getElementsByClassName('card');
+    cardElements = document.getElementsByClassName('card');
     for (let i=0; i<hand.length; i++) {
-        cards[i].removeAttribute("onclick");
+        cardElements[i].removeAttribute("onclick");
     }
-    socket.emit('cardsRedrawn', SID, player);
+    socket.emit('cardsRedrawn', SID, player, deck);
 }
 
 // Informs player that their opponent still needs to confirm starting hand
@@ -153,6 +142,8 @@ socket.on('waiting', () => {
 let myTurn = false;
 let hadFirst = false;
 socket.on('firstTurn', (PID) => {
+    socket.emit('getOpponentDeck', SID, player);
+
     // Inform players who's turn it is
     if (player != PID){    
         document.getElementById('topMsg').innerHTML = "Opponent's Turn";
@@ -165,9 +156,9 @@ socket.on('firstTurn', (PID) => {
     
     // Adds new onclick functionality for player whos turn it is
     if (myTurn) {
-        cards = document.getElementsByClassName('card');
+        cardElements = document.getElementsByClassName('card');
         for (let i=0; i<hand.length; i++) {
-            cards[i].setAttribute("onclick", "selectCard(this)");
+            cardElements[i].setAttribute("onclick", "selectCard(this)");
         }
     }
 });
@@ -214,10 +205,12 @@ function selectCard(card) {
     selectedCard = card.id;
     document.getElementById('cardSelected').style = styles[selectedCard];
     document.getElementById('hand').style = "display: none;"; 
+    document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
     if(medicFlag){
         document.getElementById('discCards').innerHTML = "";
+        document.getElementById('leaderInstructions').innerHTML = "";
         document.getElementById('instructions').innerHTML = "";
     }
     else{
@@ -248,9 +241,7 @@ function selectCard(card) {
         activateValidPositions('opSiegeLane');
     }
     else if (selectedCard === decoy) {
-        // Add functionality/ highlights to cards which can be decoyed
         pRows.forEach((row) => {
-                    // Number of cards in each row
                     let len = $("."+row).find('.cardSmall')["length"];
                     for (let i=0; i<len; i++) {
                         if(!heroes.includes($("."+row).find('.cardSmall')[i]['id'])){
@@ -304,6 +295,7 @@ function placeCard(boardPos) {
         medicFlag = false;
         revivedFlag = true;
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+        document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
         document.getElementById('pDisc').setAttribute("onclick", "showDiscard(this.id)");
         document.getElementById('oDisc').setAttribute("onclick", "showDiscard(this.id)");
@@ -350,7 +342,6 @@ function placeCard(boardPos) {
                 document.getElementById('hand').appendChild(card);
                 hand.push(deck[0]);
                 deck.shift();
-                document.getElementById('pDeckSize').innerHTML = deck.length;
             }
         }
     }
@@ -390,6 +381,7 @@ function placeCard(boardPos) {
             
             // Hide hand and instructions
             document.getElementById('hand').style = "display: none;"; 
+            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             document.getElementById('instructions').innerHTML = "";
             
             // Prevent discards being opened while reviving
@@ -434,7 +426,49 @@ function cardsPlaced(cards, positions){
     const cardsInHand = document.getElementById("hand").childElementCount;
     document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
     
-    socket.emit('switchTurn', SID, cards, positions, cardsInHand);
+    socket.emit('switchTurn', SID, cards, positions, cardsInHand, false);
+}
+
+function useLeaderAbility(useOpponentLeaderAbility=false){
+    leaderFaction = useOpponentLeaderAbility ? opponentFaction : faction;
+    leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
+    if(leaderFaction === "NR"){
+        switch(leaderUsed){
+            case "lead1": // Doubles siege lane strength 
+            useOpponentLeaderAbility ? doubledRows.push('opSiegeLane') : doubledRows.push('siegeLane');
+                break;
+            case "lead2": // Plays impenetrable fog from deck
+                if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
+                    opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
+                    selectedCard = impenetrableFog;
+                    weatherEffects.push(impenetrableFog);
+                    putCardOnBoard("weatherStats")
+                }
+                else if(!useOpponentLeaderAbility && deck.includes(impenetrableFog)){
+                    deck.splice(deck.indexOf(impenetrableFog),1);
+                    selectedCard = impenetrableFog;
+                    weatherEffects.push(impenetrableFog);
+                    putCardOnBoard("weatherStats")
+                }
+                break;
+            case "lead3": // Clears weather effects
+                resetWeather();
+                break;
+            case "lead4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
+                if(useOpponentLeaderAbility){
+                    if(powerLevels["siegePower"] >= 10) scorch(targetRows=["siegeLane"]);
+                } 
+                else {
+                    if(powerLevels["opSiegePower"] >= 10) scorch(targetRows=["opSiegeLane"]);
+                }
+                break;
+        }
+    }
+    if(!useOpponentLeaderAbility){
+        const cardsInHand = document.getElementById("hand").childElementCount;
+        document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
+        socket.emit('switchTurn', SID, [], [], cardsInHand, true);
+    }
 }
 
 function scorch(targetRows = []){
@@ -542,17 +576,19 @@ function updateOpDiscard(discCardID) {
     document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
 }
 
-socket.on('nextTurn', (cardArr, posArr, opHandSize) => {         
-    syncWithOpponent(cardArr, posArr, opHandSize)
+socket.on('nextTurn', (cardArr, posArr, opHandSize, abilityUsed) => {         
+    syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed)
     switchTurn();
 });
 
-socket.on('returnTurn', (cardArr, posArr, opHandSize) => { 
-    syncWithOpponent(cardArr, posArr, opHandSize)
+socket.on('returnTurn', (cardArr, posArr, opHandSize, abilityUsed) => { 
+    syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed)
 });
 
-function syncWithOpponent(cardArr, posArr, opHandSize) {
+function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
     if (!myTurn){
+        if(abilityUsed) useLeaderAbility(true);
+
         if (cardArr[0] === dandelion){
             doubledRows.push(posArr[0]);
         }
@@ -589,8 +625,7 @@ function syncWithOpponent(cardArr, posArr, opHandSize) {
         else{
             for (let i=0; i<cardArr.length; i++){
                 if (combatSpies.concat(siegeSpies).includes(cardArr[i])){
-                    opponentDeckSize -= 2;
-                    document.getElementById('oDeckSize').innerHTML = opponentDeckSize;
+                    opponentDeck.splice(0,2);
                 }
                 selectedCard = cardArr[i];
                 putCardOnBoard(posArr[i]);
@@ -603,6 +638,9 @@ function syncWithOpponent(cardArr, posArr, opHandSize) {
         
     }
     updatePowerValues();  
+    document.getElementById('pDeckSize').innerHTML = deck.length;
+    document.getElementById('oDeckSize').innerHTML = opponentDeck.length;
+
     document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
 }
@@ -613,6 +651,7 @@ let oLife = 2;
 socket.on('endRound', () => { 
     updateLife();
     resetWeather();
+    doubledRows = [];
 
     // Reset Scores
     for (let key in powerLevels){
@@ -740,22 +779,23 @@ function clearCards() {
 
 function playersTurn() {
     myTurn = true;
+    cardElements = document.getElementsByClassName('card');
     switchWaitingMsg();
     for (let i=0; i<hand.length; i++) {
-        cards[i].setAttribute("onclick", "selectCard(this)");
+        cardElements[i].setAttribute("onclick", "selectCard(this)");
     }
 }
 
 function opponentsTurn() {
     myTurn = false;
+    cardElements = document.getElementsByClassName('card');
     switchWaitingMsg();
     for (let i=0; i<hand.length; i++) {
-        cards[i].removeAttribute("onclick");
+        cardElements[i].removeAttribute("onclick");
     }
 }
 
 function switchTurn() {
-    cards = document.getElementsByClassName('card');
     if (myTurn) {
         opponentsTurn();
     }
@@ -863,10 +903,11 @@ function getBasePower(cardID){
     else return cardPowers[cardID];
 }
 
-let handHiddenFlag = false;
-let cardSelectedFlag = false;
-let discSelectedFlag = false;
-let passedTurn = false;
+function getLeaderInstructionText(){
+    return leaderAbilityUsed ? "" : leaderInstruction;
+}
+
+let [handHiddenFlag,cardSelectedFlag,discSelectedFlag,passedTurn,leaderAbilityUsed] = Array(5).fill(false);
 function keyPressed(event) {
     // Enter pressed and hand hasn't been selected AND card is not being revived
     if (event.keyCode === 13 && !handChosen){
@@ -877,6 +918,7 @@ function keyPressed(event) {
     if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
         if (handHiddenFlag){
             document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             document.getElementById('instructions').innerHTML = instructionTextHide;
             handHiddenFlag = false;
         }
@@ -916,6 +958,16 @@ function keyPressed(event) {
         document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
         document.getElementById('discCards').innerHTML = "";
     }
+
+    // X Pressed
+    if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
+        useLeaderAbility();
+        leaderAbilityUsed = true;
+        document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+        const cardsInHand = document.getElementById("hand").childElementCount;
+        document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+        socket.emit('switchTurn', [], [], cardsInHand, true);
+    }
     
     // Space pressed AND player's turn AND card is not selected AND card is not being revived
     if (event.keyCode===32 && myTurn && !cardSelectedFlag && !medicFlag){
@@ -946,6 +998,8 @@ function cancelCardSelection() {
     
         // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+        document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
 }
+
 

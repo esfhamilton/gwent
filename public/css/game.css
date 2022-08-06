@@ -301,12 +301,17 @@ p {
     color: #ffff87;
 }
 
+.leaderInstructions,
 .instructions {
     position: fixed;
     font-size: 110%;
     color: gold;
     bottom: 4%;
     left: 4%;
+}
+
+.leaderInstructions {
+    bottom: 8%;
 }
 
 .deckSize {

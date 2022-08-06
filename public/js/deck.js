@@ -79,21 +79,28 @@ if (faction === 'NR'){
         }
     });
 }
-/*
-    Currently only northern realms is in use,
-    other faction decks can be added in else ifs here
-*/
 
+function showAbility(abilityDescId){
+    document.getElementById(abilityDescId).style = "display: block";
+}
+
+function hideAbility(abilityDescId){
+    document.getElementById(abilityDescId).style = "display: none";
+}
 
 let leader = 0;
 function leaderSelected(id) {
     leader = +id[id.length-1];
-    document.getElementById('lead1').style.border = "none";
-    document.getElementById('lead2').style.border = "none";
-    document.getElementById('lead3').style.border = "none";
-    document.getElementById('lead4').style.border = "none";
+    resetBorders();
     document.getElementById(id).style.borderStyle = "solid";
     document.getElementById(id).style.borderColor = "gold";
+}
+
+function resetBorders(){
+    for(i=1; i<=4; i++){
+        document.getElementById('lead'+i).style.borderStyle = "solid";
+        document.getElementById('lead'+i).style.borderColor = "black";
+    }
 }
 
 let deck = [];
@@ -312,7 +319,5 @@ function submit() {
 }
 
 socket.on('playerAssignment', (PID) => {
-    // TESTING: localhost:5000
-    // LIVE: gwent-io.herokuapp.com
-    location.replace(`http://localhost:5000/game.html?SID=${SID}&player=${PID}`);
+    location.replace(`http://${env}/game.html?SID=${SID}&player=${PID}`);
 });

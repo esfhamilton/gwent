@@ -2,6 +2,7 @@ const instructionTextShow = `<button style="font-size: 90%;">E</button>&nbsp;&nb
 &nbsp;&nbsp;<button style="font-size: 90%;">Space</button>&nbsp;&nbsp;End Turn`;
 const instructionTextHide = `<button style="font-size: 90%;">E</button>&nbsp;&nbsp;Hide Cards
 &nbsp;&nbsp;<button style="font-size: 90%;">Space</button>&nbsp;&nbsp;End Turn`;
+const leaderInstruction = `<button style="font-size: 90%;">X</button>&nbsp;&nbsp;Leader&nbsp;&nbsp;`;
 
 
 /*  
