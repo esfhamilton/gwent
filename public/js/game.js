@@ -67,17 +67,8 @@ function setup() {
     document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     document.getElementById('opponentStats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     
-    
-    // Styles based on player's faction
     for (let i=0; i<initDraw; i++){
-        let card = document.createElement('div');
-        card.style = styles[deck[0]];
-        card.className = 'card';
-        card.setAttribute("id", deck[0]);
-        card.setAttribute("onclick", "replaceCard(this)");
-        document.getElementById('hand').appendChild(card);
-        hand.push(deck[0]);
-        deck.shift();
+        drawCard('replaceCard(this)');
     }
     document.getElementById('pLeader').style = styles[leader];
     document.getElementById('pDeck').style = styles["deck"];
@@ -86,6 +77,21 @@ function setup() {
     // This will require opponent's faction to change styles appropriately
     document.getElementById('oLeader').style = styles[opponentLeader];
     document.getElementById('oDeck').style = styles["deck"]; 
+}
+
+function createCard(cardId, positionId, attribute, className = "card"){
+    let card = document.createElement('div');
+    card.style = styles[cardId];
+    card.className = className;
+    card.setAttribute('id', cardId);
+    card.setAttribute('onclick', attribute);
+    document.getElementById(positionId).appendChild(card);
+}
+
+function drawCard(attribute) {
+    createCard(deck[0], 'hand', attribute);
+    hand.push(deck[0]);
+    deck.shift();
 }
 
 // Counter for how many cards have been replaced
@@ -334,14 +340,7 @@ function placeCard(boardPos) {
     if (combatSpies.concat(siegeSpies).includes(selectedCard)){
         for (let i=0;i<2;i++){
             if (deck.length != 0) {
-                let card = document.createElement('div');
-                card.style = styles[deck[0]];
-                card.className = 'card';
-                card.setAttribute("id", deck[0]);
-                card.setAttribute("onclick", "selectCard(this)");
-                document.getElementById('hand').appendChild(card);
-                hand.push(deck[0]);
-                deck.shift();
+                drawCard();
             }
         }
     }
@@ -393,12 +392,7 @@ function placeCard(boardPos) {
             document.getElementById('topMsg').innerHTML = "Choose a card to revive";
             for (let i=0; i<discPile.length; i++){
                 if(!heroes.includes(discPile[i])){
-                    let card = document.createElement('div');
-                    card.style = styles[discPile[i]];
-                    card.className = 'card';
-                    card.setAttribute("id", discPile[i]);
-                    card.setAttribute("onclick","selectCard(this)")
-                    document.getElementById('discCards').appendChild(card);   
+                    createCard(discPile[i], 'discCards', 'selectCard(this)');
                 }
             }
         }
@@ -425,7 +419,6 @@ function cardsPlaced(cards, positions){
     
     const cardsInHand = document.getElementById("hand").childElementCount;
     document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
-    
     socket.emit('switchTurn', SID, cards, positions, cardsInHand, false);
 }
 
@@ -665,6 +658,8 @@ socket.on('endRound', () => {
     
     // Move cards into discard arrays and remove from board
     clearCards();
+
+    // TODO - Faction abilities i.e., winner draws card for NR (might need to call this from updateLife)
 });
 
 socket.on('results', () => {
@@ -684,12 +679,17 @@ socket.on('results', () => {
     }    
 });
 
+function factionRoundWon() {
+    if(faction==="NR") drawCard();
+}
+
 // Adjust lives for players and decide next turn
 function updateLife() {
     // Player has won
     if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
         document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
         oLife -= 1;
+        factionRoundWon()
         playersTurn(); // Player gets next turn if they win
     }
     // Tie
@@ -732,13 +732,8 @@ function showDiscard(pileID) {
     
     let discPile = pileID == "oDisc" ? discardPiles["opDiscPile"] : discardPiles["pDiscPile"];
     
-    // Styles based on player's faction
     for (let i=0; i<discPile.length; i++){
-        let card = document.createElement('div');
-        card.style = styles[discPile[i]];
-        card.className = 'card';
-        card.setAttribute("id", discPile[i]);
-        document.getElementById('discCards').appendChild(card);
+        createCard(discPile[i], 'discCards', '');
     }
 }
 
@@ -759,13 +754,13 @@ let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
     // Move cards into corresponding discard pile
     rowIDs.forEach((row) => {
-                   let len = $("."+row).find('.cardSmall')["length"];
-                   for (let i=0; i<len; i++){
-                       opRows.includes(row) ? 
-                         discardPiles["opDiscPile"].push($("."+row).find('.cardSmall')[i]['id']) 
-                       : discardPiles["pDiscPile"].push($("."+row).find('.cardSmall')[i]['id']); 
-                   }
-                });
+        let len = $("."+row).find('.cardSmall')["length"];
+        for (let i=0; i<len; i++){
+            opRows.includes(row) 
+            ? discardPiles["opDiscPile"].push($("."+row).find('.cardSmall')[i]['id']) 
+            : discardPiles["pDiscPile"].push($("."+row).find('.cardSmall')[i]['id']); 
+        }
+    });
     
     discardPiles["pDiscPile"].length === 0 ? discEmpty("pDisc") : discNotEmpty(discardPiles["pDiscPile"],"pDisc");
     discardPiles["opDiscPile"].length === 0 ? discEmpty("oDisc") : discNotEmpty(discardPiles["opDiscPile"],"oDisc");
@@ -806,11 +801,7 @@ function switchTurn() {
 
 function putCardOnBoard(boardPosID) {
     const posID = weatherCards.includes(selectedCard) ? "weatherStats" : boardPosID;
-    let card = document.createElement('div');
-    card.style = styles[selectedCard];
-    card.className = 'cardSmall';
-    card.setAttribute("id", selectedCard);
-    document.getElementById(posID).appendChild(card);
+    createCard(selectedCard, posID, '', 'cardSmall');
 }
 
 // Counts nonhero cards in each row for moralebooster
@@ -935,12 +926,7 @@ function keyPressed(event) {
         cancelCardSelection();
         
         // Recreate card in hand
-        let card = document.createElement('div');
-        card.style = styles[selectedCard];
-        card.className = 'card';
-        card.setAttribute("id", selectedCard);
-        card.setAttribute("onclick", 'selectCard(this)');
-        document.getElementById('hand').appendChild(card);
+        createCard(selectedCard, 'hand', 'selectCard(this)');
         
         // Remove any borders around cards (used for decoy card)
         pRows.forEach((row) => {
