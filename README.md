@@ -1,1 +1,1 @@
-# A browser based platform for playing the card game GWENT (WIP)
+# A browser based platform for playing a multiplayer version of the card game GWENT (from the Witcher 3)

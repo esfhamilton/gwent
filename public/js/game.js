@@ -26,7 +26,7 @@ let hand = [];
 let index;
 socket.on('playerAssigned', (FID, leaderID, cards) => {
     faction = FID;
-    leader = 'lead'+leaderID;
+    leader = leaderID;
     deck = cards;
 });
 
@@ -41,7 +41,7 @@ let opponentDeck = [];
 socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
     if(opponentDeck.length === 0){
         opponentFaction = opponentFID;
-        opponentLeader = 'lead'+opponentLID;
+        opponentLeader = opponentLID;
         opponentDeck = opDeck;
         setup();
     }
@@ -71,12 +71,12 @@ function setup() {
         drawCard('replaceCard(this)');
     }
     document.getElementById('pLeader').style = styles[leader];
-    document.getElementById('pDeck').style = styles["deck"];
+    document.getElementById('pDeck').style = styles[faction];
     
     
     // This will require opponent's faction to change styles appropriately
     document.getElementById('oLeader').style = styles[opponentLeader];
-    document.getElementById('oDeck').style = styles["deck"]; 
+    document.getElementById('oDeck').style = styles[opponentFaction]; 
 }
 
 function createCard(cardId, positionId, attribute, className = "card"){
@@ -89,9 +89,11 @@ function createCard(cardId, positionId, attribute, className = "card"){
 }
 
 function drawCard(attribute) {
-    createCard(deck[0], 'hand', attribute);
-    hand.push(deck[0]);
-    deck.shift();
+    if(deck.length !== 0){
+        createCard(deck[0], 'hand', attribute);
+        hand.push(deck[0]);
+        deck.shift();
+    }
 }
 
 // Counter for how many cards have been replaced
@@ -234,19 +236,19 @@ function selectCard(card) {
     if (combatCards.includes(selectedCard)) {
         activateValidPositions('combatLane');
     } 
-    else if (rangedCards.includes(selectedCard)) {
+    if (rangedCards.includes(selectedCard)) {
         activateValidPositions('rangedLane');
     }
-    else if (siegeCards.includes(selectedCard)) {
+    if (siegeCards.includes(selectedCard)) {
         activateValidPositions('siegeLane');
     }
-    else if (combatSpies.includes(selectedCard)) {
+    if (combatSpies.includes(selectedCard)) {
         activateValidPositions('opCombatLane');
     }
-    else if (siegeSpies.includes(selectedCard)) {
+    if (siegeSpies.includes(selectedCard)) {
         activateValidPositions('opSiegeLane');
     }
-    else if (selectedCard === decoy) {
+    if (selectedCard === decoy) {
         pRows.forEach((row) => {
                     let len = $("."+row).find('.cardSmall')["length"];
                     for (let i=0; i<len; i++) {
@@ -257,26 +259,26 @@ function selectCard(card) {
                     }
         });
     }
-    else if (selectedCard === commandersHorn) {
+    if (selectedCard === commandersHorn) {
         hornIDs.slice(0,3).forEach((id) => {
             if(!doubledRows.includes(id)) activateValidPositions(id);
         })
     }
-    else if (selectedCard === bitingFrost) {
+    if (selectedCard === bitingFrost) {
         activateValidPositions('combatLane');
         activateValidPositions('opCombatLane');
     }
-    else if (selectedCard === impenetrableFog) {
+    if (selectedCard === impenetrableFog) {
         activateValidPositions('rangedLane');
         activateValidPositions('opRangedLane');
     }
-    else if (selectedCard === torrentialRain) {
+    if (selectedCard === torrentialRain) {
         activateValidPositions('siegeLane');
         activateValidPositions('opSiegeLane');
     }
 
     // Card must be Scorch or Clear Weather
-    else {
+    if (selectedCard === scorchId || selectedCard === clearWeather) {
         rowIDs.forEach((id) => {
             activateValidPositions(id);
         });
@@ -427,10 +429,10 @@ function useLeaderAbility(useOpponentLeaderAbility=false){
     leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
     if(leaderFaction === "NR"){
         switch(leaderUsed){
-            case "lead1": // Doubles siege lane strength 
+            case "NRLeader1": // Doubles siege lane strength 
             useOpponentLeaderAbility ? doubledRows.push('opSiegeLane') : doubledRows.push('siegeLane');
                 break;
-            case "lead2": // Plays impenetrable fog from deck
+            case "NRLeader2": // Plays impenetrable fog from deck
                 if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
                     opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
                     selectedCard = impenetrableFog;
@@ -444,10 +446,10 @@ function useLeaderAbility(useOpponentLeaderAbility=false){
                     putCardOnBoard("weatherStats")
                 }
                 break;
-            case "lead3": // Clears weather effects
+            case "NRLeader3": // Clears weather effects
                 resetWeather();
                 break;
-            case "lead4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
+            case "NRLeader4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
                 if(useOpponentLeaderAbility){
                     if(powerLevels["siegePower"] >= 10) scorch(targetRows=["siegeLane"]);
                 } 
@@ -658,11 +660,10 @@ socket.on('endRound', () => {
     
     // Move cards into discard arrays and remove from board
     clearCards();
-
-    // TODO - Faction abilities i.e., winner draws card for NR (might need to call this from updateLife)
 });
 
 socket.on('results', () => {
+    gameEnded = true;
     document.getElementById('pDisc').removeAttribute("onclick");
     document.getElementById('oDisc').removeAttribute("onclick");
     document.getElementById('topMsg2').innerHTML = "Press F5 to play again";
@@ -898,68 +899,70 @@ function getLeaderInstructionText(){
     return leaderAbilityUsed ? "" : leaderInstruction;
 }
 
-let [handHiddenFlag,cardSelectedFlag,discSelectedFlag,passedTurn,leaderAbilityUsed] = Array(5).fill(false);
+let [handHiddenFlag,cardSelectedFlag,discSelectedFlag,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
 function keyPressed(event) {
-    // Enter pressed and hand hasn't been selected AND card is not being revived
-    if (event.keyCode === 13 && !handChosen){
-        handSelected();
-    }
-    
-    // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
-    if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
-        if (handHiddenFlag){
-            document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
-            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
-            document.getElementById('instructions').innerHTML = instructionTextHide;
-            handHiddenFlag = false;
+    if(!gameEnded){
+        // Enter pressed and hand hasn't been selected AND card is not being revived
+        if (event.keyCode === 13 && !handChosen){
+            handSelected();
         }
-        else{
-            document.getElementById('hand').style = "display: none;";           
-            document.getElementById('instructions').innerHTML = instructionTextShow;
-            handHiddenFlag = true;
-        }
-    }
-    
-    // Esc pressed AND a card has been selected AND card is not being revived
-    if (event.keyCode === 27 && cardSelectedFlag && !medicFlag){
-        cardSelectedFlag = false;
-        cancelCardSelection();
         
-        // Recreate card in hand
-        createCard(selectedCard, 'hand', 'selectCard(this)');
-        
-        // Remove any borders around cards (used for decoy card)
-        pRows.forEach((row) => {
-            // Number of cards in each row
-            let len = $("."+row).find('.cardSmall')["length"];
-            for (let i=0; i<len; i++) {
-                $("."+row).find('.cardSmall')[i].style.border = '';
+        // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
+        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
+            if (handHiddenFlag){
+                document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+                document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+                document.getElementById('instructions').innerHTML = instructionTextHide;
+                handHiddenFlag = false;
             }
-        });
-    }
-    
-    // Esc pressed AND discard is showing AND card is not being revived
-    if (event.keyCode === 27 && discSelectedFlag && !medicFlag){
-        discSelectedFlag = false;
-        document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
-        document.getElementById('discCards').innerHTML = "";
-    }
+            else{
+                document.getElementById('hand').style = "display: none;";           
+                document.getElementById('instructions').innerHTML = instructionTextShow;
+                handHiddenFlag = true;
+            }
+        }
+        
+        // Esc pressed AND a card has been selected AND card is not being revived
+        if (event.keyCode === 27 && cardSelectedFlag && !medicFlag){
+            cardSelectedFlag = false;
+            cancelCardSelection();
+            
+            // Recreate card in hand
+            createCard(selectedCard, 'hand', 'selectCard(this)');
+            
+            // Remove any borders around cards (used for decoy card)
+            pRows.forEach((row) => {
+                // Number of cards in each row
+                let len = $("."+row).find('.cardSmall')["length"];
+                for (let i=0; i<len; i++) {
+                    $("."+row).find('.cardSmall')[i].style.border = '';
+                }
+            });
+        }
+        
+        // Esc pressed AND discard is showing AND card is not being revived
+        if (event.keyCode === 27 && discSelectedFlag && !medicFlag){
+            discSelectedFlag = false;
+            document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
+            document.getElementById('discCards').innerHTML = "";
+        }
 
-    // X Pressed
-    if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
-        useLeaderAbility();
-        leaderAbilityUsed = true;
-        document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
-        const cardsInHand = document.getElementById("hand").childElementCount;
-        document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
-        socket.emit('switchTurn', [], [], cardsInHand, true);
-    }
-    
-    // Space pressed AND player's turn AND card is not selected AND card is not being revived
-    if (event.keyCode===32 && myTurn && !cardSelectedFlag && !medicFlag){
-        document.getElementById('pPass').innerHTML = "<p>Passed</p>";
-        passedTurn = true;
-        socket.emit('passTurn', SID);
+        // X Pressed
+        if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
+            useLeaderAbility();
+            leaderAbilityUsed = true;
+            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+            const cardsInHand = document.getElementById("hand").childElementCount;
+            document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+            socket.emit('switchTurn', [], [], cardsInHand, true);
+        }
+        
+        // Space pressed AND player's turn AND card is not selected AND card is not being revived
+        if (event.keyCode===32 && myTurn && !cardSelectedFlag && !medicFlag){
+            document.getElementById('pPass').innerHTML = "<p>Passed</p>";
+            passedTurn = true;
+            socket.emit('passTurn', SID);
+        }
     }
 }
 
@@ -987,5 +990,3 @@ function cancelCardSelection() {
         document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
 }
-
-
