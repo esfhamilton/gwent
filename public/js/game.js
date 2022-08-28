@@ -1,3 +1,4 @@
+"use strict";
 const socket = io();
 
 // Get SID and faction ID from URL
@@ -19,11 +20,8 @@ socket.on('noDeck', (SID) => {
     document.getElementById('topMsg').innerHTML = `Error: No Deck has been Built.`;
 });
 
-let faction;
-let leader;
-let deck;
+let faction, leader, deck, index, firstTurn;
 let hand = [];
-let index;
 socket.on('playerAssigned', (FID, leaderID, cards) => {
     faction = FID;
     leader = leaderID;
@@ -35,15 +33,34 @@ socket.on('startGame', () => {
     socket.emit('getOpponentDeck', SID, player);
 });
 
-let opponentFaction;
-let opponentLeader;
+function factionPerkST() {
+    // Get the modal
+    var modal = document.getElementById("STModal");
+
+    modal.style.display = "block";
+    let playerFirstBtn = document.getElementById('playerFirstBtn');
+    let opponentFirstBtn = document.getElementById('opponentFirstBtn');
+    playerFirstBtn.onclick = function() {
+        firstTurn = player;
+        modal.style.display = "none";
+        setup();
+    }
+    opponentFirstBtn.onclick = function() {
+        firstTurn = player === 'A' ? 'B' : 'A';
+        modal.style.display = "none";
+        setup();
+    }
+}
+
+let opponentFaction, opponentLeader;
 let opponentDeck = [];
 socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
     if(opponentDeck.length === 0){
         opponentFaction = opponentFID;
         opponentLeader = opponentLID;
         opponentDeck = opDeck;
-        setup();
+        if(faction === "ST" && opponentFaction !== "ST") factionPerkST();
+        else setup();
     }
     else{
         opponentDeck = opDeck;
@@ -138,7 +155,7 @@ function handSelected() {
     for (let i=0; i<hand.length; i++) {
         cardElements[i].removeAttribute("onclick");
     }
-    socket.emit('cardsRedrawn', SID, player, deck);
+    socket.emit('cardsRedrawn', SID, player, deck, firstTurn);
 }
 
 // Informs player that their opponent still needs to confirm starting hand
@@ -680,21 +697,21 @@ socket.on('results', () => {
     }    
 });
 
-function factionRoundWon() {
+function roundWon() {
     if(faction==="NR") drawCard();
+    document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
+    oLife -= 1;
+    playersTurn(); // Player gets next turn if they win
 }
 
-// Adjust lives for players and decide next turn
-function updateLife() {
-    // Player has won
-    if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
-        document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
-        oLife -= 1;
-        factionRoundWon()
-        playersTurn(); // Player gets next turn if they win
+function roundTie() {
+    if(faction === "NG" && opponentFaction !== "NG"){
+        roundWon();
+    } 
+    else if(faction !== "NG" && opponentFaction === "NG"){
+        roundLost();
     }
-    // Tie
-    else if(powerLevels["totalPower"] == powerLevels["opTotalPower"]) {
+    else{
         document.getElementById('heart'+String(pLife)).style = "color:grey;";
         document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
         oLife -= 1;
@@ -707,11 +724,24 @@ function updateLife() {
             playersTurn();
         }
     }
-    // Player has lost 
+}
+
+function roundLost() {
+    document.getElementById('heart'+String(pLife)).style = "color:grey;";
+    pLife -= 1;
+    opponentsTurn(); // Opponent gets next turn if player loses round
+}
+
+// Adjust lives for players and decide next turn
+function updateLife() {
+    if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
+        roundWon();
+    }
+    else if(powerLevels["totalPower"] == powerLevels["opTotalPower"]) {
+        roundTie();
+    }
     else {
-        document.getElementById('heart'+String(pLife)).style = "color:grey;";
-        pLife -= 1;
-        opponentsTurn(); // Opponent gets next turn if player loses round
+        roundLost();
     }
     
     // End game if a player has lost all their lives
@@ -753,6 +783,8 @@ function discNotEmpty(discPile,pileID) {
 
 let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
+    // TODO - Create rule for Monster deck to retain random card
+
     // Move cards into corresponding discard pile
     rowIDs.forEach((row) => {
         let len = $("."+row).find('.cardSmall')["length"];

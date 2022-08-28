@@ -13,6 +13,22 @@
         <div class="board" id="board">
             <h3 id="topMsg">Waiting for opponent...</h3>
             <p id="topMsg2" style="display: none;">Press Enter to continue</p>
+
+            <div id="STModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>WOULD YOU LIKE TO GO FIRST?</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>The Scoia'Tael faction perk allows you to decide who will get to go first.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="playerFirstBtn">Go First</button>
+                        <button id="opponentFirstBtn">Let Opponent Start</button>
+                    </div>
+                </div>
+            </div>
+
             <!--Stats contain info regarding hand size & lives-->
             <div class="pStats" id="pStats" style="display: none;">
                 <p id="stats" style="color: gold"><span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span></p>

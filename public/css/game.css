@@ -46,7 +46,75 @@ p {
     font-size: 140%;  
 }
 
+/* ------ Modal ------ */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+  }
+  
+.modal-content {
+    background-color: #383838;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+    color: rgb(233, 233, 233);
+}
 
+.modal-header {
+    padding: 2px 16px;
+    color: rgb(185, 185, 185);
+}
+  
+.modal-body {padding: 2px 16px;}
+  
+.modal-footer {
+    padding: 2px 16px;
+    color: white;
+}
+
+#playerFirstBtn,
+#opponentFirstBtn {
+    margin-top: 15px;
+    cursor: pointer;
+    background-color: #222222;
+    font-size: 120%;
+    text-shadow:
+        0.05em 0 black,
+        0 0.05em black,
+        -0.05em 0 black,
+        0 -0.05em black,
+        -0.05em -0.05em black,
+        -0.05em 0.05em black,
+        0.05em -0.05em black,
+        0.05em 0.05em black;
+}
+
+#playerFirstBtn {
+    color: rgb(0, 85, 0);
+} 
+
+#opponentFirstBtn {
+    margin-left: 30px;
+    color: rgb(107, 0, 0);
+}
+
+#playerFirstBtn:hover {
+    color: rgb(0, 156, 0);
+}
+
+#opponentFirstBtn:hover {
+    color: rgb(156, 0, 0);
+}
 
 /* ------ GAME COMPONENTS ------ */
 

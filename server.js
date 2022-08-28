@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const path = require('path');
+//const path = require('path');
 const PORT = process.env.PORT || 5000; 
 
 app.use(express.static('public'))
@@ -14,6 +14,7 @@ let startCheck = {};
 let gameData = {};
 let redrawnCheck = {};
 let roomPassCount = {};
+let roomFirstTurn = {};
 
 function shuffle(deck) {
     var currentIndex = deck.length, temporaryValue, randomIndex;
@@ -41,11 +42,8 @@ io.on('connection', (socket) => {
                 socket.join(SID);
                 // Emits to both (all) users in SID 
                 io.in(SID).emit('continue', SID);
-                console.log(`Room: ${SID} successfully joined`);                
             } 
             else {
-                // Room is full, only 2 people can enter a room at a time
-                console.log("Room is full, only 2 people can enter a room at a time");
                 socket.emit('full', SID);
             }
         } 
@@ -69,7 +67,6 @@ io.on('connection', (socket) => {
         // Join room and add corresponding SID to openRooms
         socket.join(SID);
         socket.emit('validRoom', SID);
-        console.log(`Room: ${SID} successfully created`); // LOGGING
         openRooms.push(SID);     
     });
     
@@ -80,17 +77,12 @@ io.on('connection', (socket) => {
         if (!openRooms.includes(SID)){
             socket.join(SID);
             openRooms.push(SID);   
-            console.log(`Room: ${SID} successfully recreated`); // LOGGING
         }
         if (numClients != undefined){
             if (numClients.length<2){
-                // Authorise join request
                 socket.join(SID);
-                console.log(`Room: ${SID} successfully rejoined`);                
             } 
             else {
-                // Room is full, only 2 people can enter a room at a time
-                console.log(`Room: ${SID} is full.`);
                 socket.emit('full', SID);
             }
         }       
@@ -133,8 +125,20 @@ io.on('connection', (socket) => {
             socket.emit('noDeck');
         }
     });
+
+    // Checks whether both players are on the game.html page
+    socket.on('startCheck', (SID) => {
+        if(SID in roomFirstTurn) delete roomFirstTurn[SID];
+        if ((SID+'A') in startCheck && (SID+'B') in startCheck) {
+            delete startCheck[SID+'A'];
+            delete startCheck[SID+'B'];
+            roomPassCount[SID] = 0;
+            io.in(SID).emit('startGame');
+        } 
+    });
     
     socket.on('getOpponentDeck', (SID, player) => {
+        if(!(SID in roomFirstTurn)) roomFirstTurn[SID] = Math.random()>0.5 ? 'A':'B';
         let OID;
         if (player === 'A') {
             OID = SID + 'B';
@@ -146,24 +150,15 @@ io.on('connection', (socket) => {
         }
     });
     
-    // Checks whether both players are on the game.html page
-    socket.on('startCheck', (SID) => {
-        if ((SID+'A') in startCheck && (SID+'B') in startCheck) {
-            delete startCheck[SID+'A'];
-            delete startCheck[SID+'B'];
-            roomPassCount[SID] = 0;
-            io.in(SID).emit('startGame');
-        } 
-    });
-    
     // Checks if players have redrawn the starting hand
-    socket.on('cardsRedrawn', (SID, player, deck) => {
+    socket.on('cardsRedrawn', (SID, player, deck, firstTurn) => {
         gameData[SID + player]["deck"] = deck;
+        if(firstTurn) roomFirstTurn[SID] = firstTurn;
         if(SID in redrawnCheck) {
             // Prevents crash from page refresh, should be true
             if (redrawnCheck[SID] != player) {
                 delete redrawnCheck[SID];
-                io.in(SID).emit('firstTurn', Math.random()>0.5 ? 'A':'B');
+                io.in(SID).emit('firstTurn', roomFirstTurn[SID]);
             }       
         }
         else {
@@ -213,7 +208,6 @@ io.on('connection', (socket) => {
     });
     
     socket.on('disconnect', () => {
-        console.log('user disconnected'); // LOGGING
         // Check each open room and remove SID if every user has disconnected 
         openRooms.forEach((SID, index) => {
             let numClients = io.sockets.adapter.rooms[''+SID];

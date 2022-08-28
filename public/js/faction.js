@@ -12,7 +12,3 @@ function submit() {
     let faction = document.getElementById('faction').value;
     location.replace(`http://${env}/deck.html?SID=${SID}&faction=${faction}`);
 }
-
-
-
-
