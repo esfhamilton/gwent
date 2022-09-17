@@ -77,7 +77,7 @@ function setup() {
     document.getElementById('pDeckSize').innerHTML = deck.length-10;
     document.getElementById('oDeckSize').innerHTML = opponentDeck.length-10;
     
-    powerIDs.forEach((id) => {
+    powerIds.forEach((id) => {
         document.getElementById(id).innerHTML = 0;
     });
     
@@ -96,7 +96,7 @@ function setup() {
     document.getElementById('oDeck').style = styles[opponentFaction]; 
 }
 
-function createCard(cardId, positionId, attribute, className = "card"){
+function createCard(cardId, positionId, attribute, className = "card") {
     let card = document.createElement('div');
     card.style = styles[cardId];
     card.className = className;
@@ -217,13 +217,21 @@ function decoyCard(card) {
     card.remove();
 }
 
+function getMusterCategory(cardId) {
+    let musterCategory = null;
+    Object.keys(musterCategories).forEach(category => {
+        if(musterCategories[category].includes(cardId)) musterCategory = category;
+    });
+    return musterCategory;
+}
+
 const activateValidPositions = ((id) => {
     document.getElementById(id).style = "background: rgba(255, 233, 0, 0.15);";
     document.getElementById(id).setAttribute('onclick','placeCard(this)');
 })
 
-const pRows = rowIDs.slice(0,3);
-const opRows = rowIDs.slice(3);
+const pRows = rowIds.slice(0,3);
+const opRows = rowIds.slice(3);
 let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
@@ -277,7 +285,7 @@ function selectCard(card) {
         });
     }
     if (selectedCard === commandersHorn) {
-        hornIDs.slice(0,3).forEach((id) => {
+        hornIds.slice(0,3).forEach((id) => {
             if(!doubledRows.includes(id)) activateValidPositions(id);
         })
     }
@@ -296,7 +304,7 @@ function selectCard(card) {
 
     // Card must be Scorch or Clear Weather
     if (selectedCard === scorchId || selectedCard === clearWeather) {
-        rowIDs.forEach((id) => {
+        rowIds.forEach((id) => {
             activateValidPositions(id);
         });
     }
@@ -309,14 +317,15 @@ let medicPosIDs = []; // Placeholder for pos IDs if medic is used
 let doubledRows = []; // Positions with horns placed
 
 function placeCard(boardPos) {
-    const boardPosID = boardPos.id;
+    const firstSelectedCard = selectedCard;
+    let boardPosId = boardPos.id;
     cardSelectedFlag = false;
     cancelCardSelection();
     
     // Both medic and revived card have been placed
     if (medicFlag){
         medicCards.push(selectedCard);
-        medicPosIDs.push(boardPosID);    
+        medicPosIDs.push(boardPosId);    
         medicFlag = false;
         revivedFlag = true;
         document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
@@ -332,24 +341,59 @@ function placeCard(boardPos) {
         }   
     }
 
+    let musterCategory = getMusterCategory(selectedCard);
+    if (Object.keys(musterCategories).includes(musterCategory)){
+        let cardsPlayed = [];
+        let cardPositions  = [];
+        if(selectedCard === arachasBehemoth){
+            putCardOnBoard(boardPosId);
+            cardsPlayed.push(selectedCard);
+            cardPositions.push(boardPosId)
+            musterCategory = "Arachas";
+            boardPosId = "combatLane";
+            hand.splice(hand.indexOf(selectedCard), 1);
+        } 
+        musterCategories[musterCategory].forEach(cardId => {
+            if(deck.includes(cardId)){
+                selectedCard = cardId;
+                putCardOnBoard(boardPosId);
+                deck.splice(deck.indexOf(cardId), 1);
+                cardsPlayed.push(cardId);
+                cardPositions.push(boardPosId)
+            }
+
+            if(hand.includes(cardId)){
+                selectedCard = cardId;
+                putCardOnBoard(boardPosId);
+                hand.splice(hand.indexOf(cardId), 1);
+                cardsPlayed.push(cardId);
+                cardPositions.push(boardPosId)
+                if(selectedCard !== firstSelectedCard) document.getElementsByClassName('card')[selectedCard].remove();
+            }
+        });
+
+        cardsPlaced(cardsPlayed, cardPositions);
+        return;
+    }
+
     if(weatherCards.includes(selectedCard)){
         if(!weatherEffects.includes(selectedCard)){
             weatherEffects.push(selectedCard);
-            putCardOnBoard(boardPosID);
+            putCardOnBoard(boardPosId);
         }
-        cardsPlaced([selectedCard], [boardPosID]);
+        cardsPlaced([selectedCard], [boardPosId]);
         return;
     }
 
     if (selectedCard === clearWeather){
         resetWeather();
-        cardsPlaced([selectedCard], [boardPosID]);
+        cardsPlaced([selectedCard], [boardPosId]);
         return;
     }
 
     // Displays card in corresponding location
     if(selectedCard !== scorchId){
-        putCardOnBoard(boardPosID);    
+        putCardOnBoard(boardPosId);    
     }
     
     // Updates power values on the board
@@ -365,16 +409,16 @@ function placeCard(boardPos) {
     }
     
     else if(selectedCard === scorchId){
-        scorch(targetRows=rowIDs);
+        scorch(targetRows=rowIds);
     }
     
     else if(selectedCard === villentretenmerth){
         updatePowerValues();
-        if(powerLevels["opCombatPower"] >= 10) scorch(targetRows=["opCombatLane"]);
+        if(powerLevels["opCombatPower"] >= 10) scorch(["opCombatLane"]);
     }
     
     else if(horns.includes(selectedCard)){
-        doubledRows.push(boardPosID);
+        doubledRows.push(boardPosId);
     }
     
     // Medic - Choose a non-hero card from discard to play 
@@ -391,7 +435,7 @@ function placeCard(boardPos) {
             // Prevents duplicate medic bug when chain reviving
             if(medicCards[medicCards.length-1] != selectedCard){
                 medicCards.push(selectedCard);
-                medicPosIDs.push(boardPosID);    
+                medicPosIDs.push(boardPosId);    
             }
             
             discSelectedFlag = true;
@@ -419,7 +463,7 @@ function placeCard(boardPos) {
     
     // Prevents turn switch if medic has been played and player needs to revive a card
     if (!medicFlag && !revivedFlag){
-        cardsPlaced([selectedCard], [boardPosID]);
+        cardsPlaced([selectedCard], [boardPosId]);
     }
     
     // If a medic has been played, emit multiple cards played to the server
@@ -493,11 +537,8 @@ function scorch(targetRows = []){
     let moraleRowCount = {}; // Dictionary of morale boosters in each row
     
     // Iterate through each of the player's rows
-    let cardID;
-    let cardsInRow;
-    let hornInRow;
     targetRows.forEach((row) => {
-        cardsInRow = $('.'+row).find('.cardSmall').length;
+        let cardsInRow = $('.'+row).find('.cardSmall').length;
         topRowVals[row] = 0;
         moraleRowCount[row] = 0;
         moraleBoosters.forEach((moraleCard) => {
@@ -506,19 +547,19 @@ function scorch(targetRows = []){
             }
         });
         
-        hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
+        let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
-            cardID = $('.'+row).find('.cardSmall')[i].id;
-            basePower = getBasePower(cardID);
-            if(!heroes.includes(cardID)){
-                let cardPow = basePower * (tightBondMods[row][cardID] ?? 1 ) + moraleRowCount[row];
-                if(hornInRow !== undefined || dandelion === cardID) cardPow *= 2;
+            let cardId = $('.'+row).find('.cardSmall')[i].id;
+            let basePower = getBasePower(cardId);
+            if(!heroes.includes(cardId)){
+                let cardPow = basePower * (tightBondMods[row][cardId] ?? 1 ) + moraleRowCount[row];
+                if(hornInRow !== undefined || dandelion === cardId) cardPow *= 2;
                 if(hornInRow === undefined && doubledRows.includes(row)) cardPow -= basePower; 
-                if(moraleBoosters.includes(cardID)) cardPow -= 1;
+                if(moraleBoosters.includes(cardId)) cardPow -= 1;
                 
                 if(cardPow>=topRowVals[row]){
                     topRowVals[row] = cardPow;
-                    strongestCards[row] === undefined ? strongestCards[row] = [cardID] : strongestCards[row].push(cardID);
+                    strongestCards[row] === undefined ? strongestCards[row] = [cardId] : strongestCards[row].push(cardId);
                 }                
             }
         }
@@ -528,8 +569,7 @@ function scorch(targetRows = []){
     });
     maxVal = Math.max(...maxVal);
     targetRows.forEach((row) => { 
-        
-        cardIdsInRow = $('.'+row).find('.cardSmall').map(function() {return this.id})
+        let cardIdsInRow = $('.'+row).find('.cardSmall').map(function() {return this.id})
         let uniqueCardIdList = [];  
         for(let ID of cardIdsInRow){
             if(uniqueCardIdList.indexOf(ID)===-1){
@@ -537,13 +577,13 @@ function scorch(targetRows = []){
             }
         }
         
-        cardsInRow = uniqueCardIdList.length;
-        hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
+        let cardsInRow = uniqueCardIdList.length;
+        let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
-            cardID = uniqueCardIdList[i];
-            basePower = getBasePower(cardID);
+            let cardId = uniqueCardIdList[i];
+            let basePower = getBasePower(cardId);
             if(strongestCards[row] !== undefined){
-                if(!strongestCards[row].includes(cardID)){
+                if(!strongestCards[row].includes(cardId)){
                     continue;
                 }
                 else{
@@ -553,10 +593,10 @@ function scorch(targetRows = []){
                         if(hornInRow === undefined && doubledRows.includes(row)) cardPow -= basePower;
                         if(moraleBoosters.includes(sCard)) cardPow -= 1;
 
-                        if (cardPow === maxVal && sCard === cardID){
-                            if(cardID === dandelion) doubledRows.splice(doubledRows.indexOf(row),1); 
+                        if (cardPow === maxVal && sCard === cardId){
+                            if(cardId === dandelion) doubledRows.splice(doubledRows.indexOf(row),1); 
                             $('.'+row).find('#'+sCard).remove();
-                            opRows.includes(row) ? discardPiles["opDiscPile"].push(cardID) : discardPiles["pDiscPile"].push(cardID);
+                            opRows.includes(row) ? discardPiles["opDiscPile"].push(cardId) : discardPiles["pDiscPile"].push(cardId);
                         }
                     })
                 }
@@ -616,22 +656,25 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
                 }
             }
         }
-        else if (scorchId === cardArr[0]){
-            scorch(targetRows=rowIDs);
+        if (Object.keys(musterCategories).includes(getMusterCategory(cardArr[0]))){
+            cardArr.forEach((cardId) => {if(opponentDeck.includes(cardId)) opponentDeck.splice(opponentDeck.indexOf(cardId),1)});
         }
-        else if (villentretenmerth === cardArr[0]){
+        if (scorchId === cardArr[0]){
+            scorch(targetRows=rowIds);
+        }
+        if (villentretenmerth === cardArr[0]){
             if(powerLevels["combatPower"] >= 10) scorch(targetRows=["combatLane"]);
             selectedCard = cardArr[0];
             putCardOnBoard(posArr[0]);
         }
-        else if(weatherCards.includes(cardArr[0])) {
+        if(weatherCards.includes(cardArr[0])) {
             if(!weatherEffects.includes(cardArr[0])){
                 selectedCard = cardArr[0];
                 weatherEffects.push(selectedCard);
                 putCardOnBoard(selectedCard);
             }
         }
-        else if (cardArr[0] === clearWeather){
+        if (cardArr[0] === clearWeather){
             resetWeather();
         }
         else{
@@ -786,7 +829,7 @@ function clearCards() {
     // TODO - Create rule for Monster deck to retain random card
 
     // Move cards into corresponding discard pile
-    rowIDs.forEach((row) => {
+    rowIds.forEach((row) => {
         let len = $("."+row).find('.cardSmall')["length"];
         for (let i=0; i<len; i++){
             opRows.includes(row) 
@@ -832,9 +875,9 @@ function switchTurn() {
     }
 }
 
-function putCardOnBoard(boardPosID) {
-    const posID = weatherCards.includes(selectedCard) ? "weatherStats" : boardPosID;
-    createCard(selectedCard, posID, '', 'cardSmall');
+function putCardOnBoard(boardPosId) {
+    const posId = weatherCards.includes(selectedCard) ? "weatherStats" : boardPosId;
+    createCard(selectedCard, posId, '', 'cardSmall');
 }
 
 // Counts nonhero cards in each row for moralebooster
@@ -849,7 +892,7 @@ function getPowerModifiers() {
     let cardID;
     let cardsInRow;
     let rowIndex = 0;
-    rowIDs.forEach((row) =>{
+    rowIds.forEach((row) =>{
         cardsInRow = $('.'+row).find('.cardSmall').length;
         for(let i=0; i<cardsInRow; i++){
             cardID = $('.'+row).find('.cardSmall')[i].id;
@@ -871,7 +914,7 @@ function getPowerModifiers() {
 
 let powerLevels = {};
 const resetPowerLevels = (() => {
-    powerIDs.forEach((id) => {
+    powerIds.forEach((id) => {
         powerLevels[id] = 0;
     })
 })
@@ -884,7 +927,7 @@ function updatePowerValues() {
 
     // Calculate power values for each row
     let rowIndex = 0;
-    rowIDs.forEach((row) =>{
+    rowIds.forEach((row) =>{
         let powerStr = row.substring(0,row.length-4)+"Power";
         let cardsInRow = $('.'+row).find('.cardSmall').length;
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
@@ -1003,7 +1046,7 @@ function cancelCardSelection() {
         document.getElementById('cardSelected').style = "display: none;";
         
         // Remove any div highlights for where card can be placed and onclick attributes
-        boardIDs.forEach((id) =>{
+        boardPosIds.forEach((id) =>{
             document.getElementById(id).style = "background: none;";    
             document.getElementById(id).removeAttribute("onclick");
         });

@@ -543,7 +543,17 @@ const heroes = ["neutral1", "neutral3", "neutral8", "neutral9", "neutral10", "ne
                 "MO1", "MO2", "MO3", "MO4"];
 const medics = ["neutral10", "NR18", "NG2", "NG29", "NG30", "ST35", "ST36"];
 const tightBonds = ["NR5", "NR17", "NR22", "NR25", "NG16", "NG24", "NG28"] 
-const moraleBoosters = ["NR28", "ST3", "ST5"];
+const musterCategories = {
+    "Arachas" : ["MO20", "MO21", "MO22"],
+    "ArachasBehemoth" : ["MO8"],
+    "Crone" : ["MO9", "MO10", "MO11"],
+    "Vampire" : ["MO23", "MO24", "MO25", "MO26"],
+    "Nekker" : ["MO34", "MO35", "MO36"],
+    "Ghoul" : ["MO37", "MO38", "MO39"]
+}
+const arachasBehemoth = "MO8";
+const musterIds = [].concat(...Object.values(musterCategories));
+const moraleBoosters = ["NR28", "ST3", "ST5", "MO4"];
 const horns = ["neutral2", "neutral17"];
 const weatherCards = ["neutral4", "neutral5", "neutral6"];
 const decoy = "neutral1";
@@ -556,10 +566,10 @@ const clearWeather = "neutral7";
 const villentretenmerth = "neutral13";
 const dandelion = "neutral17";
 
-const rowIDs = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
-const hornIDs = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];
-const boardIDs = rowIDs.concat(hornIDs);
-const powerIDs = ["opSiegePower", "opRangedPower", "opCombatPower", "opTotalPower", "combatPower", "rangedPower", "siegePower", "totalPower"];
+const rowIds = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
+const hornIds = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];
+const boardPosIds = rowIds.concat(hornIds);
+const powerIds = ["opSiegePower", "opRangedPower", "opCombatPower", "opTotalPower", "combatPower", "rangedPower", "siegePower", "totalPower"];
 
 const modBase = {combatLane:{}, rangedLane:{}, siegeLane:{}, opCombatLane:{}, opRangedLane:{}, opSiegeLane:{}};
 let tightBondMods = moraleMods = $.extend(true,{},modBase); // Deep clone
