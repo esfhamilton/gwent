@@ -67,6 +67,7 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
     }
 });
 
+let opponentHandSize = initDraw;
 // Sets up mulligan phase after both players have created their decks
 function setup() {
     document.addEventListener("keydown",keyPressed);
@@ -488,6 +489,10 @@ function cardsPlaced(cards, positions){
 function useLeaderAbility(useOpponentLeaderAbility=false){
     leaderFaction = useOpponentLeaderAbility ? opponentFaction : faction;
     leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
+    if(opponentLeader === "NGLeader1"){ 
+        document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action"
+        return;
+    }
     if(leaderFaction === "NR"){
         switch(leaderUsed){
             case "NRLeader1": // Doubles siege lane strength 
@@ -684,6 +689,7 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
                 }
                 selectedCard = cardArr[i];
                 putCardOnBoard(posArr[i]);
+                opponentHandSize = opHandSize;
                 document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
                 if (i>0){
                     updateOpDiscard(cardArr[i]);
@@ -742,6 +748,9 @@ socket.on('results', () => {
 
 function roundWon() {
     if(faction==="NR") drawCard();
+    const cardsInHand = document.getElementById("hand").childElementCount;
+    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
+
     document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
     oLife -= 1;
     playersTurn(); // Player gets next turn if they win
@@ -770,6 +779,11 @@ function roundTie() {
 }
 
 function roundLost() {
+    if(opponentFaction === "NR") {
+        opponentHandSize += 1;
+        document.getElementById('opponentStats').innerHTML = `${opponentHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
+    }
+        
     document.getElementById('heart'+String(pLife)).style = "color:grey;";
     pLife -= 1;
     opponentsTurn(); // Opponent gets next turn if player loses round
@@ -881,12 +895,12 @@ function putCardOnBoard(boardPosId) {
 }
 
 // Counts nonhero cards in each row for moralebooster
-let nonHeroes;
+let boostableCards;
 function getPowerModifiers() {
     
     // Reset modifier placeholders
     tightBondMods = moraleMods = $.extend(true,{},modBase);
-    nonHeroes = [0,0,0,0,0,0];
+    boostableCards = [0,0,0,0,0,0];
     
     // Iterate through each of the player's rows
     let cardID;
@@ -903,9 +917,10 @@ function getPowerModifiers() {
             if (moraleBoosters.includes(cardID)){
                 moraleMods[row][cardID] ??= 0;
                 moraleMods[row][cardID] += 1;
+                if(!heroes.includes(cardID)) boostableCards[rowIndex] -= 1;
             }
             if(!heroes.includes(cardID) && cardID !== decoy){
-                nonHeroes[rowIndex] += 1;
+                boostableCards[rowIndex] += 1;
             }
         }
         rowIndex += 1;
@@ -937,12 +952,12 @@ function updatePowerValues() {
             if(!heroes.includes(cardID) && (hornInRow !== undefined || doubledRows.includes(row))){
                 powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);
 
-                if(moraleBoosters.includes(cardID)) powerLevels[powerStr] += (nonHeroes[rowIndex]-1);
+                if(moraleBoosters.includes(cardID)) powerLevels[powerStr] += boostableCards[rowIndex];
                 if(dandelion === cardID && hornInRow === undefined) powerLevels[powerStr] -= basePower;
             }
             
             if(moraleBoosters.includes(cardID)){ 
-                powerLevels[powerStr] += (nonHeroes[rowIndex]-1);
+                powerLevels[powerStr] += boostableCards[rowIndex];
             }
 
             powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);    

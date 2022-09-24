@@ -549,7 +549,10 @@ const musterCategories = {
     "Crone" : ["MO9", "MO10", "MO11"],
     "Vampire" : ["MO23", "MO24", "MO25", "MO26"],
     "Nekker" : ["MO34", "MO35", "MO36"],
-    "Ghoul" : ["MO37", "MO38", "MO39"]
+    "Ghoul" : ["MO37", "MO38", "MO39"],
+    "HavekarSmuggler" : ["ST14", "ST15", "ST16"],
+    "DwarvernSkirmisher" : ["ST27", "ST28", "ST29"],
+    "ElvenSkirmisher" : ["ST31", "ST32", "ST33"]
 }
 const arachasBehemoth = "MO8";
 const musterIds = [].concat(...Object.values(musterCategories));
