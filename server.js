@@ -177,6 +177,11 @@ io.on('connection', (socket) => {
             io.in(SID).emit('passedTurn');
         }
     });
+
+    socket.on('sendMonsterCard', (SID, player, cardId, posId) => {
+        let opPlayer = player === "A" ? "B" : "A";
+        io.in(SID).emit('syncMonsterCard', opPlayer, cardId, 'op'+posId.substring(0,1).toUpperCase()+posId.substring(1));
+    });
     
     // Switches turn and passes on player choice to opponent 
     socket.on('switchTurn', (SID, cardIDs, posIDs, cardsInHand, abilityUsed) => {

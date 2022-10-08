@@ -573,6 +573,8 @@ const rowIds = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRang
 const hornIds = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];
 const boardPosIds = rowIds.concat(hornIds);
 const powerIds = ["opSiegePower", "opRangedPower", "opCombatPower", "opTotalPower", "combatPower", "rangedPower", "siegePower", "totalPower"];
+const pRows = rowIds.slice(0,3);
+const opRows = rowIds.slice(3);
 
 const modBase = {combatLane:{}, rangedLane:{}, siegeLane:{}, opCombatLane:{}, opRangedLane:{}, opSiegeLane:{}};
 let tightBondMods = moraleMods = $.extend(true,{},modBase); // Deep clone

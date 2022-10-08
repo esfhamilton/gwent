@@ -231,8 +231,6 @@ const activateValidPositions = ((id) => {
     document.getElementById(id).setAttribute('onclick','placeCard(this)');
 })
 
-const pRows = rowIds.slice(0,3);
-const opRows = rowIds.slice(3);
 let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
@@ -313,8 +311,8 @@ function selectCard(card) {
 
 let medicFlag = false;
 let revivedFlag = false;
-let medicCards = []; // Placeholder for card IDs if medic is used
-let medicPosIDs = []; // Placeholder for pos IDs if medic is used
+let medicCards = []; // Placeholder for card Ids if medic is used
+let medicPosIDs = []; // Placeholder for pos Ids if medic is used
 let doubledRows = []; // Positions with horns placed
 
 function placeCard(boardPos) {
@@ -335,11 +333,7 @@ function placeCard(boardPos) {
         document.getElementById('pDisc').setAttribute("onclick", "showDiscard(this.id)");
         document.getElementById('oDisc').setAttribute("onclick", "showDiscard(this.id)");
         
-        // Remove card from discard pile
-        index = discardPiles["pDiscPile"].indexOf(selectedCard);  
-        if (index > -1) {
-            discardPiles["pDiscPile"].splice(index, 1);
-        }   
+        removeCardFromDiscard(selectedCard, "pDiscPile")
     }
 
     let musterCategory = getMusterCategory(selectedCard);
@@ -410,7 +404,7 @@ function placeCard(boardPos) {
     }
     
     else if(selectedCard === scorchId){
-        scorch(targetRows=rowIds);
+        scorch(rowIds);
     }
     
     else if(selectedCard === villentretenmerth){
@@ -489,42 +483,37 @@ function cardsPlaced(cards, positions){
 function useLeaderAbility(useOpponentLeaderAbility=false){
     leaderFaction = useOpponentLeaderAbility ? opponentFaction : faction;
     leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
-    if(opponentLeader === "NGLeader1"){ 
-        document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action"
-        return;
-    }
-    if(leaderFaction === "NR"){
-        switch(leaderUsed){
-            case "NRLeader1": // Doubles siege lane strength 
+    switch(leaderUsed){
+        case "NRLeader1": // Doubles siege lane strength 
             useOpponentLeaderAbility ? doubledRows.push('opSiegeLane') : doubledRows.push('siegeLane');
-                break;
-            case "NRLeader2": // Plays impenetrable fog from deck
-                if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
-                    opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
-                    selectedCard = impenetrableFog;
-                    weatherEffects.push(impenetrableFog);
-                    putCardOnBoard("weatherStats")
-                }
-                else if(!useOpponentLeaderAbility && deck.includes(impenetrableFog)){
-                    deck.splice(deck.indexOf(impenetrableFog),1);
-                    selectedCard = impenetrableFog;
-                    weatherEffects.push(impenetrableFog);
-                    putCardOnBoard("weatherStats")
-                }
-                break;
-            case "NRLeader3": // Clears weather effects
-                resetWeather();
-                break;
-            case "NRLeader4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
-                if(useOpponentLeaderAbility){
-                    if(powerLevels["siegePower"] >= 10) scorch(targetRows=["siegeLane"]);
-                } 
-                else {
-                    if(powerLevels["opSiegePower"] >= 10) scorch(targetRows=["opSiegeLane"]);
-                }
-                break;
-        }
+            break;
+        case "NRLeader2": // Plays impenetrable fog from deck
+            if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
+                opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
+                selectedCard = impenetrableFog;
+                weatherEffects.push(impenetrableFog);
+                putCardOnBoard("weatherStats")
+            }
+            else if(!useOpponentLeaderAbility && deck.includes(impenetrableFog)){
+                deck.splice(deck.indexOf(impenetrableFog),1);
+                selectedCard = impenetrableFog;
+                weatherEffects.push(impenetrableFog);
+                putCardOnBoard("weatherStats")
+            }
+            break;
+        case "NRLeader3": // Clears weather effects
+            resetWeather();
+            break;
+        case "NRLeader4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
+            if(useOpponentLeaderAbility){
+                if(powerLevels["siegePower"] >= 10) scorch(["siegeLane"]);
+            } 
+            else {
+                if(powerLevels["opSiegePower"] >= 10) scorch(["opSiegeLane"]);
+            }
+            break;
     }
+
     if(!useOpponentLeaderAbility){
         const cardsInHand = document.getElementById("hand").childElementCount;
         document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
@@ -626,11 +615,17 @@ socket.on('passedTurn', () => {
     switchTurn();
 });
 
-function updateOpDiscard(discCardID) {
-    let discInd = discardPiles["opDiscPile"].indexOf(discCardID);
-    discardPiles["opDiscPile"].splice(discInd,1);
-    discardPiles["opDiscPile"].length === 0 ? discEmpty("oDisc") : discNotEmpty(discardPiles["opDiscPile"],"oDisc");
-    document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
+function removeCardFromDiscard(cardId, pile) {
+    let discardId = pile === "pDiscPile" ? "pDisc" : "oDisc";
+    let discSize = discardId + "Size"; 
+
+    let index = discardPiles[pile].indexOf(cardId);
+    if(index > -1){
+        discardPiles[pile].splice(index,1);
+        document.getElementById(discSize).innerHTML = discardPiles[pile].length > 0 ? discardPiles[pile].length : '';
+        if(discardPiles[pile].length !== 0) document.getElementById(discardId).style = styles[discardPiles[pile][0]];
+        discardPiles[pile].length === 0 ? discEmpty(discardId) : discNotEmpty(discardPiles[pile], discardId);
+    }
 }
 
 socket.on('nextTurn', (cardArr, posArr, opHandSize, abilityUsed) => {         
@@ -665,10 +660,10 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
             cardArr.forEach((cardId) => {if(opponentDeck.includes(cardId)) opponentDeck.splice(opponentDeck.indexOf(cardId),1)});
         }
         if (scorchId === cardArr[0]){
-            scorch(targetRows=rowIds);
+            scorch(rowIds);
         }
         if (villentretenmerth === cardArr[0]){
-            if(powerLevels["combatPower"] >= 10) scorch(targetRows=["combatLane"]);
+            if(powerLevels["combatPower"] >= 10) scorch(["combatLane"]);
             selectedCard = cardArr[0];
             putCardOnBoard(posArr[0]);
         }
@@ -692,7 +687,7 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
                 opponentHandSize = opHandSize;
                 document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
                 if (i>0){
-                    updateOpDiscard(cardArr[i]);
+                    removeCardFromDiscard(cardArr[i], "opDiscPile");
                 }
             }    
         }
@@ -826,21 +821,57 @@ function showDiscard(pileID) {
 }
 
 // Remove any attributes/ visuals 
-function discEmpty(pileID) {
-    document.getElementById(pileID).style = "display: none;";
-    document.getElementById(pileID).removeAttribute("onclick");
+function discEmpty(pileId) {
+    document.getElementById(pileId).style = "display: none;";
+    document.getElementById(pileId).removeAttribute("onclick");
 }
 
 // Add necessary attributes/ visuals
-function discNotEmpty(discPile,pileID) {
-    document.getElementById(pileID).style = styles[discPile[0]];
-    document.getElementById(pileID).setAttribute("onclick","showDiscard(this.id)");
+function discNotEmpty(discPile,pileId) {
+    document.getElementById(pileId).style = styles[discPile[0]];
+    document.getElementById(pileId).setAttribute("onclick","showDiscard(this.id)");
 }
 
+// Retain a random unit card for new round
+function monstersFactionPerk() {
+    let validCards = {};
+    pRows.forEach((row) => {
+        let len = $("."+row).find('.cardSmall')["length"];
+        if(len>0){
+            for (let i=0; i<len; i++){
+                let cardId = $("."+row).find('.cardSmall')[i]['id'];
+                if(!heroes.includes(cardId)){
+                    if (validCards[row] === undefined) validCards[row] = [];
+                    validCards[row].push(cardId);
+                }
+            }
+        }
+    })
+
+    if(Object.keys(validCards).length !== 0){
+        const validRows = Object.keys(validCards);
+        const randomRowIndex = Math.floor(Math.random() * validRows.length);
+        const randomRow = validCards[validRows[randomRowIndex]];
+        const randomCardIndex = Math.floor(Math.random() * randomRow.length);
+        
+        $("."+validRows[randomRowIndex]).find('#'+randomRow[randomCardIndex]).addClass("cardTemp").removeClass("cardSmall");
+        socket.emit('sendMonsterCard', SID, player, randomRow[randomCardIndex], validRows[randomRowIndex]);
+    }
+}
+
+socket.on('syncMonsterCard', (opPlayer, cardId, posId) => { 
+    if(player === opPlayer){
+        selectedCard = cardId;
+        putCardOnBoard(posId);
+        removeCardFromDiscard(cardId, "opDiscPile");
+    }
+
+    updatePowerValues();
+});
 
 let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
-    // TODO - Create rule for Monster deck to retain random card
+    if(faction === "MO" && pLife !== 0 && oLife !== 0)  monstersFactionPerk();
 
     // Move cards into corresponding discard pile
     rowIds.forEach((row) => {
@@ -860,6 +891,9 @@ function clearCards() {
     
     // Remove Cards from Board
     $('.cardSmall').remove();
+
+    // Re-add monster card
+    $('.cardTemp').addClass("cardSmall").removeClass("cardTemp");
 }
 
 function playersTurn() {
@@ -1039,12 +1073,16 @@ function keyPressed(event) {
 
         // X Pressed
         if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
-            useLeaderAbility();
-            leaderAbilityUsed = true;
-            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
-            const cardsInHand = document.getElementById("hand").childElementCount;
-            document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
-            socket.emit('switchTurn', [], [], cardsInHand, true);
+            if(opponentLeader === "NGLeader1") document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action";
+            
+            if(leader !== "NGLeader1" && opponentLeader !== "NGLeader1"){
+                useLeaderAbility();
+                leaderAbilityUsed = true;
+                document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+                const cardsInHand = document.getElementById("hand").childElementCount;
+                document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+                socket.emit('switchTurn', SID, [], [], cardsInHand, true);
+            }
         }
         
         // Space pressed AND player's turn AND card is not selected AND card is not being revived
