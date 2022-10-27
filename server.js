@@ -182,6 +182,21 @@ io.on('connection', (socket) => {
         let opPlayer = player === "A" ? "B" : "A";
         io.in(SID).emit('syncMonsterCard', opPlayer, cardId, 'op'+posId.substring(0,1).toUpperCase()+posId.substring(1));
     });
+
+    socket.on('drawFromOpDisc', (SID , player, cardId) => {
+        let opPlayer = player === "A" ? "B" : "A";
+        io.in(SID).emit('syncDrawFromOpDisc', opPlayer, cardId);
+    })
+
+    socket.on('getOpponentHand', (SID, player) => {
+        let opPlayer = player === "A" ? "B" : "A";
+        io.in(SID).emit('opponentHandRequested', opPlayer);
+    });
+    
+    socket.on('opponentHandRevealed', (SID, opPlayer, cardsToReveal) => {
+        let player = opPlayer === "A" ? "B" : "A";
+        io.in(SID).emit('revealOpHandToPlayer', player, cardsToReveal);
+    });
     
     // Switches turn and passes on player choice to opponent 
     socket.on('switchTurn', (SID, cardIDs, posIDs, cardsInHand, abilityUsed) => {

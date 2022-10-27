@@ -48,9 +48,14 @@ function createFactionCard(i, attribute, colNotation = "") {
     return factionCard;
 }
 
+function setCardStyle(elementId, styleId){
+    document.getElementById(elementId).style.background = styles[styleId].background; 
+    document.getElementById(elementId).style.display = styles[styleId].display; 
+}
+
 function addCardStyles() {
     for (let id in styles){
-        if(document.getElementById(id) !== null) document.getElementById(id).style = styles[id];
+        if(document.getElementById(id) !== null) setCardStyle(id,id);
     }
 }
 
@@ -116,7 +121,7 @@ function addToDeck(id) {
 
     if(cardsAvailable[id] === 0) document.getElementById(id).style="display: none;";
     
-    document.getElementById(deckID).style = styles[id];
+    setCardStyle(deckID,id);
     document.getElementById(addedID).innerHTML = "x"+cardsAdded[id];
 }
 
@@ -135,7 +140,7 @@ function removeFromDeck(id) {
 
     if(cardsAdded[id] === 0) document.getElementById(deckID).style="display: none;";
     
-    document.getElementById(id).style = styles[id];
+    setCardStyle(id,id);
     document.getElementById(availabilityID).innerHTML = "x"+cardsAvailable[id];
 }
 

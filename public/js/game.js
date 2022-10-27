@@ -1,4 +1,7 @@
 "use strict";
+
+const e = require("express");
+
 const socket = io();
 
 // Get SID and faction ID from URL
@@ -33,9 +36,14 @@ socket.on('startGame', () => {
     socket.emit('getOpponentDeck', SID, player);
 });
 
+function setCardStyle(elementId, styleId){
+    document.getElementById(elementId).style.background = styles[styleId].background; 
+    document.getElementById(elementId).style.display = styles[styleId].display; 
+}
+
 function factionPerkST() {
     // Get the modal
-    var modal = document.getElementById("STModal");
+    let modal = document.getElementById("STModal");
 
     modal.style.display = "block";
     let playerFirstBtn = document.getElementById('playerFirstBtn');
@@ -70,49 +78,71 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
 let opponentHandSize = initDraw;
 // Sets up mulligan phase after both players have created their decks
 function setup() {
+    const opInitDraw = opLeader === "STLeader3" ? initDraw+1 : initDraw;
     document.addEventListener("keydown",keyPressed);
     document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
     document.getElementById('topMsg2').style = "display: fixed;";
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
-    document.getElementById('pDeckSize').innerHTML = deck.length-10;
-    document.getElementById('oDeckSize').innerHTML = opponentDeck.length-10;
+    document.getElementById('pDeckSize').innerHTML = deck.length-initDraw;
+    document.getElementById('oDeckSize').innerHTML = opponentDeck.length-opInitDraw;
     
     powerIds.forEach((id) => {
         document.getElementById(id).innerHTML = 0;
     });
     
     document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-    document.getElementById('opponentStats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    document.getElementById('opponentStats').innerHTML = `${opInitDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     
     for (let i=0; i<initDraw; i++){
-        drawCard('replaceCard(this)');
+        drawCardFromDeck('replaceCard(this)');
     }
-    document.getElementById('pLeader').style = styles[leader];
-    document.getElementById('pDeck').style = styles[faction];
-    
-    
-    // This will require opponent's faction to change styles appropriately
-    document.getElementById('oLeader').style = styles[opponentLeader];
-    document.getElementById('oDeck').style = styles[opponentFaction]; 
+    setCardStyle('pLeader', leader);
+    setCardStyle('pDeck', faction);
+    setCardStyle('oLeader', opponentLeader);
+    setCardStyle('oDeck', opponentFaction);
 }
 
 function createCard(cardId, positionId, attribute, className = "card") {
     let card = document.createElement('div');
-    card.style = styles[cardId];
+    card.style.background = styles[cardId].background;
+    card.style.display = styles[cardId].display;
     card.className = className;
     card.setAttribute('id', cardId);
     card.setAttribute('onclick', attribute);
     document.getElementById(positionId).appendChild(card);
 }
 
-function drawCard(attribute) {
+function drawCardFromDeck(attribute) {
     if(deck.length !== 0){
         createCard(deck[0], 'hand', attribute);
         hand.push(deck[0]);
         deck.shift();
     }
 }
+
+function drawCardFromOpDiscard(card){
+    let cardId = card.id;
+    createCard(cardId, 'hand', "selectCard(this)");
+    hand.push(cardId);
+    removeCardFromDiscard(cardId, "opDiscPile");
+    document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
+    document.getElementById('highlightedCards').innerHTML = "";
+    handHiddenFlag = false;
+    holdSwitchTurn = false;
+    document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+    document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+    document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+    document.getElementById('instructions').innerHTML = instructionTextHide;
+    socket.emit('drawFromOpDisc', SID , player);
+    socket.emit('switchTurn', SID, [], [], hand.length, true);
+}
+
+socket.on('syncDrawFromOpDisc', (opPlayer, cardId) => {
+    if(player === opPlayer){
+        removeCardFromDiscard(cardId, "pDiscPile")
+    }
+})
 
 // Counter for how many cards have been replaced
 let replaceCount = 0;
@@ -130,7 +160,8 @@ function replaceCard(card) {
             hand.splice(index, 1);
         }
         // Add new card to hand from deck
-        card.style = styles[deck[0]];
+        card.style.background = styles[deck[0]].background;
+        card.style.display = styles[deck[0]].display;
         card.setAttribute("id", deck[0]);
         hand.push(deck[0]);
         deck.shift();
@@ -151,6 +182,10 @@ function handSelected() {
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
     
+    if(leader === "STLeader3"){
+        drawCardFromDeck("");
+    }
+
     // Remove onclick functionality until opponent has reselected their cards
     cardElements = document.getElementsByClassName('card');
     for (let i=0; i<hand.length; i++) {
@@ -195,7 +230,8 @@ function decoyCard(card) {
     cancelCardSelection();
     
     let cardToHand = document.createElement('div');
-    cardToHand.style = styles[card.id];
+    cardToHand.style.background = styles[card.id].background;
+    cardToHand.style.display = styles[card.id].display;
     cardToHand.className = 'card';
     cardToHand.setAttribute("id", card.id);
     cardToHand.setAttribute("onclick", "selectCard(this)");
@@ -227,7 +263,7 @@ function getMusterCategory(cardId) {
 }
 
 const activateValidPositions = ((id) => {
-    document.getElementById(id).style = "background: rgba(255, 233, 0, 0.15);";
+    document.getElementById(id).style.background = "rgba(255, 233, 0, 0.15)";
     document.getElementById(id).setAttribute('onclick','placeCard(this)');
 })
 
@@ -235,13 +271,13 @@ let selectedCard;
 function selectCard(card) {
     cardSelectedFlag = true;
     selectedCard = card.id;
-    document.getElementById('cardSelected').style = styles[selectedCard];
+    setCardStyle('cardSelected', selectedCard);
     document.getElementById('hand').style = "display: none;"; 
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
     if(medicFlag){
-        document.getElementById('discCards').innerHTML = "";
+        document.getElementById('highlightedCards').innerHTML = "";
         document.getElementById('leaderInstructions').innerHTML = "";
         document.getElementById('instructions').innerHTML = "";
     }
@@ -315,7 +351,7 @@ let medicCards = []; // Placeholder for card Ids if medic is used
 let medicPosIDs = []; // Placeholder for pos Ids if medic is used
 let doubledRows = []; // Positions with horns placed
 
-function placeCard(boardPos) {
+async function placeCard(boardPos) {
     const firstSelectedCard = selectedCard;
     let boardPosId = boardPos.id;
     cardSelectedFlag = false;
@@ -398,18 +434,18 @@ function placeCard(boardPos) {
     if (combatSpies.concat(siegeSpies).includes(selectedCard)){
         for (let i=0;i<2;i++){
             if (deck.length != 0) {
-                drawCard();
+                drawCardFromDeck("selectCard(this)");
             }
         }
     }
     
     else if(selectedCard === scorchId){
-        scorch(rowIds);
+        await scorch(rowIds);
     }
     
     else if(selectedCard === villentretenmerth){
         updatePowerValues();
-        if(powerLevels["opCombatPower"] >= 10) scorch(["opCombatLane"]);
+        if(powerLevels["opCombatPower"] >= 10) await scorch(["opCombatLane"]);
     }
     
     else if(horns.includes(selectedCard)){
@@ -433,7 +469,7 @@ function placeCard(boardPos) {
                 medicPosIDs.push(boardPosId);    
             }
             
-            discSelectedFlag = true;
+            highlightedCardsFlag = true;
             revivedFlag = false;
             
             // Hide hand and instructions
@@ -446,11 +482,11 @@ function placeCard(boardPos) {
             document.getElementById('oDisc').removeAttribute("onclick");
             
             // Show revivable unit cards
-            document.getElementById('discCards').innerHTML = "";
+            document.getElementById('highlightedCards').innerHTML = "";
             document.getElementById('topMsg').innerHTML = "Choose a card to revive";
             for (let i=0; i<discPile.length; i++){
                 if(!heroes.includes(discPile[i])){
-                    createCard(discPile[i], 'discCards', 'selectCard(this)');
+                    createCard(discPile[i], 'highlightedCards', 'selectCard(this)');
                 }
             }
         }
@@ -475,17 +511,26 @@ function cardsPlaced(cards, positions){
     index = hand.indexOf(selectedCard);  
     if (index > -1) hand.splice(index, 1); // Remove card from hand - If not in discard
     
-    const cardsInHand = document.getElementById("hand").childElementCount;
-    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
-    socket.emit('switchTurn', SID, cards, positions, cardsInHand, false);
+    document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
+    socket.emit('switchTurn', SID, cards, positions, hand.length, false);
 }
 
-function useLeaderAbility(useOpponentLeaderAbility=false){
-    leaderFaction = useOpponentLeaderAbility ? opponentFaction : faction;
-    leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
+function leaderHorn(row){
+    let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
+    if(!hornInRow.includes(row)){
+        doubledRows.push(row)
+        selectedCard = commandersHorn;
+        placeCard(row);
+    }
+}
+
+let holdSwitchTurn = false;
+async function useLeaderAbility(useOpponentLeaderAbility=false){
+    holdSwitchTurn = false;
+    let leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
     switch(leaderUsed){
         case "NRLeader1": // Doubles siege lane strength 
-            useOpponentLeaderAbility ? doubledRows.push('opSiegeLane') : doubledRows.push('siegeLane');
+            useOpponentLeaderAbility ? leaderHorn('opSiegeLane') : leaderHorn('siegeLane');
             break;
         case "NRLeader2": // Plays impenetrable fog from deck
             if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
@@ -506,22 +551,132 @@ function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         case "NRLeader4": // Destroy enemies strongest siege unit(s) if opSiegePower >= 10
             if(useOpponentLeaderAbility){
-                if(powerLevels["siegePower"] >= 10) scorch(["siegeLane"]);
+                if(powerLevels["siegePower"] >= 10) await scorch(["siegeLane"]);
             } 
             else {
-                if(powerLevels["opSiegePower"] >= 10) scorch(["opSiegeLane"]);
+                if(powerLevels["opSiegePower"] >= 10) await scorch(["opSiegeLane"]);
             }
             break;
+        
+
+        case "NGLeader2": // Plays torrential rain from deck
+            if(useOpponentLeaderAbility && opponentDeck.includes(torrentialRain)){
+                opponentDeck.splice(opponentDeck.indexOf(torrentialRain),1);
+                selectedCard = torrentialRain;
+                weatherEffects.push(torrentialRain);
+                putCardOnBoard("weatherStats")
+            }
+            else if(!useOpponentLeaderAbility && deck.includes(torrentialRain)){
+                deck.splice(deck.indexOf(torrentialRain),1);
+                selectedCard = torrentialRain;
+                weatherEffects.push(torrentialRain);
+                putCardOnBoard("weatherStats")
+            }
+            break;
+        case "NGLeader3": // Look at 3 random cards from opponent's hand
+            if(!useOpponentLeaderAbility){
+                handHiddenFlag = true;
+                holdSwitchTurn = true;
+                highlightedCardsFlag = true;
+                document.getElementById('hand').style = "display: none;";           
+                document.getElementById('instructions').innerHTML = instructionTextShow;
+                socket.emit('getOpponentHand', SID, player); 
+            }
+            break;
+        case "NGLeader4": // Draw card from opponent's discard
+            if(!useOpponentLeaderAbility){
+                highlightedCardsFlag = true;
+                holdSwitchTurn = true;
+                document.getElementById('hand').style = "display: none;";           
+                document.getElementById('instructions').innerHTML = instructionTextShow;
+                
+                let opDiscPile = discardPiles["opDiscPile"];
+                if(opDiscPile.length >0){
+                    document.getElementById('topMsg').innerHTML = "Choose a card to draw";
+                    for (let i=0; i<opDiscPile.length; i++){
+                        createCard(opDiscPile[i], 'highlightedCards', 'drawCardFromOpDiscard(this)');
+                    }
+                }
+                else{
+                    document.getElementById('topMsg').innerHTML = "Opponent's discard is empty - Press Esc to continue";
+                }
+            }
+            break;
+
+
+        case "STLeader1": // Doubles ranged lane strength    
+            useOpponentLeaderAbility ? leaderHorn('opRangedLane') : leaderHorn('rangedLane');
+            break;
+        case "STLeader2": // Play biting frost card from deck    
+            if(useOpponentLeaderAbility && opponentDeck.includes(bitingFrost)){
+                opponentDeck.splice(opponentDeck.indexOf(bitingFrost),1);
+                selectedCard = bitingFrost;
+                weatherEffects.push(bitingFrost);
+                putCardOnBoard("weatherStats")
+            }
+            else if(!useOpponentLeaderAbility && deck.includes(bitingFrost)){
+                deck.splice(deck.indexOf(bitingFrost),1);
+                selectedCard = bitingFrost;
+                weatherEffects.push(torrentialRain);
+                putCardOnBoard("weatherStats")
+            }
+            break; 
+        case "STLeader4": // Destroy enemies strongest combat unit(s) if opCombatPower >= 10
+            if(useOpponentLeaderAbility){
+                if(powerLevels["combatPower"] >= 10) await scorch(["combatLane"]);
+            } 
+            else {
+                if(powerLevels["opCombatPower"] >= 10) await scorch(["opCombatLane"]);
+            }
+            break;
+        
+        case "MOLeader1": // Draw card from discard
+            // TODO
+            break;
+        case "MOLeader2": // Double combat lane strength
+            useOpponentLeaderAbility ? leaderHorn('opCombatLane') : leaderHorn('combatLane');
+            break;
+        case "MOLeader3": // Pick any weather card from deck and play it instantly
+            // TODO
+            break;
+        case "MOLeader4": // Discard 2 cards and draw 1 card from deck
+            // TODO
+            break;
+        
     }
 
-    if(!useOpponentLeaderAbility){
-        const cardsInHand = document.getElementById("hand").childElementCount;
-        document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
-        socket.emit('switchTurn', SID, [], [], cardsInHand, true);
+    if(!useOpponentLeaderAbility && !holdSwitchTurn){
+        document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
+        socket.emit('switchTurn', SID, [], [], hand.length, true);
     }
 }
 
-function scorch(targetRows = []){
+socket.on('opponentHandRequested', (opPlayer) => {
+    if(player === opPlayer){
+        let cardsToReveal = [];
+        for(let i=0; i<hand.length; i++){
+            cardsToReveal.push(hand[i]);
+            if(i === 2) break;
+        }
+        socket.emit('opponentHandRevealed', SID, opPlayer, cardsToReveal);
+    }
+})
+
+socket.on('revealOpHandToPlayer', (playerId, cardsToReveal) => {
+    if(player === playerId){
+        if(cardsToReveal.length > 0){
+            document.getElementById('topMsg').innerHTML = "Press Esc to Continue";
+            for (let i=0; i<cardsToReveal.length; i++){
+                createCard(cardsToReveal[i], 'highlightedCards', '');
+            }
+        }
+        else{
+            document.getElementById('topMsg').innerHTML = "Opponent's hand is empty - Press Esc to Continue";
+        }
+    }
+});
+
+async function scorch(targetRows = []){
     // Get current power modifiers
     resetPowerLevels();
     getPowerModifiers();
@@ -529,8 +684,8 @@ function scorch(targetRows = []){
     let topRowVals = {}; // Dictionary of strongest cards per row
     let strongestCards = {}; // Dictionary of rows/ strongest cards
     let moraleRowCount = {}; // Dictionary of morale boosters in each row
-    
-    // Iterate through each of the player's rows
+    let scorchedCards = [];
+
     targetRows.forEach((row) => {
         let cardsInRow = $('.'+row).find('.cardSmall').length;
         topRowVals[row] = 0;
@@ -571,6 +726,7 @@ function scorch(targetRows = []){
             }
         }
         
+        
         let cardsInRow = uniqueCardIdList.length;
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
@@ -581,7 +737,7 @@ function scorch(targetRows = []){
                     continue;
                 }
                 else{
-                    strongestCards[row].forEach((sCard) => {
+                    strongestCards[row].forEach(async (sCard) => {
                         let cardPow = basePower * (tightBondMods[row][sCard] ?? 1) + moraleRowCount[row]; 
                         if(hornInRow !== undefined || dandelion === sCard) cardPow *= 2;
                         if(hornInRow === undefined && doubledRows.includes(row)) cardPow -= basePower;
@@ -589,7 +745,7 @@ function scorch(targetRows = []){
 
                         if (cardPow === maxVal && sCard === cardId){
                             if(cardId === dandelion) doubledRows.splice(doubledRows.indexOf(row),1); 
-                            $('.'+row).find('#'+sCard).remove();
+                            scorchedCards.push([row,cardId]);
                             opRows.includes(row) ? discardPiles["opDiscPile"].push(cardId) : discardPiles["pDiscPile"].push(cardId);
                         }
                     })
@@ -597,10 +753,64 @@ function scorch(targetRows = []){
             }
         }
     });
+    
     if(discardPiles["opDiscPile"].length!==0){discNotEmpty(discardPiles["opDiscPile"],"oDisc")}
     document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
     if(discardPiles["pDiscPile"].length!==0){discNotEmpty(discardPiles["pDiscPile"],"pDisc")}
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
+
+    scorchedCards.forEach(async (rowAndCard) => {
+        await animateScorch($('.'+rowAndCard[0]).find('#'+rowAndCard[1])[0]);
+        $('.'+rowAndCard[0]).find('#'+rowAndCard[1]).remove();
+    });
+}
+
+async function animateScorch(scorchedCard) {
+        scorchedCard.style.backgroundImage = "url(img/anim_scorch.png)";
+        scorchedCard.style.backgroundSize = "cover";
+
+		fadeIn(scorchedCard, 300);
+        await sleep(1300);
+		fadeOut(scorchedCard, 300);
+        await sleep(300);
+		scorchedCard.style.backgroundSize = ""; 
+        scorchedCard.style.backgroundImage = "";
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fade(fadeIn, elem, dur){
+    await sleep(100);
+	let op = fadeIn ?  0.1 : 1;
+	elem.style.opacity = op;
+	elem.style.filter = "alpha(opacity=" + (op * 100) + ")";
+	if (fadeIn)
+		elem.classList.remove("hide");
+	let timer = setInterval( async function() {
+		op += op * (fadeIn ? 0.1 : -0.1);
+		if (op >= 1) {
+			clearInterval(timer);
+			return;
+		} else if (op <= 0.1) {
+			elem.classList.add("hide");
+			elem.style.opacity = "";
+			elem.style.filter = "";
+			clearInterval(timer);
+			return;
+		}
+		elem.style.opacity = op;
+		elem.style.filter = "alpha(opacity=" + (op * 100) + ")";
+	}, dur/24);
+}
+
+async function fadeOut(elem, duration) {
+	await fade(false, elem, duration);
+}
+
+async function fadeIn(elem, duration){
+	await fade(true, elem, duration);
 }
 
 function switchWaitingMsg() {
@@ -623,7 +833,7 @@ function removeCardFromDiscard(cardId, pile) {
     if(index > -1){
         discardPiles[pile].splice(index,1);
         document.getElementById(discSize).innerHTML = discardPiles[pile].length > 0 ? discardPiles[pile].length : '';
-        if(discardPiles[pile].length !== 0) document.getElementById(discardId).style = styles[discardPiles[pile][0]];
+        if(discardPiles[pile].length !== 0) setCardStyle(discardId, discardPiles[pile][0]);
         discardPiles[pile].length === 0 ? discEmpty(discardId) : discNotEmpty(discardPiles[pile], discardId);
     }
 }
@@ -637,7 +847,7 @@ socket.on('returnTurn', (cardArr, posArr, opHandSize, abilityUsed) => {
     syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed)
 });
 
-function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
+async function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
     if (!myTurn){
         if(abilityUsed) useLeaderAbility(true);
 
@@ -659,22 +869,23 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
         if (Object.keys(musterCategories).includes(getMusterCategory(cardArr[0]))){
             cardArr.forEach((cardId) => {if(opponentDeck.includes(cardId)) opponentDeck.splice(opponentDeck.indexOf(cardId),1)});
         }
-        if (scorchId === cardArr[0]){
-            scorch(rowIds);
-        }
+        
         if (villentretenmerth === cardArr[0]){
-            if(powerLevels["combatPower"] >= 10) scorch(["combatLane"]);
-            selectedCard = cardArr[0];
-            putCardOnBoard(posArr[0]);
+            if(powerLevels["combatPower"] >= 10) await scorch(["combatLane"]);
         }
-        if(weatherCards.includes(cardArr[0])) {
+
+        // Conditionals before ELSE to prevent or control card being played
+        if (scorchId === cardArr[0]){
+            await scorch(rowIds);
+        }
+        else if(weatherCards.includes(cardArr[0])) {
             if(!weatherEffects.includes(cardArr[0])){
                 selectedCard = cardArr[0];
                 weatherEffects.push(selectedCard);
                 putCardOnBoard(selectedCard);
             }
         }
-        if (cardArr[0] === clearWeather){
+        else if (cardArr[0] === clearWeather){
             resetWeather();
         }
         else{
@@ -684,21 +895,22 @@ function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
                 }
                 selectedCard = cardArr[i];
                 putCardOnBoard(posArr[i]);
-                opponentHandSize = opHandSize;
-                document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
                 if (i>0){
                     removeCardFromDiscard(cardArr[i], "opDiscPile");
                 }
             }    
         }
-        
+        opponentHandSize = opHandSize;
+        document.getElementById('opponentStats').innerHTML = `${opHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
     }
     updatePowerValues();  
     document.getElementById('pDeckSize').innerHTML = deck.length;
     document.getElementById('oDeckSize').innerHTML = opponentDeck.length;
-
-    document.getElementById("pDisc").style = styles[discardPiles["pDiscPile"][0]];
+    
+    discardPiles["pDiscPile"].length === 0 ? discEmpty("pDisc") : discNotEmpty(discardPiles["pDiscPile"],"pDisc");
+    discardPiles["opDiscPile"].length === 0 ? discEmpty("oDisc") : discNotEmpty(discardPiles["opDiscPile"],"oDisc");
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
+    document.getElementById('oDiscSize').innerHTML = discardPiles["opDiscPile"].length > 0 ? discardPiles["opDiscPile"].length : '';
 }
      
 // Decide who round winner is based on total values and run any faction rules
@@ -742,11 +954,10 @@ socket.on('results', () => {
 });
 
 function roundWon() {
-    if(faction==="NR") drawCard();
-    const cardsInHand = document.getElementById("hand").childElementCount;
-    document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
+    if(faction==="NR") drawCardFromDeck("selectCard(this)");
+    document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
 
-    document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
+    document.getElementById('oHeart'+String(oLife)).style.color = "grey";
     oLife -= 1;
     playersTurn(); // Player gets next turn if they win
 }
@@ -759,8 +970,8 @@ function roundTie() {
         roundLost();
     }
     else{
-        document.getElementById('heart'+String(pLife)).style = "color:grey;";
-        document.getElementById('oHeart'+String(oLife)).style = "color:grey;";
+        document.getElementById('heart'+String(pLife)).style.color = "grey";
+        document.getElementById('oHeart'+String(oLife)).style.color = "grey";
         oLife -= 1;
         pLife -= 1;
         // Player gets next turn if opponent had first turn initially
@@ -779,7 +990,7 @@ function roundLost() {
         document.getElementById('opponentStats').innerHTML = `${opponentHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
     }
         
-    document.getElementById('heart'+String(pLife)).style = "color:grey;";
+    document.getElementById('heart'+String(pLife)).style.color = "grey";
     pLife -= 1;
     opponentsTurn(); // Opponent gets next turn if player loses round
 }
@@ -809,14 +1020,14 @@ function resetWeather(){
 
 // Show cards in the discard pile
 function showDiscard(pileID) {
-    discSelectedFlag = true;
-    document.getElementById('discCards').innerHTML = "";
+    highlightedCardsFlag = true;
+    document.getElementById('highlightedCards').innerHTML = "";
     document.getElementById('topMsg').innerHTML = "Press Esc to Cancel";
     
     let discPile = pileID == "oDisc" ? discardPiles["opDiscPile"] : discardPiles["pDiscPile"];
     
     for (let i=0; i<discPile.length; i++){
-        createCard(discPile[i], 'discCards', '');
+        createCard(discPile[i], 'highlightedCards', '');
     }
 }
 
@@ -828,7 +1039,7 @@ function discEmpty(pileId) {
 
 // Add necessary attributes/ visuals
 function discNotEmpty(discPile,pileId) {
-    document.getElementById(pileId).style = styles[discPile[0]];
+    setCardStyle(pileId, discPile[0]);
     document.getElementById(pileId).setAttribute("onclick","showDiscard(this.id)");
 }
 
@@ -925,7 +1136,7 @@ function switchTurn() {
 
 function putCardOnBoard(boardPosId) {
     const posId = weatherCards.includes(selectedCard) ? "weatherStats" : boardPosId;
-    createCard(selectedCard, posId, '', 'cardSmall');
+    if(!weatherEffects.includes(selectedCard)) createCard(selectedCard, posId, '', 'cardSmall');
 }
 
 // Counts nonhero cards in each row for moralebooster
@@ -1023,7 +1234,7 @@ function getLeaderInstructionText(){
     return leaderAbilityUsed ? "" : leaderInstruction;
 }
 
-let [handHiddenFlag,cardSelectedFlag,discSelectedFlag,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
+let [handHiddenFlag,cardSelectedFlag,highlightedCardsFlag,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
 function keyPressed(event) {
     if(!gameEnded){
         // Enter pressed and hand hasn't been selected AND card is not being revived
@@ -1032,9 +1243,9 @@ function keyPressed(event) {
         }
         
         // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
-        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag){
+        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag && !highlightedCardsFlag){
             if (handHiddenFlag){
-                document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+                document.getElementById('hand').style = "display: fixed; bottom: 0%;";
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
                 document.getElementById('instructions').innerHTML = instructionTextHide;
                 handHiddenFlag = false;
@@ -1064,11 +1275,20 @@ function keyPressed(event) {
             });
         }
         
-        // Esc pressed AND discard is showing AND card is not being revived
-        if (event.keyCode === 27 && discSelectedFlag && !medicFlag){
-            discSelectedFlag = false;
+        // Esc pressed AND cards highlighted AND card is not being revived
+        if (event.keyCode === 27 && highlightedCardsFlag && !medicFlag){
+            highlightedCardsFlag = false;
             document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
-            document.getElementById('discCards').innerHTML = "";
+            document.getElementById('highlightedCards').innerHTML = "";
+
+            if(holdSwitchTurn){
+                handHiddenFlag = false;
+                holdSwitchTurn = false;
+                document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+                document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+                document.getElementById('instructions').innerHTML = instructionTextHide;
+                socket.emit('switchTurn', SID, [], [], hand.length, true);
+            }
         }
 
         // X Pressed
@@ -1079,9 +1299,6 @@ function keyPressed(event) {
                 useLeaderAbility();
                 leaderAbilityUsed = true;
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
-                const cardsInHand = document.getElementById("hand").childElementCount;
-                document.getElementById('stats').innerHTML = `${cardsInHand} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
-                socket.emit('switchTurn', SID, [], [], cardsInHand, true);
             }
         }
         
@@ -1096,11 +1313,11 @@ function keyPressed(event) {
 
 function cancelCardSelection() {
         // Remove card from placeholder at top
-        document.getElementById('cardSelected').style = "display: none;";
+        document.getElementById('cardSelected').style.display = "none";
         
         // Remove any div highlights for where card can be placed and onclick attributes
         boardPosIds.forEach((id) =>{
-            document.getElementById(id).style = "background: none;";    
+            document.getElementById(id).style.background = "none";    
             document.getElementById(id).removeAttribute("onclick");
         });
     
