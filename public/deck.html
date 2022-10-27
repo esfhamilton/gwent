@@ -8,18 +8,22 @@
         <title>GWENT</title>
     </head>
     <body>
-        <h1>Build your Deck</h1>
-        <p class="info" id="info">Select a Leader and click on the cards in the "Available" column below to add them to your deck. When you're ready press the "Next" button to continue.</p>
-        <button class="btn" onclick="submit()"><h2>Next</h2></button>
-        <div class="leaders" id="leaderSection">
-            <h3>Leader</h3>
-            <br>
-        </div>
-        <div class="column" id="availableCards">
-            <h3>Available</h3>
-        </div>
-        <div class="column" id="currentDeck">
-            <h3>Current Deck</h3>
+        <div style="display: flex; justify-content: space-around;">
+            <span><h1>Build your Deck</h1></span>
+                <div style="position: absolute; top:30%">
+                <p class="info" id="info">Select a Leader and click on the cards in the "Available" column below to add them to your deck. When you're ready press the "Next" button to continue.</p>
+                <button class="btn" onclick="submit()"><h2>Next</h2></button>
+                <h3>Leader</h3>
+                <br>
+                <div class="leaders" id="leaderSection">
+                </div>
+                <div class="column" id="availableCards">
+                    <h3>Available</h3>
+                </div>
+                <div class="column" id="currentDeck">
+                    <h3>Current Deck</h3>
+                </div>
+            </div>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 
                 integrity="sha256-ijqLssetA1NMNjZ+w1zaUafQQLm4IW5OoM8O+4tatME=" 
