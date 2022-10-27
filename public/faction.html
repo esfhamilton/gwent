@@ -8,17 +8,21 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>    
-        <h1>Choose your Faction</h1>
-        <br><br>
-        <select style="font-size: 175%;" name="faction" id="faction">
-            <option value="NR">Northern Realms</option>
-            <option value="NG">Nilfgaard</option>
-            <option value="ST">Scoia'Tael</option>
-            <option value="MO">Monsters</option>
-            <!--<option value="HB">Homebrew</option>-->
-        </select>
-        <br><br>
-        <button class="btn" onclick="submit()"><h2>Next</h2></button>
+        <div style="display: flex; justify-content: space-around;">
+            <span><h1>Choose your Faction</h1></span>
+            <div style="position: absolute; top: 32%;">
+                <select style="font-size: 175%;" name="faction" id="faction">
+                    <option value="NR">Northern Realms</option>
+                    <option value="NG">Nilfgaard</option>
+                    <option value="ST">Scoia'Tael</option>
+                    <option value="MO">Monsters</option>
+                    <!--<option value="HB">Homebrew</option>-->
+                </select>
+                <br><br>
+                <button class="btn" onclick="submit()"><h2>Next</h2></button>
+            </div>
+        </div>
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.4/qs.min.js" 
                 integrity="sha256-ijqLssetA1NMNjZ+w1zaUafQQLm4IW5OoM8O+4tatME=" 
                 crossorigin="anonymous">

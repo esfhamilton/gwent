@@ -8,15 +8,19 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>    
-        <h1>GWENT ONLINE</h1>
-        <form action="lobby.html">
-            <button class="btn"><h2>CREATE ROOM</h2></button>
-        </form>
-        <form action="lobby.html">
-            <button class="btn"><h2>JOIN GAME</h2></button>
-            <br>
-            <input pattern=".{5}" required title="5 Digit length" type="text" name="SID" placeholder="Enter Session ID" required>
-        </form>
+        <div style="display: flex; justify-content: space-around;">
+            <span><h1>GWENT ONLINE</h1></span>
+            <div style="position: absolute; top:32%">
+                <form action="lobby.html">
+                    <button class="btn"><h2>CREATE ROOM</h2></button>
+                </form>
+                <form action="lobby.html">
+                    <button class="btn"><h2>JOIN GAME</h2></button>
+                    <br>
+                    <input pattern=".{5}" required title="5 Digit length" type="text" name="SID" placeholder="Enter Session ID" required>
+                </form>
+            </div>
+        </div>
     </body>
     <footer>
         <p>An unofficial fan work under the Gwent Fan Content Guidelines. Not approved/endorsed by CD PROJEKT RED</p>
