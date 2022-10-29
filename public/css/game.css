@@ -122,264 +122,211 @@ p {
     background-image: url("../img/board.jpg");
     background-position: center;
 	background-repeat:no-repeat;
-    background-size: 95%;
+    background-size: 100%;
     height: 100%;
-    width: auto;
+    width: 100%;
 }
 
 .hand {
-    position: fixed;
+    position: absolute;
     bottom: 30%;
-    left: 50%;
-    margin-left: -400px;
+    left: 29%;
 }
 
+.pStats,
+.oStats {
+    position: absolute;
+    left: 8.2%;
+}
 .pStats {
-    position: fixed;
-    left: 160px;
     bottom: 32%;
 }
-
 .oStats {
-    position: fixed;
-    left: 160px;
     top: 32%;
 }
 
-.pLeader {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
-    bottom: 11%;
-    left: 137px;
-}
-
+.pLeader,
 .oLeader {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
-    top: 11%;
-    left: 137px;
+    position: absolute;   
+    height: 16vh;
+    width: 11vh;
+    left: 7.1%;
+}
+.pLeader {
+    bottom: 12%;
+}
+.oLeader {
+    top: 12%;
 }
 
-.pPass {
-    position: fixed;
-    left: 17%;
-    bottom: 27%;
-    z-index: 100;
-}
-
+.pPass,
 .oPass {
-    position: fixed;
-    left: 17%;
-    top: 27%;
-    z-index: 100;
+    position: absolute;
+    left: 15%;
+}
+.pPass {
+    bottom: 12%;
+}
+.oPass {
+    top: 12%;
 }
 
-.pDeck {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
-    border-radius: 5px;
-    bottom: 25%;
-    right: 155px;
-}
-
+.pDeck,
 .oDeck {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
+    position: absolute;   
+    height: 17vh;
+    width: 12vh;
     border-radius: 5px;
+    right: 8%;
+}
+.pDeck {
+    bottom: 25%;
+}
+.oDeck {
     top: 25%;
-    right: 155px;
 }
 
-.pDisc {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
-    border-radius: 5px;
-    bottom: 10%;
-    right: 155px;
-}
-
+.pDisc,
 .oDisc {
-    position: fixed;   
-    height: 132px;
-    width: 88px;
+    position: absolute;
+    height: 17vh;
+    width: 12vh;
     border-radius: 5px;
-    top: 10%;
-    right: 155px;
+    right: 8%;
 }
-
-/* 12 LANE, WEATHER, HORN & POWER PLACEHOLDERS */
-.weatherStats {
-    position: fixed;
-    height: 105px;
-    width: 230px;
-    top: 45%;
-    left: 6%;
-}
-
-.opSiegeLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    top: 1.2%;
-    left: 36.5%;
-}
-.opSiegeHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    top: 1.2%;
-    left: 29%;
-}
-.opSiegePower {
-    position: fixed; 
-    top: 7%;
-    left: 25%;
-}
-
-.opRangedLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    top: 18%;
-    left: 36.5%;
-}
-.opRangedHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    top: 18%;
-    left: 29%;
-}
-.opRangedPower {
-    position: fixed; 
-    top: 23.8%;
-    left: 25%;
-}
-
-.opCombatLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    top: 34%;
-    left: 36.5%;
-}
-.opCombatHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    top: 34%;
-    left: 29%;
-}
-.opCombatPower {
-    position: fixed; 
-    top: 39.8%;
-    left: 25%;
-}
-
-.combatLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    bottom: 34%;
-    left: 36.5%;
-}
-.combatHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    bottom: 34%;
-    left: 29%;
-}
-.combatPower {
-    position: fixed; 
-    bottom: 39.8%;
-    left: 25%;
-}
-
-.rangedLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    bottom: 18%;
-    left: 36.5%;
-}
-.rangedHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    bottom: 18%;
-    left: 29%;
-}
-.rangedPower {
-    position: fixed; 
-    bottom: 23.8%;
-    left: 25%;
-}
-
-.siegeLane {
-    position: fixed;   
-    height: 105px;
-    width: 700px;
-    bottom: 1.2%;
-    left: 36.5%;
-}
-.siegeHorn {
-    position: fixed;   
-    height: 105px;
-    width: 115px;
-    bottom: 1.2%;
-    left: 29%;
-}
-.siegePower {
-    position: fixed; 
+.pDisc {
     bottom: 7%;
-    left: 25%;
+}
+.oDisc {
+    top: 7%;
 }
 
-.opCombatPower,
-.opRangedPower,
-.opSiegePower {
-    font-size: 130%;
-    color: #aaefff;
+.weatherStats {
+    position: absolute;
+    height: 15vh;
+    width: 30vh;
+    top: 42%;
+    left: 3%;
 }
+
+.opSiegePower,
+.opRangedPower,
+.opCombatPower,
 .combatPower,
 .rangedPower,
 .siegePower {
-    font-size: 130%;
+    position: absolute;
+    left: 25%;
     color: #ffff87;
+    font-size: 130%;
 }
-
-.opTotalPower {
-    position: fixed;
-    left: 270px;
-    top: 33%;
-    font-size: 200%;
+.opCombatPower,
+.opRangedPower,
+.opSiegePower {
     color: #aaefff;
 }
-.totalPower {
-    position: fixed;
-    left: 270px;
-    bottom: 33%;
-    font-size: 200%;
-    color: #ffff87;
+.opSiegePower {
+    top: 7%;
+}
+.opRangedPower {
+    top: 23.8%;
+}
+.opCombatPower {
+    top: 39.8%;
+}
+.combatPower {
+    bottom: 39.8%;
+}
+.rangedPower {
+    bottom: 23.8%;
+}
+.siegePower {
+    bottom: 7%;
 }
 
-.leaderInstructions,
-.instructions {
-    position: fixed;
+.opSiegeLane,
+.opRangedLane,
+.opCombatLane,
+.combatLane,
+.rangedLane,
+.siegeLane {
+    position: absolute;
+    left: 36%;
+    height: 13vh;
+    width: 100vh;
+}
+.opSiegeLane {
+    top: 1.2%;
+}
+.opRangedLane {
+    top: 18%;
+}
+.opCombatLane {
+    top: 34%;
+}
+.combatLane {
+    bottom: 34%;
+}
+.rangedLane {
+    bottom: 18%;
+}
+.siegeLane {
+    bottom: 1.2%;
+}
+
+.opSiegeHorn,
+.opRangedHorn,
+.opCombatHorn,
+.combatHorn,
+.rangedHorn,
+.siegeHorn {
+    position:absolute;
+    height: 14vh;
+    width: 12vh;
+    left: 28.75%;
+}
+.opSiegeHorn {
+    top: 1.2%;
+}
+.opRangedHorn {
+    top: 18%;
+}
+.opCombatHorn {
+    top: 34%;
+}
+.combatHorn {
+    bottom: 34%;
+}
+.rangedHorn {
+    bottom: 18%;
+}
+.siegeHorn {
+    bottom: 1.2%;
+}
+
+.totalPower,
+.opTotalPower {
+    position: absolute;
+    left: 17%;
+    bottom: 33%;
+    color: #ffff87;
+    font-size: 200%;
+}
+.opTotalPower {
+    top: 33%;
+    color: #aaefff;
+}
+
+.instructions,
+.leaderInstructions {
+    position: absolute;
     font-size: 110%;
     color: gold;
-    bottom: 4%;
+    bottom: 2%;
     left: 4%;
 }
-
 .leaderInstructions {
-    bottom: 8%;
+    bottom: 6%;
 }
 
 .deckSize {
@@ -390,8 +337,8 @@ p {
 .card {
     float: left;
     display: none;
-    height: 180px;
-    width: 108px;
+    height: 20vh;
+    width: 12vh;
     transition: transform 300ms ease 0s;
     border-radius: 5px;
 }
@@ -410,12 +357,12 @@ p {
 }
 
 .cardSelected {
-    position: fixed;
+    position: absolute;
     display: none;
-    top: 5%;
-    left: 50%;
-    height: 180px;
-    width: 108px;
+    top: 7%;
+    left: 47.5%;
+    height: 18vh;
+    width: 10.8vh;
     border-radius: 5px;
 }
 
@@ -424,19 +371,14 @@ p {
     border: solid gold;
 }
 
-/* CARDS IN PLAY */
-
 .cardSmall {
     float: left;
-    /* TODO Margin needs to change depending on amount of cards */
-    margin-left: 5px;
-    height: 105px;
-    width: 63px;
+    height: 13vh;
+    width: 7.2vh;
 }
 
 /* one item */
 cardSmall:first-child:nth-last-child(1) {
-/* -or- li:only-child { */
     margin-left: 90px;
 }
 
@@ -457,12 +399,3 @@ cardSmall:first-child:nth-last-child(4),
 cardSmall:first-child:nth-last-child(4) ~ cardSmall {
     margin-left: 20px;
 }
-
-
-
-
-
-
-
-
-

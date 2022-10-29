@@ -70,8 +70,9 @@ span{
     position: absolute;
     top: 20%;
     left: 50%;
+    width: 80%;
     transform: translate(-50%,-50%);
-    letter-spacing: 5px;
+    letter-spacing: 4px;
     background-image: linear-gradient(
      to right,
      #292346 0,
@@ -123,8 +124,8 @@ button{
 /* ------ CARDS ------ */
 
 .leaders {
-    margin: 25px 30%;
-    height: 400px;
+    margin: 25px 27%;
+    height: 30vh;
     display: flex;
     justify-content: space-between;
 }

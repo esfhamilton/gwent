@@ -1,7 +1,5 @@
 "use strict";
 
-const e = require("express");
-
 const socket = io();
 
 // Get SID and faction ID from URL
@@ -78,7 +76,7 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
 let opponentHandSize = initDraw;
 // Sets up mulligan phase after both players have created their decks
 function setup() {
-    const opInitDraw = opLeader === "STLeader3" ? initDraw+1 : initDraw;
+    const opInitDraw = opponentLeader === "STLeader3" ? initDraw+1 : initDraw;
     document.addEventListener("keydown",keyPressed);
     document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
     document.getElementById('topMsg2').style = "display: fixed;";
