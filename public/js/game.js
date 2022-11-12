@@ -73,26 +73,27 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
     }
 });
 
-let opponentHandSize = initDraw;
+let opponentHandSize = baseDrawCount;
 // Sets up mulligan phase after both players have created their decks
 function setup() {
-    const opInitDraw = opponentLeader === "STLeader3" ? initDraw+1 : initDraw;
+    const drawCount = (leader === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
+    const opDrawCount = (opponentLeader === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
     document.addEventListener("keydown",keyPressed);
     document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
     document.getElementById('topMsg2').style = "display: fixed;";
     document.getElementById('pStats').style = "display: fixed;";
     document.getElementById('oStats').style = "display: fixed;";
-    document.getElementById('pDeckSize').innerHTML = deck.length-initDraw;
-    document.getElementById('oDeckSize').innerHTML = opponentDeck.length-opInitDraw;
+    document.getElementById('pDeckSize').innerHTML = deck.length-baseDrawCount;
+    document.getElementById('oDeckSize').innerHTML = opponentDeck.length-opDrawCount;
     
     powerIds.forEach((id) => {
         document.getElementById(id).innerHTML = 0;
     });
     
-    document.getElementById('stats').innerHTML = `${initDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
-    document.getElementById('opponentStats').innerHTML = `${opInitDraw} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    document.getElementById('stats').innerHTML = `${drawCount} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
+    document.getElementById('opponentStats').innerHTML = `${opDrawCount} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;
     
-    for (let i=0; i<initDraw; i++){
+    for (let i=0; i<baseDrawCount; i++){
         drawCardFromDeck('replaceCard(this)');
     }
     setCardStyle('pLeader', leader);
@@ -128,7 +129,7 @@ function drawCardFromOpDiscard(card){
     document.getElementById('highlightedCards').innerHTML = "";
     handHiddenFlag = false;
     holdSwitchTurn = false;
-    document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+    document.getElementById('hand').style = "display: fixed; bottom: 1%;";
     document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
@@ -176,13 +177,11 @@ let cardElements;
 function handSelected() {
     handChosen = true;
     document.getElementById('topMsg2').style = "display: none;";
-    document.getElementById('hand').style = "bottom: 0%;";
+    document.getElementById('hand').style = "bottom: 1%;";
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
     
-    if(leader === "STLeader3"){
-        drawCardFromDeck("");
-    }
+    if(leader === "STLeader3") drawCardFromDeck("");
 
     // Remove onclick functionality until opponent has reselected their cards
     cardElements = document.getElementsByClassName('card');
@@ -361,7 +360,7 @@ async function placeCard(boardPos) {
         medicPosIDs.push(boardPosId);    
         medicFlag = false;
         revivedFlag = true;
-        document.getElementById('hand').style = "display: fixed; bottom: 0%;";  
+        document.getElementById('hand').style = "display: fixed; bottom: 1%;";  
         document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
         document.getElementById('pDisc').setAttribute("onclick", "showDiscard(this.id)");
@@ -406,10 +405,8 @@ async function placeCard(boardPos) {
     }
 
     if(weatherCards.includes(selectedCard)){
-        if(!weatherEffects.includes(selectedCard)){
-            weatherEffects.push(selectedCard);
-            putCardOnBoard(boardPosId);
-        }
+        putCardOnBoard(boardPosId);
+        weatherEffects.push(selectedCard);
         cardsPlaced([selectedCard], [boardPosId]);
         return;
     }
@@ -514,11 +511,12 @@ function cardsPlaced(cards, positions){
 }
 
 function leaderHorn(row){
-    let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
-    if(!hornInRow.includes(row)){
+    let hornId = row.slice(0,-4).concat("Horn");
+    let hornPlaced = $('.'+hornId).find('.cardSmall')[0];
+    if(!hornPlaced){
         doubledRows.push(row)
         selectedCard = commandersHorn;
-        placeCard(row);
+        putCardOnBoard(hornId);
     }
 }
 
@@ -534,14 +532,14 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
                 opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
                 selectedCard = impenetrableFog;
+                putCardOnBoard("weatherStats");
                 weatherEffects.push(impenetrableFog);
-                putCardOnBoard("weatherStats")
             }
             else if(!useOpponentLeaderAbility && deck.includes(impenetrableFog)){
                 deck.splice(deck.indexOf(impenetrableFog),1);
                 selectedCard = impenetrableFog;
+                putCardOnBoard("weatherStats");
                 weatherEffects.push(impenetrableFog);
-                putCardOnBoard("weatherStats")
             }
             break;
         case "NRLeader3": // Clears weather effects
@@ -556,19 +554,18 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             }
             break;
         
-
         case "NGLeader2": // Plays torrential rain from deck
             if(useOpponentLeaderAbility && opponentDeck.includes(torrentialRain)){
                 opponentDeck.splice(opponentDeck.indexOf(torrentialRain),1);
                 selectedCard = torrentialRain;
+                putCardOnBoard("weatherStats");
                 weatherEffects.push(torrentialRain);
-                putCardOnBoard("weatherStats")
             }
             else if(!useOpponentLeaderAbility && deck.includes(torrentialRain)){
                 deck.splice(deck.indexOf(torrentialRain),1);
                 selectedCard = torrentialRain;
+                putCardOnBoard("weatherStats");
                 weatherEffects.push(torrentialRain);
-                putCardOnBoard("weatherStats")
             }
             break;
         case "NGLeader3": // Look at 3 random cards from opponent's hand
@@ -601,7 +598,6 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             }
             break;
 
-
         case "STLeader1": // Doubles ranged lane strength    
             useOpponentLeaderAbility ? leaderHorn('opRangedLane') : leaderHorn('rangedLane');
             break;
@@ -609,14 +605,14 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             if(useOpponentLeaderAbility && opponentDeck.includes(bitingFrost)){
                 opponentDeck.splice(opponentDeck.indexOf(bitingFrost),1);
                 selectedCard = bitingFrost;
+                putCardOnBoard("weatherStats");
                 weatherEffects.push(bitingFrost);
-                putCardOnBoard("weatherStats")
             }
             else if(!useOpponentLeaderAbility && deck.includes(bitingFrost)){
                 deck.splice(deck.indexOf(bitingFrost),1);
                 selectedCard = bitingFrost;
-                weatherEffects.push(torrentialRain);
-                putCardOnBoard("weatherStats")
+                putCardOnBoard("weatherStats");
+                weatherEffects.push(bitingFrost);
             }
             break; 
         case "STLeader4": // Destroy enemies strongest combat unit(s) if opCombatPower >= 10
@@ -697,7 +693,7 @@ async function scorch(targetRows = []){
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             let cardId = $('.'+row).find('.cardSmall')[i].id;
-            let basePower = getBasePower(cardId);
+            let basePower = getBasePower(cardId, row);
             if(!heroes.includes(cardId)){
                 let cardPow = basePower * (tightBondMods[row][cardId] ?? 1 ) + moraleRowCount[row];
                 if(hornInRow !== undefined || dandelion === cardId) cardPow *= 2;
@@ -729,7 +725,7 @@ async function scorch(targetRows = []){
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             let cardId = uniqueCardIdList[i];
-            let basePower = getBasePower(cardId);
+            let basePower = getBasePower(cardId, row);
             if(strongestCards[row] !== undefined){
                 if(!strongestCards[row].includes(cardId)){
                     continue;
@@ -1190,20 +1186,20 @@ function updatePowerValues() {
         let cardsInRow = $('.'+row).find('.cardSmall').length;
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
-            let cardID = $('.'+row).find('.cardSmall')[i].id;
-            let basePower = getBasePower(cardID);
-            if(!heroes.includes(cardID) && (hornInRow !== undefined || doubledRows.includes(row))){
-                powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);
+            let cardId = $('.'+row).find('.cardSmall')[i].id;
+            let basePower = getBasePower(cardId, row);
+            if(!heroes.includes(cardId) && (hornInRow !== undefined || doubledRows.includes(row))){
+                powerLevels[powerStr] += basePower * (tightBondMods[row][cardId] ?? 1);
 
-                if(moraleBoosters.includes(cardID)) powerLevels[powerStr] += boostableCards[rowIndex];
-                if(dandelion === cardID && hornInRow === undefined) powerLevels[powerStr] -= basePower;
+                if(moraleBoosters.includes(cardId)) powerLevels[powerStr] += boostableCards[rowIndex];
+                if(dandelion === cardId && hornInRow === undefined) powerLevels[powerStr] -= basePower;
             }
             
-            if(moraleBoosters.includes(cardID)){ 
+            if(moraleBoosters.includes(cardId)){ 
                 powerLevels[powerStr] += boostableCards[rowIndex];
             }
 
-            powerLevels[powerStr] += basePower * (tightBondMods[row][cardID] ?? 1);    
+            powerLevels[powerStr] += basePower * (tightBondMods[row][cardId] ?? 1);    
         }
         
         // Display power value for each row
@@ -1221,14 +1217,15 @@ function updatePowerValues() {
 }
 
 let weatherEffects = [];
-function getBasePower(cardID){
-    if (combatCards.concat(combatSpies).includes(cardID) && weatherEffects.includes(bitingFrost) && !heroes.includes(cardID)) return 1;
-    else if (rangedCards.includes(cardID) && weatherEffects.includes(impenetrableFog) && !heroes.includes(cardID)) return 1;
-    else if (siegeCards.concat(siegeSpies).includes(cardID) && weatherEffects.includes(torrentialRain) && !heroes.includes(cardID)) return 1;
-    else return cardPowers[cardID];
+function getBasePower(cardId, row){
+    if (row.toUpperCase().includes('COMBATLANE') && weatherEffects.includes(bitingFrost) && !heroes.includes(cardId)) return 1;
+    else if (row.toUpperCase().includes('RANGEDLANE') && weatherEffects.includes(impenetrableFog) && !heroes.includes(cardId)) return 1;
+    else if (row.toUpperCase().includes('SIEGELANE') && weatherEffects.includes(torrentialRain) && !heroes.includes(cardId)) return 1;
+    else return cardPowers[cardId];
 }
 
 function getLeaderInstructionText(){
+    if(leader === "STLeader3" || leader === "NGLeader1") return "";
     return leaderAbilityUsed ? "" : leaderInstruction;
 }
 
@@ -1243,7 +1240,7 @@ function keyPressed(event) {
         // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
         if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag && !highlightedCardsFlag){
             if (handHiddenFlag){
-                document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+                document.getElementById('hand').style = "display: fixed; bottom: 1%;";
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
                 document.getElementById('instructions').innerHTML = instructionTextHide;
                 handHiddenFlag = false;
@@ -1282,7 +1279,7 @@ function keyPressed(event) {
             if(holdSwitchTurn){
                 handHiddenFlag = false;
                 holdSwitchTurn = false;
-                document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+                document.getElementById('hand').style = "display: fixed; bottom: 1%;";
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
                 document.getElementById('instructions').innerHTML = instructionTextHide;
                 socket.emit('switchTurn', SID, [], [], hand.length, true);
@@ -1293,7 +1290,7 @@ function keyPressed(event) {
         if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
             if(opponentLeader === "NGLeader1") document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action";
             
-            if(leader !== "NGLeader1" && opponentLeader !== "NGLeader1"){
+            if(leader !== "NGLeader1" && leader !== "STLeader3" && opponentLeader !== "NGLeader1"){
                 useLeaderAbility();
                 leaderAbilityUsed = true;
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
@@ -1329,7 +1326,7 @@ function cancelCardSelection() {
         });
     
         // Show hand and instructions again
-        document.getElementById('hand').style = "display: fixed; bottom: 0%;";
+        document.getElementById('hand').style = "display: fixed; bottom: 1%;";
         document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
 }
