@@ -516,7 +516,7 @@ const cardPowers = {neutral1:0,
                 MO39:1
             };
 
-const initDraw = 10;
+const baseDrawCount = 10;
 const combatCards = ["neutral8", "neutral9", "neutral11", "neutral13", "neutral14", "neutral15", "neutral16", "neutral17", 
                      "NR1", "NR2", "NR3", "NR12", "NR13", "NR22", "NR23", "NR25", "NR26", "NR27", 
                      "NG1", "NG2", "NG12", "NG16", "NG18", "NG24", "NG27", "NG28", 
@@ -530,11 +530,12 @@ const rangedCards = ["neutral10", "NR4", "NR6", "NR14", "NR15", "NR17", "NR20", 
                      "ST1", "ST2", "ST4", "ST5", "ST7", "ST8", "ST9", "ST10", "ST11", "ST12", "ST13", "ST17", "ST18", "ST24",
                      "ST25", "ST26", "ST30", "ST31", "ST32", "ST33", "ST34", "ST35", "ST36", "ST37",
                      "MO3", "MO4", "MO18", "MO27", "MO28", "MO29", "MO30", "MO31", "MO33"];
-const siegeCards = ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28", 
-                    "NG3", "NG7", "NG13", "NG15", "NG22", "NG30",
-                    "MO5", "MO7", "MO8", "MO17"];
+const siegeCards =  ["NR5", "NR7", "NR8", "NR9", "NR10", "NR11", "NR18", "NR28", 
+                     "NG3", "NG7", "NG13", "NG15", "NG22", "NG30",
+                     "MO5", "MO7", "MO8", "MO17"];
 const combatSpies = ["neutral12", "NR16", "NR19", "NG8", "NG9", "NG20"];
 const siegeSpies = ["NR24"];
+const unitCards = combatCards.concat(rangedCards).concat(siegeCards).concat(combatSpies).concat(siegeSpies);
 const heroes = ["neutral1", "neutral3", "neutral8", "neutral9", "neutral10", "neutral11", "neutral12", 
                 "NR1", "NR2", "NR3", "NR4",
                 "NG1", "NG2", "NG3", "NG4",

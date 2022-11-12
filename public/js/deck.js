@@ -7,6 +7,8 @@ const {SID, faction} = Qs.parse(location.search, {
 
 socket.emit('rejoinRequest', SID);
 
+let unitCardsPicked = 0;
+
 function createLeaderCard(i) {
     let leaderCard = document.createElement('div');
     leaderCard.className = "leaderCard";
@@ -123,6 +125,10 @@ function addToDeck(id) {
     
     setCardStyle(deckID,id);
     document.getElementById(addedID).innerHTML = "x"+cardsAdded[id];
+    if(unitCards.includes(id)) {
+        unitCardsPicked += 1;
+        document.getElementById('unitCardCount').innerText = `Unit Cards: ${unitCardsPicked}/22`
+    }
 }
 
 function removeFromDeck(id) {
@@ -142,6 +148,11 @@ function removeFromDeck(id) {
     
     setCardStyle(id,id);
     document.getElementById(availabilityID).innerHTML = "x"+cardsAvailable[id];
+    
+    if(unitCards.includes(id)) {
+        unitCardsPicked -= 1;
+        document.getElementById('unitCardCount').innerText = `Unit Cards: ${unitCardsPicked}/22`
+    }
 }
 
 function submit() {
@@ -149,8 +160,7 @@ function submit() {
         document.getElementById('info').innerHTML = "You need to select a leader first.";
     }
     else {
-        // TODO - Add check for total unit cards instead of all cards
-        if (deck.length<23) {
+        if (unitCardsPicked < 22) {
             document.getElementById('info').innerHTML = "Your deck is weak. Add at least 22 unit cards before proceeding.";
         }
         else {
@@ -163,3 +173,19 @@ function submit() {
 socket.on('playerAssignment', (PID) => {
     location.replace(`http://${env}/game.html?SID=${SID}&player=${PID}`);
 });
+
+var stickyContainer = $('.stickyPlaceholder');
+var origOffsetY = stickyContainer.offset().top;
+
+function onScroll() {
+    if(window.scrollY >= origOffsetY ){
+        stickyContainer.removeClass('stickyPlaceholder')
+        stickyContainer.addClass('sticky') 
+    }
+    else{
+        stickyContainer.removeClass('sticky');
+        stickyContainer.addClass('stickyPlaceholder')
+    }
+}
+
+$(document).on('scroll', onScroll);

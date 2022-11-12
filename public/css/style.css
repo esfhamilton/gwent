@@ -51,14 +51,6 @@ a {
     color: #5300f5;
 }
 
-.info {
-    text-align: center; 
-    font-size: 150%; 
-    margin-top: 15px; 
-    margin-left: 20%; 
-    margin-right: 20%;
-}
-
 footer {
     position:absolute;
     bottom:0;
@@ -87,9 +79,29 @@ span{
     -webkit-background-clip:text;
  }
 
- .indexOptions{
-    margin-top: 15%;
- }
+ .info {
+    text-align: center; 
+    font-size: 130%; 
+    margin: 4% 20%; 
+}
+
+.stickyPlaceholder {
+    z-index: 1;
+}
+
+.sticky {
+    position: fixed;
+    top: 0%;
+    width: 100%;
+    text-align: center;
+    background-color: #110819; 
+    z-index: 1;
+}
+
+.unitCardCount {
+    font-size: 170%;
+    margin: 2px auto;
+}
 
 /* ------ BUTTONS ------ */
 
