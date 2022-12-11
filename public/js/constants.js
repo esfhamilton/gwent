@@ -557,8 +557,6 @@ const musterCategories = {
 const arachasBehemoth = "MO8";
 const musterIds = [].concat(...Object.values(musterCategories));
 const moraleBoosters = ["NR28", "ST3", "ST5", "MO4"];
-const horns = ["neutral2", "neutral17"];
-const weatherCards = ["neutral4", "neutral5", "neutral6"];
 const decoy = "neutral1";
 const commandersHorn = "neutral2";
 const scorchId = "neutral3";
@@ -568,6 +566,8 @@ const torrentialRain = "neutral6";
 const clearWeather = "neutral7";
 const villentretenmerth = "neutral13";
 const dandelion = "neutral17";
+const horns = [commandersHorn, dandelion];
+const weatherCards = [bitingFrost, impenetrableFog, torrentialRain];
 
 const rowIds = ["combatLane", "rangedLane", "siegeLane", "opCombatLane", "opRangedLane", "opSiegeLane"];
 const hornIds = ['combatHorn','rangedHorn','siegeHorn', "opCombatHorn", "opRangedHorn", "opSiegeHorn"];

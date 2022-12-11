@@ -120,28 +120,27 @@ function drawCardFromDeck(attribute) {
     }
 }
 
-function drawCardFromOpDiscard(card){
+function drawCardFromDiscard(card, drawFromOpDisc){
     let cardId = card.id;
     createCard(cardId, 'hand', "selectCard(this)");
     hand.push(cardId);
-    removeCardFromDiscard(cardId, "opDiscPile");
-    document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
+    drawFromOpDisc ? removeCardFromDiscard(cardId, "opDiscPile") : removeCardFromDiscard(cardId, "pDiscPile");
+    document.getElementById('topMsg').innerHTML = myTurn === false ? "Opponent's Turn" : "Your Turn";
     document.getElementById('highlightedCards').innerHTML = "";
     handHiddenFlag = false;
-    holdSwitchTurn = false;
     document.getElementById('hand').style = "display: fixed; bottom: 1%;";
     document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
-    socket.emit('drawFromOpDisc', SID , player);
+    socket.emit('drawFromDisc', SID , player, drawFromOpDisc);
     socket.emit('switchTurn', SID, [], [], hand.length, true);
 }
 
-socket.on('syncDrawFromOpDisc', (opPlayer, cardId) => {
-    if(player === opPlayer){
-        removeCardFromDiscard(cardId, "pDiscPile")
+socket.on('syncDrawFromDisc', (opPlayer, cardId, drawFromOpDisc) => {
+    if(player === opPlayer && drawFromOpDisc){
+        drawFromOpDisc ? removeCardFromDiscard(cardId, "pDiscPile") : removeCardFromDiscard(cardId, "opDiscPile");
     }
-})
+});
 
 // Counter for how many cards have been replaced
 let replaceCount = 0;
@@ -520,7 +519,44 @@ function leaderHorn(row){
     }
 }
 
-let holdSwitchTurn = false;
+function playLeaderWeather(cardId, spliceDeck = false, switchTurn = false){
+    if(spliceDeck) deck.splice(deck.indexOf(cardId),1);
+    selectedCard = cardId;
+    putCardOnBoard("weatherStats");
+    weatherEffects.push(cardId);
+
+    document.getElementById('highlightedCards').innerHTML = "";
+    handHiddenFlag = false;
+    document.getElementById('hand').style = "display: fixed; bottom: 1%;";
+    document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+    document.getElementById('instructions').innerHTML = instructionTextHide;
+    
+    if(switchTurn) socket.emit('switchTurn', SID, [cardId], ['weatherStats'], hand.length, false);
+}
+
+function playWeatherCardFromDeck(){
+    highlightedCardsFlag = true;
+    holdSwitchTurn = true;
+    document.getElementById('hand').style = "display: none;";           
+    document.getElementById('instructions').innerHTML = '';
+    
+    let weatherCardsInDeck = [];
+    weatherCards.forEach((cardId) => {
+        if(deck.includes(cardId)) weatherCardsInDeck.push(cardId);
+    });
+    
+    if(weatherCardsInDeck.length > 0){
+        document.getElementById('topMsg').innerHTML = "Choose a card to play";
+        weatherCardsInDeck.forEach((cardId) => {
+            createCard(cardId, 'highlightedCards', 'playLeaderWeather(this.id, true, true)');
+        });
+    }
+    else{
+        document.getElementById('topMsg').innerHTML = "No weather cards in deck - Press Esc to continue";
+    }
+}
+
+let holdSwitchTurn;
 async function useLeaderAbility(useOpponentLeaderAbility=false){
     holdSwitchTurn = false;
     let leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
@@ -530,17 +566,13 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         case "NRLeader2": // Plays impenetrable fog from deck
             if(useOpponentLeaderAbility && opponentDeck.includes(impenetrableFog)){
-                opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1);
-                selectedCard = impenetrableFog;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(impenetrableFog);
+                opponentDeck.splice(opponentDeck.indexOf(impenetrableFog),1)
+                playLeaderWeather(impenetrableFog);
             }
             else if(!useOpponentLeaderAbility && deck.includes(impenetrableFog)){
-                deck.splice(deck.indexOf(impenetrableFog),1);
-                selectedCard = impenetrableFog;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(impenetrableFog);
+                playLeaderWeather(impenetrableFog, true);
             }
+            
             break;
         case "NRLeader3": // Clears weather effects
             resetWeather();
@@ -556,16 +588,11 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
         
         case "NGLeader2": // Plays torrential rain from deck
             if(useOpponentLeaderAbility && opponentDeck.includes(torrentialRain)){
-                opponentDeck.splice(opponentDeck.indexOf(torrentialRain),1);
-                selectedCard = torrentialRain;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(torrentialRain);
+                opponentDeck.splice(opponentDeck.indexOf(torrentialRain),1)
+                playLeaderWeather(torrentialRain);
             }
             else if(!useOpponentLeaderAbility && deck.includes(torrentialRain)){
-                deck.splice(deck.indexOf(torrentialRain),1);
-                selectedCard = torrentialRain;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(torrentialRain);
+                playLeaderWeather(torrentialRain, true);
             }
             break;
         case "NGLeader3": // Look at 3 random cards from opponent's hand
@@ -586,10 +613,10 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
                 document.getElementById('instructions').innerHTML = instructionTextShow;
                 
                 let opDiscPile = discardPiles["opDiscPile"];
-                if(opDiscPile.length >0){
+                if(opDiscPile.length > 0){
                     document.getElementById('topMsg').innerHTML = "Choose a card to draw";
                     for (let i=0; i<opDiscPile.length; i++){
-                        createCard(opDiscPile[i], 'highlightedCards', 'drawCardFromOpDiscard(this)');
+                        createCard(opDiscPile[i], 'highlightedCards', 'drawCardFromDiscard(this, true)');
                     }
                 }
                 else{
@@ -603,16 +630,11 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         case "STLeader2": // Play biting frost card from deck    
             if(useOpponentLeaderAbility && opponentDeck.includes(bitingFrost)){
-                opponentDeck.splice(opponentDeck.indexOf(bitingFrost),1);
-                selectedCard = bitingFrost;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(bitingFrost);
+                opponentDeck.splice(opponentDeck.indexOf(bitingFrost),1)
+                playLeaderWeather(bitingFrost);
             }
             else if(!useOpponentLeaderAbility && deck.includes(bitingFrost)){
-                deck.splice(deck.indexOf(bitingFrost),1);
-                selectedCard = bitingFrost;
-                putCardOnBoard("weatherStats");
-                weatherEffects.push(bitingFrost);
+                playLeaderWeather(bitingFrost, true);
             }
             break; 
         case "STLeader4": // Destroy enemies strongest combat unit(s) if opCombatPower >= 10
@@ -625,16 +647,47 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         
         case "MOLeader1": // Draw card from discard
-            // TODO
+            if(!useOpponentLeaderAbility){
+                highlightedCardsFlag = true;
+                holdSwitchTurn = true;
+                document.getElementById('hand').style = "display: none;";           
+                document.getElementById('instructions').innerHTML = instructionTextShow;
+                
+                let discPile = discardPiles["pDiscPile"];
+                if(discPile.length > 0){
+                    document.getElementById('topMsg').innerHTML = "Choose a card to draw";
+                    for (let i=0; i<discPile.length; i++){
+                        createCard(discPile[i], 'highlightedCards', 'drawCardFromDiscard(this, false)');
+                    }
+                }
+                else{
+                    document.getElementById('topMsg').innerHTML = "Discard is empty - Press Esc to continue";
+                }
+            }
             break;
         case "MOLeader2": // Double combat lane strength
             useOpponentLeaderAbility ? leaderHorn('opCombatLane') : leaderHorn('combatLane');
             break;
         case "MOLeader3": // Pick any weather card from deck and play it instantly
-            // TODO
+            if(!useOpponentLeaderAbility)
+            {
+                playWeatherCardFromDeck();
+            }
             break;
         case "MOLeader4": // Discard 2 cards and draw 1 card from deck
             // TODO
+             /*
+                If discard is empty OR hand.length < 2 skip and pass turn
+                HighlightedCardsFlag = true
+                Show hand in centre
+                topMsg text = Choose 2 cards to discard 0/2
+                When 2 is hit replace hand with discard
+            
+            if(!useOpponentLeaderAbility)
+            {
+
+            }
+           */
             break;
         
     }
@@ -1273,17 +1326,13 @@ function keyPressed(event) {
         // Esc pressed AND cards highlighted AND card is not being revived
         if (event.keyCode === 27 && highlightedCardsFlag && !medicFlag){
             highlightedCardsFlag = false;
+            handHiddenFlag = false;
             document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
             document.getElementById('highlightedCards').innerHTML = "";
-
-            if(holdSwitchTurn){
-                handHiddenFlag = false;
-                holdSwitchTurn = false;
-                document.getElementById('hand').style = "display: fixed; bottom: 1%;";
-                document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
-                document.getElementById('instructions').innerHTML = instructionTextHide;
-                socket.emit('switchTurn', SID, [], [], hand.length, true);
-            }
+            document.getElementById('hand').style = "display: fixed; bottom: 1%;";
+            document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+            document.getElementById('instructions').innerHTML = instructionTextHide;
+            socket.emit('switchTurn', SID, [], [], hand.length, true);
         }
 
         // X Pressed

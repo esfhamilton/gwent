@@ -164,7 +164,6 @@ function submit() {
             document.getElementById('info').innerHTML = "Your deck is weak. Add at least 22 unit cards before proceeding.";
         }
         else {
-            // Send player's deck, leader and SID info to server
             socket.emit('playerDeck',SID,leader,deck,faction);
         }
     }
