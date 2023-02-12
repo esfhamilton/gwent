@@ -17,7 +17,7 @@
     "socket.io": "^2.4.0"
   },
   "devDependencies": {
-    "got": "^11.8.5",
+    "got": "^12.5.3",
     "tape": "^4.7.0"
   },
   "repository": {
