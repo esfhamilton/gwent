@@ -556,6 +556,26 @@ function playWeatherCardFromDeck(){
     }
 }
 
+function discard2Draw1(){
+            /*
+                TODO
+                If discard is empty OR hand.length < 2 skip and pass turn X
+                HighlightedCardsFlag = true X
+                Show hand in centre 
+                topMsg text = Choose 2 cards to discard 0/2 
+                When 2 is hit replace hand with discard
+            */
+    holdSwitchTurn = true;
+    highlightedCardsFlag = true;
+    if(discardPiles["pDiscPile"].length === 0 || hand.length < 2){
+        document.getElementById('topMsg').innerHTML = "Not enough cards available for leader ability - Press Esc to continue";
+    }
+
+    hand.forEach((cardId) => {
+        createCard(cardId, 'highlightedCards', 'sacrifice(this.id)');
+    });
+}
+
 let holdSwitchTurn;
 async function useLeaderAbility(useOpponentLeaderAbility=false){
     holdSwitchTurn = false;
@@ -676,18 +696,11 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         case "MOLeader4": // Discard 2 cards and draw 1 card from deck
             // TODO
-             /*
-                If discard is empty OR hand.length < 2 skip and pass turn
-                HighlightedCardsFlag = true
-                Show hand in centre
-                topMsg text = Choose 2 cards to discard 0/2
-                When 2 is hit replace hand with discard
-            
-            if(!useOpponentLeaderAbility)
-            {
-
-            }
-           */
+            // if(!useOpponentLeaderAbility)
+            // {
+            //     holdSwitchTurn = true;
+            //     sacrificeDraw();
+            // }
             break;
         
     }
