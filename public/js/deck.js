@@ -170,7 +170,7 @@ function submit() {
 }
 
 socket.on('playerAssignment', (PID) => {
-    location.replace(`http://${env}/game.html?SID=${SID}&player=${PID}`);
+    location.replace(`https://${env}/game.html?SID=${SID}&player=${PID}`);
 });
 
 var stickyContainer = $('.stickyPlaceholder');

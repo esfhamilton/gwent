@@ -578,7 +578,7 @@ function discard2Draw1(){
 
 let holdSwitchTurn;
 async function useLeaderAbility(useOpponentLeaderAbility=false){
-    holdSwitchTurn = false;
+     holdSwitchTurn = false;
     let leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
     switch(leaderUsed){
         case "NRLeader1": // Doubles siege lane strength 
@@ -1345,7 +1345,6 @@ function keyPressed(event) {
             document.getElementById('hand').style = "display: fixed; bottom: 1%;";
             document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             document.getElementById('instructions').innerHTML = instructionTextHide;
-            socket.emit('switchTurn', SID, [], [], hand.length, true);
         }
 
         // X Pressed
