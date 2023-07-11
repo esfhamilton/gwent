@@ -17,15 +17,15 @@ socket.on('full', (SID) => {
 });
 
 // No deck error
-socket.on('noDeck', (SID) => {
+socket.on('noDeck', () => {
     document.getElementById('topMsg').innerHTML = `Error: No Deck has been Built.`;
 });
 
-let faction, leader, deck, index, firstTurn;
+let factionId, leaderId, deck, index, firstTurn;
 let hand = [];
 socket.on('playerAssigned', (FID, leaderID, cards) => {
-    faction = FID;
-    leader = leaderID;
+    factionId = FID;
+    leaderId = leaderID;
     deck = cards;
 });
 
@@ -58,14 +58,14 @@ function factionPerkST() {
     }
 }
 
-let opponentFaction, opponentLeader;
+let opFactionId, opLeaderId;
 let opponentDeck = [];
 socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
     if(opponentDeck.length === 0){
-        opponentFaction = opponentFID;
-        opponentLeader = opponentLID;
+        opFactionId = opponentFID;
+        opLeaderId = opponentLID;
         opponentDeck = opDeck;
-        if(faction === "ST" && opponentFaction !== "ST") factionPerkST();
+        if(factionId === "ST" && opFactionId !== "ST") factionPerkST();
         else setup();
     }
     else{
@@ -76,8 +76,11 @@ socket.on('opponentDeck', (opponentFID, opponentLID, opDeck) => {
 let opponentHandSize = baseDrawCount;
 // Sets up mulligan phase after both players have created their decks
 function setup() {
-    const drawCount = (leader === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
-    const opDrawCount = (opponentLeader === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
+    const drawCount = (leaderId === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
+    const opDrawCount = (opLeaderId === "STLeader3") ? baseDrawCount+1 : baseDrawCount;
+
+    grayscaleUsedLeaders();
+
     document.addEventListener("keydown",keyPressed);
     document.getElementById('topMsg').innerHTML = "Choose a card to redraw. 0/2";
     document.getElementById('topMsg2').style = "display: fixed;";
@@ -96,11 +99,35 @@ function setup() {
     for (let i=0; i<baseDrawCount; i++){
         drawCardFromDeck('replaceCard(this)');
     }
-    setCardStyle('pLeader', leader);
-    setCardStyle('pDeck', faction);
-    setCardStyle('oLeader', opponentLeader);
-    setCardStyle('oDeck', opponentFaction);
+    document.getElementById('pLeaderContainer').setAttribute('onclick', "leaderSelected('"+leaderId+"')");
+    document.getElementById('oLeaderContainer').setAttribute('onclick', "leaderSelected('"+opLeaderId+"')");
+    setCardStyle('pLeader', leaderId);
+    setCardStyle('oLeader', opLeaderId);
+    setCardStyle('pDeck', factionId);
+    setCardStyle('oDeck', opFactionId);
 }
+
+const grayscaleUsedLeaders = () => {
+    if(leaderId === "NGLeader1" || opLeaderId === "NGLeader1"){
+        document.getElementById('pLeader').style = "filter: grayscale(90%);"
+        document.getElementById('oLeader').style = "filter: grayscale(90%);"
+    }
+    if (leaderId === "STLeader3") {
+        document.getElementById('pLeader').style = "filter: grayscale(90%);"
+    }
+    if (opLeaderId === "STLeader3"){
+        document.getElementById('oLeader').style = "filter: grayscale(90%);"
+    }
+}
+
+const leaderSelected = (leaderId) => {
+    if(handChosen && !cardSelectedFlag && !switchTurnLock && !medicFlag){
+        document.getElementById('cardDetailView').style = "display: fixed;";
+        setCardStyle('cardDetailView', leaderId);
+        document.getElementById('topMsg').innerHTML = abilityDescriptions[leaderId];
+        document.getElementById('topMsg2').innerHTML = "Press Esc to close";
+    }
+};
 
 function createCard(cardId, positionId, attribute, className = "card") {
     let card = document.createElement('div');
@@ -175,12 +202,12 @@ let cardElements;
 // Second setup for after player has confirmed their starting hand
 function handSelected() {
     handChosen = true;
-    document.getElementById('topMsg2').style = "display: none;";
+    document.getElementById('topMsg2').innerHTML = "";
     document.getElementById('hand').style = "bottom: 1%;";
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
     
-    if(leader === "STLeader3") drawCardFromDeck("");
+    if(leaderId === "STLeader3") drawCardFromDeck("");
 
     // Remove onclick functionality until opponent has reselected their cards
     cardElements = document.getElementsByClassName('card');
@@ -463,7 +490,7 @@ async function placeCard(boardPos) {
                 medicPosIDs.push(boardPosId);    
             }
             
-            highlightedCardsFlag = true;
+            switchTurnLock = true;
             revivedFlag = false;
             
             // Hide hand and instructions
@@ -494,7 +521,6 @@ async function placeCard(boardPos) {
     // If a medic has been played, emit multiple cards played to the server
     else if (revivedFlag){
         cardsPlaced(medicCards, medicPosIDs);
-
         medicCards = [];
         medicPosIDs = [];
         revivedFlag = false;
@@ -535,8 +561,7 @@ function playLeaderWeather(cardId, spliceDeck = false, switchTurn = false){
 }
 
 function playWeatherCardFromDeck(){
-    highlightedCardsFlag = true;
-    holdSwitchTurn = true;
+    switchTurnLock = true;
     document.getElementById('hand').style = "display: none;";           
     document.getElementById('instructions').innerHTML = '';
     
@@ -552,7 +577,9 @@ function playWeatherCardFromDeck(){
         });
     }
     else{
-        document.getElementById('topMsg').innerHTML = "No weather cards in deck - Press Esc to continue";
+        document.getElementById('topMsg').innerHTML = "No weather cards in deck";
+        document.getElementById('topMsg2').innerHTML = "Press Esc to continue";
+        releaseTurnLockOnEsc = true;
     }
 }
 
@@ -565,10 +592,11 @@ function discard2Draw1(){
                 topMsg text = Choose 2 cards to discard 0/2 
                 When 2 is hit replace hand with discard
             */
-    holdSwitchTurn = true;
-    highlightedCardsFlag = true;
+    switchTurnLock = true;
     if(discardPiles["pDiscPile"].length === 0 || hand.length < 2){
-        document.getElementById('topMsg').innerHTML = "Not enough cards available for leader ability - Press Esc to continue";
+        document.getElementById('topMsg').innerHTML = "Not enough cards available for leader ability";
+        document.getElementById('topMsg2').innerHTML = "Press Esc to continue";
+        releaseTurnLockOnEsc = true;
     }
 
     hand.forEach((cardId) => {
@@ -576,10 +604,15 @@ function discard2Draw1(){
     });
 }
 
-let holdSwitchTurn;
 async function useLeaderAbility(useOpponentLeaderAbility=false){
-     holdSwitchTurn = false;
-    let leaderUsed = useOpponentLeaderAbility ? opponentLeader : leader;
+    switchTurnLock = false;
+
+    if(useOpponentLeaderAbility) document.getElementById('oLeader').style = "filter: grayscale(90%);"
+    else document.getElementById('pLeader').style = "filter: grayscale(90%);"
+    setCardStyle('pLeader', leaderId);
+    setCardStyle('oLeader', opLeaderId);
+
+    let leaderUsed = useOpponentLeaderAbility ? opLeaderId : leaderId;
     switch(leaderUsed){
         case "NRLeader1": // Doubles siege lane strength 
             useOpponentLeaderAbility ? leaderHorn('opSiegeLane') : leaderHorn('siegeLane');
@@ -618,8 +651,8 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
         case "NGLeader3": // Look at 3 random cards from opponent's hand
             if(!useOpponentLeaderAbility){
                 handHiddenFlag = true;
-                holdSwitchTurn = true;
-                highlightedCardsFlag = true;
+                switchTurnLock = true;
+                releaseTurnLockOnEsc = true;
                 document.getElementById('hand').style = "display: none;";           
                 document.getElementById('instructions').innerHTML = instructionTextShow;
                 socket.emit('getOpponentHand', SID, player); 
@@ -627,8 +660,7 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             break;
         case "NGLeader4": // Draw card from opponent's discard
             if(!useOpponentLeaderAbility){
-                highlightedCardsFlag = true;
-                holdSwitchTurn = true;
+                switchTurnLock = true;
                 document.getElementById('hand').style = "display: none;";           
                 document.getElementById('instructions').innerHTML = instructionTextShow;
                 
@@ -640,7 +672,9 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
                     }
                 }
                 else{
-                    document.getElementById('topMsg').innerHTML = "Opponent's discard is empty - Press Esc to continue";
+                    document.getElementById('topMsg').innerHTML = "Opponent's discard is empty";
+                    document.getElementById('topMsg2').innerHTML = "Press Esc to continue";
+                    releaseTurnLockOnEsc = true;
                 }
             }
             break;
@@ -668,8 +702,7 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
         
         case "MOLeader1": // Draw card from discard
             if(!useOpponentLeaderAbility){
-                highlightedCardsFlag = true;
-                holdSwitchTurn = true;
+                switchTurnLock = true;
                 document.getElementById('hand').style = "display: none;";           
                 document.getElementById('instructions').innerHTML = instructionTextShow;
                 
@@ -681,7 +714,9 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
                     }
                 }
                 else{
-                    document.getElementById('topMsg').innerHTML = "Discard is empty - Press Esc to continue";
+                    document.getElementById('topMsg').innerHTML = "Discard is empty";
+                    document.getElementById('topMsg2').innerHTML = "Press Esc to continue";
+                    releaseTurnLockOnEsc = true;
                 }
             }
             break;
@@ -698,14 +733,14 @@ async function useLeaderAbility(useOpponentLeaderAbility=false){
             // TODO
             // if(!useOpponentLeaderAbility)
             // {
-            //     holdSwitchTurn = true;
+            //     switchTurnLock = true;
             //     sacrificeDraw();
             // }
             break;
         
     }
 
-    if(!useOpponentLeaderAbility && !holdSwitchTurn){
+    if(!useOpponentLeaderAbility && !switchTurnLock){
         document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
         socket.emit('switchTurn', SID, [], [], hand.length, true);
     }
@@ -725,13 +760,14 @@ socket.on('opponentHandRequested', (opPlayer) => {
 socket.on('revealOpHandToPlayer', (playerId, cardsToReveal) => {
     if(player === playerId){
         if(cardsToReveal.length > 0){
-            document.getElementById('topMsg').innerHTML = "Press Esc to Continue";
+            document.getElementById('topMsg').innerHTML = "Press Esc to continue";
             for (let i=0; i<cardsToReveal.length; i++){
                 createCard(cardsToReveal[i], 'highlightedCards', '');
             }
         }
         else{
-            document.getElementById('topMsg').innerHTML = "Opponent's hand is empty - Press Esc to Continue";
+            document.getElementById('topMsg').innerHTML = "Opponent's hand is empty";
+            document.getElementById('topMsg2').innerHTML = "Press Esc to continue";
         }
     }
 });
@@ -934,7 +970,7 @@ async function syncWithOpponent(cardArr, posArr, opHandSize, abilityUsed) {
             if(powerLevels["combatPower"] >= 10) await scorch(["combatLane"]);
         }
 
-        // Conditionals before ELSE to prevent or control card being played
+        // Conditionals before ELSE to prevent/ control card being played
         if (scorchId === cardArr[0]){
             await scorch(rowIds);
         }
@@ -1000,7 +1036,6 @@ socket.on('results', () => {
     document.getElementById('pDisc').removeAttribute("onclick");
     document.getElementById('oDisc').removeAttribute("onclick");
     document.getElementById('topMsg2').innerHTML = "Press F5 to play again";
-    document.getElementById('topMsg2').style = "display:fixed;";
     
     if (pLife == 0 && oLife == 0){
         document.getElementById('topMsg').innerHTML = "Game is a Draw!";
@@ -1014,7 +1049,7 @@ socket.on('results', () => {
 });
 
 function roundWon() {
-    if(faction==="NR") drawCardFromDeck("selectCard(this)");
+    if(factionId==="NR") drawCardFromDeck("selectCard(this)");
     document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`; 
 
     document.getElementById('oHeart'+String(oLife)).style.color = "grey";
@@ -1023,10 +1058,10 @@ function roundWon() {
 }
 
 function roundTie() {
-    if(faction === "NG" && opponentFaction !== "NG"){
+    if(factionId === "NG" && opFactionId !== "NG"){
         roundWon();
     } 
-    else if(faction !== "NG" && opponentFaction === "NG"){
+    else if(factionId !== "NG" && opFactionId === "NG"){
         roundLost();
     }
     else{
@@ -1045,7 +1080,7 @@ function roundTie() {
 }
 
 function roundLost() {
-    if(opponentFaction === "NR") {
+    if(opFactionId === "NR") {
         opponentHandSize += 1;
         document.getElementById('opponentStats').innerHTML = `${opponentHandSize} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;  
     }
@@ -1080,9 +1115,8 @@ function resetWeather(){
 
 // Show cards in the discard pile
 function showDiscard(pileID) {
-    highlightedCardsFlag = true;
     document.getElementById('highlightedCards').innerHTML = "";
-    document.getElementById('topMsg').innerHTML = "Press Esc to Cancel";
+    document.getElementById('topMsg').innerHTML = "Press Esc to close";
     
     let discPile = pileID == "oDisc" ? discardPiles["opDiscPile"] : discardPiles["pDiscPile"];
     
@@ -1142,7 +1176,7 @@ socket.on('syncMonsterCard', (opPlayer, cardId, posId) => {
 
 let discardPiles = {"opDiscPile":[], "pDiscPile":[]};
 function clearCards() {
-    if(faction === "MO" && pLife !== 0 && oLife !== 0)  monstersFactionPerk();
+    if(factionId === "MO" && pLife !== 0 && oLife !== 0)  monstersFactionPerk();
 
     // Move cards into corresponding discard pile
     rowIds.forEach((row) => {
@@ -1290,21 +1324,21 @@ function getBasePower(cardId, row){
     else return cardPowers[cardId];
 }
 
-function getLeaderInstructionText(){
-    if(leader === "STLeader3" || leader === "NGLeader1") return "";
-    return leaderAbilityUsed ? "" : leaderInstruction;
-}
+const getLeaderInstructionText = () => 
+    (leaderId === "STLeader3" || leaderId === "NGLeader1" || leaderAbilityUsed) 
+    ? "" 
+    : leaderInstruction;
 
-let [handHiddenFlag,cardSelectedFlag,highlightedCardsFlag,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
+let [handHiddenFlag,cardSelectedFlag,switchTurnLock,releaseTurnLockOnEsc,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
 function keyPressed(event) {
     if(!gameEnded){
-        // Enter pressed and hand hasn't been selected AND card is not being revived
+        // Enter pressed - Hand has not been selected 
         if (event.keyCode === 13 && !handChosen){
             handSelected();
         }
         
-        // E pressed AND hand has been chosen AND card has not been selected AND card is not being revived
-        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag && !highlightedCardsFlag){
+        // E pressed - Hand has been chosen, card not selected, card not being revived
+        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag && !switchTurnLock){
             if (handHiddenFlag){
                 document.getElementById('hand').style = "display: fixed; bottom: 1%;";
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
@@ -1318,7 +1352,7 @@ function keyPressed(event) {
             }
         }
         
-        // Esc pressed AND a card has been selected AND card is not being revived
+        // Esc pressed - Card has been selected, card not being revived
         if (event.keyCode === 27 && cardSelectedFlag && !medicFlag){
             cardSelectedFlag = false;
             cancelCardSelection();
@@ -1336,30 +1370,36 @@ function keyPressed(event) {
             });
         }
         
-        // Esc pressed AND cards highlighted AND card is not being revived
-        if (event.keyCode === 27 && highlightedCardsFlag && !medicFlag){
-            highlightedCardsFlag = false;
+        // Esc pressed - A sequence isn't in place && card not being revived
+        if (event.keyCode === 27 && (!switchTurnLock || releaseTurnLockOnEsc) && !medicFlag){
+            switchTurnLock = false;
             handHiddenFlag = false;
             document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
+            document.getElementById('topMsg2').innerHTML = "";
             document.getElementById('highlightedCards').innerHTML = "";
             document.getElementById('hand').style = "display: fixed; bottom: 1%;";
             document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             document.getElementById('instructions').innerHTML = instructionTextHide;
+            document.getElementById('cardDetailView').style  = "display: none;";
+            if(releaseTurnLockOnEsc){
+                releaseTurnLockOnEsc = false;
+                socket.emit('switchTurn', SID, [], [], hand.length, true);
+            }
         }
 
-        // X Pressed
+        // X Pressed 
         if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
-            if(opponentLeader === "NGLeader1") document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action";
+            if(opLeaderId === "NGLeader1") document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action";
             
-            if(leader !== "NGLeader1" && leader !== "STLeader3" && opponentLeader !== "NGLeader1"){
+            if(leaderId !== "NGLeader1" && leaderId !== "STLeader3" && opLeaderId !== "NGLeader1"){
                 useLeaderAbility();
                 leaderAbilityUsed = true;
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             }
         }
         
-        // Space pressed AND player's turn AND card is not selected AND card is not being revived
-        if (event.keyCode===32 && myTurn && !cardSelectedFlag && !medicFlag){
+        // Space pressed 
+        if (event.keyCode===32 && myTurn && !switchTurnLock && !cardSelectedFlag && !medicFlag){
             document.getElementById('pPass').innerHTML = "<p>Passed</p>";
             passedTurn = true;
             socket.emit('passTurn', SID);

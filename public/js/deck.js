@@ -19,7 +19,7 @@ function createLeaderCard(i) {
     let abilityDesc = document.createElement('p');
     abilityDesc.className = "abilityDesc";
     abilityDesc.id = "ability"+i;
-    abilityDesc.innerHTML = abilityDescriptions[faction+i];
+    abilityDesc.innerHTML = abilityDescriptions[faction+"Leader"+i];
     leaderCard.appendChild(abilityDesc);
     return leaderCard;
 }
@@ -170,7 +170,7 @@ function submit() {
 }
 
 socket.on('playerAssignment', (PID) => {
-    location.replace(`https://${env}/game.html?SID=${SID}&player=${PID}`);
+    location.replace(`${env}/game.html?SID=${SID}&player=${PID}`);
 });
 
 var stickyContainer = $('.stickyPlaceholder');

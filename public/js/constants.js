@@ -193,22 +193,22 @@ const styles = {
 const factionCardAmounts = {"NR":28, "NG":30, "ST":37, "MO":39};            
 
 const abilityDescriptions = {
-    "NR1" : "Ability: Doubles the strength of all your Siege units (unless a Commander's Horn is also present on that row).",
-    "NR2" : "Ability: Pick an Impenetrable Fog card from your deck and play it instantly.",
-    "NR3" : "Ability: Clear any weather effects (resulting from Biting Frost, Torrential Rain or Impenetrable Fog cards) in play.",
-    "NR4" : "Ability: Destroy your enemy's strongest Siege unit(s) if the combined strength of their Siege units is 10 or more.",
-    "NG1" : "Ability: Cancel your opponent's Leader Ability.",
-    "NG2" : "Ability: Pick a Torrential Rain card from your deck and play it instantly.",
-    "NG3" : "Ability: Look at 3 random cards from your opponent's hand.",
-    "NG4" : "Ability: Draw a card from your opponent's discard pile.",
-    "ST1" : "Ability: Doubles the strength of all your Ranged units (unless a Commander's Horn is also present on that row).",
-    "ST2" : "Ability: Pick a Biting Frost card from your deck and play it instantly.",
-    "ST3" : "Ability: Draw an extra card at the beginning of the battle.",
-    "ST4" : "Ability: Destroy your enemy's strongest Close Combat unit(s) if the combined strength of their Close Combat units is 10 or more.",
-    "MO1" : "Ability: Restore a card from your discard pile to your hand.",
-    "MO2" : "Ability: Double the strength of all your Close Combat units (unless a Commander's horn is also present on that row).",
-    "MO3" : "Ability: Pick any weather card from your deck and play it instantly.",
-    "MO4" : "Ability: Discard 2 cards and draw 1 card of your choice from your deck."
+    "NRLeader1" : "Ability: Doubles the strength of all your Siege units (unless a Commander's Horn is also present on that row).",
+    "NRLeader2" : "Ability: Pick an Impenetrable Fog card from your deck and play it instantly.",
+    "NRLeader3" : "Ability: Clear any weather effects (resulting from Biting Frost, Torrential Rain or Impenetrable Fog cards) in play.",
+    "NRLeader4" : "Ability: Destroy your enemy's strongest Siege unit(s) if the combined strength of their Siege units is 10 or more.",
+    "NGLeader1" : "Ability: Cancel your opponent's Leader Ability.",
+    "NGLeader2" : "Ability: Pick a Torrential Rain card from your deck and play it instantly.",
+    "NGLeader3" : "Ability: Look at 3 random cards from your opponent's hand.",
+    "NGLeader4" : "Ability: Draw a card from your opponent's discard pile.",
+    "STLeader1" : "Ability: Doubles the strength of all your Ranged units (unless a Commander's Horn is also present on that row).",
+    "STLeader2" : "Ability: Pick a Biting Frost card from your deck and play it instantly.",
+    "STLeader3" : "Ability: Draw an extra card at the beginning of the battle.",
+    "STLeader4" : "Ability: Destroy your enemy's strongest Close Combat unit(s) if the combined strength of their Close Combat units is 10 or more.",
+    "MOLeader1" : "Ability: Restore a card from your discard pile to your hand.",
+    "MOLeader2" : "Ability: Double the strength of all your Close Combat units (unless a Commander's horn is also present on that row).",
+    "MOLeader3" : "Ability: Pick any weather card from your deck and play it instantly.",
+    "MOLeader4" : "Ability: Discard 2 cards and draw 1 card of your choice from your deck."
 }
 
 let cardsAvailable = {

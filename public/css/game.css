@@ -145,18 +145,45 @@ p {
     top: 32%;
 }
 
-.pLeader,
-.oLeader {
-    position: absolute;   
+.pLeaderContainer,
+.oLeaderContainer {
+    position: absolute; 
     height: 16vh;
     width: 11vh;
     left: 7.1%;
+    border-radius: 5px;
 }
-.pLeader {
+
+.pLeaderContainer::before,
+.oLeaderContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 5px;
+    z-index: 1; 
+}
+
+.pLeaderContainer {
     bottom: 12%;
 }
-.oLeader {
+
+.oLeaderContainer {
     top: 12%;
+}
+
+.pLeaderContainer:hover::before,
+.oLeaderContainer:hover::before {
+    box-shadow: 0px 0px 0px 2px gold inset;
+}
+
+.pLeader,
+.oLeader {
+    height: 16vh;
+    width: 11vh;
+    z-index: 2; 
 }
 
 .pPass,
@@ -348,12 +375,22 @@ p {
 }
 
 .card:hover {
-    border: solid gold;
+    box-shadow:0px 0px 0px 2px gold inset;
     transform: scale(1.2) translateY(-1em);
 }
 
 .card:hover ~ .card {
     transform: translateX(42px);
+}
+
+.cardDetailView {
+    position: absolute;
+    display: none;
+    top: 25%;
+    left: 44%;
+    height: 36vh;
+    width: 21.6vh;
+    border-radius: 5px;
 }
 
 .cardSelected {
@@ -368,7 +405,7 @@ p {
 
 .pDisc:hover,
 .oDisc:hover {
-    border: solid gold;
+    box-shadow:0px 0px 0px 2px gold inset;
 }
 
 .cardSmall {
