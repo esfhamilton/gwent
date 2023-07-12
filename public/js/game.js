@@ -121,7 +121,7 @@ const grayscaleUsedLeaders = () => {
 }
 
 const leaderSelected = (leaderId) => {
-    if(handChosen && !cardSelectedFlag && !switchTurnLock && !medicFlag){
+    if(handChosen && !cardSelectedFlag && !switchTurnLock && !gameEnded){
         document.getElementById('cardDetailView').style = "display: fixed;";
         setCardStyle('cardDetailView', leaderId);
         document.getElementById('topMsg').innerHTML = abilityDescriptions[leaderId];
@@ -292,27 +292,21 @@ const activateValidPositions = ((id) => {
 
 let selectedCard;
 function selectCard(card) {
+    if(gameEnded) return;
+
     cardSelectedFlag = true;
     selectedCard = card.id;
     setCardStyle('cardSelected', selectedCard);
     document.getElementById('hand').style = "display: none;"; 
-    document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
+    document.getElementById('leaderInstructions').innerHTML = "";
     document.getElementById('instructions').innerHTML = `<button style="font-size: 80%;">Esc</button>&nbsp;&nbsp;Cancel`;
     
-    if(medicFlag){
+    if(switchTurnLock){
         document.getElementById('highlightedCards').innerHTML = "";
-        document.getElementById('leaderInstructions').innerHTML = "";
         document.getElementById('instructions').innerHTML = "";
     }
     else{
-        // Remove card div from hand (this can be recreated if esc pressed)
-        card.parentNode.removeChild(card);
-    }
-    
-    // Resets available lanes (might be redundant due to this being in (cancelCardSelection()))
-    let positions = document.querySelectorAll("combatLane, rangedLane, siegeLane, opCombatLane, opRangedLane, opSiegeLane");
-    for (let i=0; i<positions.length; i++) {
-        positions[i].removeAttribute("onclick");
+        card.parentNode.removeChild(card); // Remove card from hand
     }
 
     // Highlight divs which are available for the card to be placed in
@@ -368,7 +362,6 @@ function selectCard(card) {
     }
 }
 
-let medicFlag = false;
 let revivedFlag = false;
 let medicCards = []; // Placeholder for card Ids if medic is used
 let medicPosIDs = []; // Placeholder for pos Ids if medic is used
@@ -381,10 +374,10 @@ async function placeCard(boardPos) {
     cancelCardSelection();
     
     // Both medic and revived card have been placed
-    if (medicFlag){
+    if (switchTurnLock){
         medicCards.push(selectedCard);
         medicPosIDs.push(boardPosId);    
-        medicFlag = false;
+        switchTurnLock = false;
         revivedFlag = true;
         document.getElementById('hand').style = "display: fixed; bottom: 1%;";  
         document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
@@ -477,30 +470,24 @@ async function placeCard(boardPos) {
     else if(medics.includes(selectedCard)){
         let discPile = discardPiles["pDiscPile"];
         
-        // Check if there are non-hero cards in the discard pile
+        // Lock turn switch if card can be revived
         for (let i=0; i<discPile.length; i++){
-            if(!heroes.includes(discPile[i])) medicFlag = true;           
+            if(!heroes.includes(discPile[i])) switchTurnLock = true;           
         }
-                    
-        // Can only use medic ability if there are non-hero cards in the discard pile
-        if (medicFlag){
+
+        if (switchTurnLock){
             // Prevents duplicate medic bug when chain reviving
             if(medicCards[medicCards.length-1] != selectedCard){
                 medicCards.push(selectedCard);
                 medicPosIDs.push(boardPosId);    
             }
             
-            switchTurnLock = true;
             revivedFlag = false;
             
             // Hide hand and instructions
             document.getElementById('hand').style = "display: none;"; 
             document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
             document.getElementById('instructions').innerHTML = "";
-            
-            // Prevent discards being opened while reviving
-            document.getElementById('pDisc').removeAttribute("onclick");
-            document.getElementById('oDisc').removeAttribute("onclick");
             
             // Show revivable unit cards
             document.getElementById('highlightedCards').innerHTML = "";
@@ -513,8 +500,8 @@ async function placeCard(boardPos) {
         }
     }
     
-    // Prevents turn switch if medic has been played and player needs to revive a card
-    if (!medicFlag && !revivedFlag){
+    // Turn switch only occurs if not locked and card hasn't been revived (this is handled in next condition)
+    if (!switchTurnLock && !revivedFlag){
         cardsPlaced([selectedCard], [boardPosId]);
     }
     
@@ -523,12 +510,13 @@ async function placeCard(boardPos) {
         cardsPlaced(medicCards, medicPosIDs);
         medicCards = [];
         medicPosIDs = [];
+        switchTurnLock = false;
         revivedFlag = false;
     }
 }
 
 function cardsPlaced(cards, positions){
-    index = hand.indexOf(selectedCard);  
+    index = hand.indexOf(cards[0]);  
     if (index > -1) hand.splice(index, 1); // Remove card from hand - If not in discard
     
     document.getElementById('stats').innerHTML = `${hand.length} <span class="iconify" data-icon="ion:tablet-portrait" data-inline="false"></span>`;    
@@ -556,8 +544,11 @@ function playLeaderWeather(cardId, spliceDeck = false, switchTurn = false){
     document.getElementById('hand').style = "display: fixed; bottom: 1%;";
     document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
     document.getElementById('instructions').innerHTML = instructionTextHide;
-    
-    if(switchTurn) socket.emit('switchTurn', SID, [cardId], ['weatherStats'], hand.length, false);
+
+    if(switchTurn){
+        switchTurnLock = false;
+        socket.emit('switchTurn', SID, [cardId], ['weatherStats'], hand.length, true);
+    } 
 }
 
 function playWeatherCardFromDeck(){
@@ -822,7 +813,6 @@ async function scorch(targetRows = []){
             }
         }
         
-        
         let cardsInRow = uniqueCardIdList.length;
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
@@ -855,13 +845,20 @@ async function scorch(targetRows = []){
     if(discardPiles["pDiscPile"].length!==0){discNotEmpty(discardPiles["pDiscPile"],"pDisc")}
     document.getElementById('pDiscSize').innerHTML = discardPiles["pDiscPile"].length > 0 ? discardPiles["pDiscPile"].length : '';
 
-    scorchedCards.forEach(async (rowAndCard) => {
-        await animateScorch($('.'+rowAndCard[0]).find('#'+rowAndCard[1])[0]);
-        $('.'+rowAndCard[0]).find('#'+rowAndCard[1]).remove();
-    });
+
+    animateThenUpdatePowerValues(scorchedCards);
 }
 
-async function animateScorch(scorchedCard) {
+const animateThenUpdatePowerValues = async (scorchedCards) => {
+    await Promise.all(scorchedCards.map(async (rowAndCard) => {
+      await animateScorch($('.' + rowAndCard[0]).find('#' + rowAndCard[1])[0]);
+      $('.' + rowAndCard[0]).find('#' + rowAndCard[1]).remove();
+    }));
+  
+    updatePowerValues();
+};
+
+const animateScorch = async (scorchedCard) => {
         scorchedCard.style.backgroundImage = "url(img/anim_scorch.png)";
         scorchedCard.style.backgroundSize = "cover";
 
@@ -1033,8 +1030,6 @@ socket.on('endRound', () => {
 
 socket.on('results', () => {
     gameEnded = true;
-    document.getElementById('pDisc').removeAttribute("onclick");
-    document.getElementById('oDisc').removeAttribute("onclick");
     document.getElementById('topMsg2').innerHTML = "Press F5 to play again";
     
     if (pLife == 0 && oLife == 0){
@@ -1095,15 +1090,14 @@ function updateLife() {
     if(powerLevels["totalPower"] > powerLevels["opTotalPower"]) {
         roundWon();
     }
-    else if(powerLevels["totalPower"] == powerLevels["opTotalPower"]) {
+    else if(powerLevels["totalPower"] === powerLevels["opTotalPower"]) {
         roundTie();
     }
     else {
         roundLost();
     }
     
-    // End game if a player has lost all their lives
-    if(pLife == 0 || oLife == 0){
+    if(pLife === 0 || oLife === 0){
         socket.emit('endGame', SID, player);
     }
 }
@@ -1113,8 +1107,9 @@ function resetWeather(){
     $('.weatherStats').find('.cardSmall').remove();
 }
 
-// Show cards in the discard pile
 function showDiscard(pileID) {
+    if (gameEnded || switchTurnLock) return;
+
     document.getElementById('highlightedCards').innerHTML = "";
     document.getElementById('topMsg').innerHTML = "Press Esc to close";
     
@@ -1125,13 +1120,11 @@ function showDiscard(pileID) {
     }
 }
 
-// Remove any attributes/ visuals 
 function discEmpty(pileId) {
     document.getElementById(pileId).style = "display: none;";
     document.getElementById(pileId).removeAttribute("onclick");
 }
 
-// Add necessary attributes/ visuals
 function discNotEmpty(discPile,pileId) {
     setCardStyle(pileId, discPile[0]);
     document.getElementById(pileId).setAttribute("onclick","showDiscard(this.id)");
@@ -1272,7 +1265,7 @@ const resetPowerLevels = (() => {
         powerLevels[id] = 0;
     })
 })
-function updatePowerValues() {  
+async function updatePowerValues() {  
     // Reset powerLevels with each update
     resetPowerLevels();
     
@@ -1282,36 +1275,33 @@ function updatePowerValues() {
     // Calculate power values for each row
     let rowIndex = 0;
     rowIds.forEach((row) =>{
-        let powerStr = row.substring(0,row.length-4)+"Power";
+        let rowPowerValueId = row.substring(0,row.length-4)+"Power";
         let cardsInRow = $('.'+row).find('.cardSmall').length;
         let hornInRow = $('.'+row.slice(0,-4).concat("Horn")).find('.cardSmall')[0];
         for(let i=0; i<cardsInRow; i++){
             let cardId = $('.'+row).find('.cardSmall')[i].id;
             let basePower = getBasePower(cardId, row);
             if(!heroes.includes(cardId) && (hornInRow !== undefined || doubledRows.includes(row))){
-                powerLevels[powerStr] += basePower * (tightBondMods[row][cardId] ?? 1);
+                powerLevels[rowPowerValueId] += basePower * (tightBondMods[row][cardId] ?? 1);
 
-                if(moraleBoosters.includes(cardId)) powerLevels[powerStr] += boostableCards[rowIndex];
-                if(dandelion === cardId && hornInRow === undefined) powerLevels[powerStr] -= basePower;
+                if(moraleBoosters.includes(cardId)) powerLevels[rowPowerValueId] += boostableCards[rowIndex];
+                if(dandelion === cardId && hornInRow === undefined) powerLevels[rowPowerValueId] -= basePower;
             }
             
             if(moraleBoosters.includes(cardId)){ 
-                powerLevels[powerStr] += boostableCards[rowIndex];
+                powerLevels[rowPowerValueId] += boostableCards[rowIndex];
             }
 
-            powerLevels[powerStr] += basePower * (tightBondMods[row][cardId] ?? 1);    
+            powerLevels[rowPowerValueId] += basePower * (tightBondMods[row][cardId] ?? 1);    
         }
         
-        // Display power value for each row
-        document.getElementById(powerStr).innerHTML = powerLevels[powerStr];
+        document.getElementById(rowPowerValueId).innerHTML = powerLevels[rowPowerValueId]; 
         rowIndex += 1;
     });
     
-    // Calculate total power values
     powerLevels["totalPower"] = powerLevels["combatPower"] + powerLevels["rangedPower"] + powerLevels["siegePower"];
     powerLevels["opTotalPower"] = powerLevels["opCombatPower"] + powerLevels["opRangedPower"] + powerLevels["opSiegePower"];
     
-    // Display total power values
     document.getElementById("opTotalPower").innerHTML = powerLevels["opTotalPower"];
     document.getElementById("totalPower").innerHTML = powerLevels["totalPower"];
 }
@@ -1332,13 +1322,13 @@ const getLeaderInstructionText = () =>
 let [handHiddenFlag,cardSelectedFlag,switchTurnLock,releaseTurnLockOnEsc,passedTurn,leaderAbilityUsed,gameEnded] = Array(6).fill(false);
 function keyPressed(event) {
     if(!gameEnded){
-        // Enter pressed - Hand has not been selected 
+        // Enter 
         if (event.keyCode === 13 && !handChosen){
             handSelected();
         }
         
-        // E pressed - Hand has been chosen, card not selected, card not being revived
-        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !medicFlag && !switchTurnLock){
+        // E 
+        if (event.keyCode === 69 && handChosen && !cardSelectedFlag && !switchTurnLock){
             if (handHiddenFlag){
                 document.getElementById('hand').style = "display: fixed; bottom: 1%;";
                 document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
@@ -1352,8 +1342,8 @@ function keyPressed(event) {
             }
         }
         
-        // Esc pressed - Card has been selected, card not being revived
-        if (event.keyCode === 27 && cardSelectedFlag && !medicFlag){
+        // Esc - Card selected and sequence not in place
+        if (event.keyCode === 27 && cardSelectedFlag && (!switchTurnLock || releaseTurnLockOnEsc)){
             cardSelectedFlag = false;
             cancelCardSelection();
             
@@ -1370,8 +1360,8 @@ function keyPressed(event) {
             });
         }
         
-        // Esc pressed - A sequence isn't in place && card not being revived
-        if (event.keyCode === 27 && (!switchTurnLock || releaseTurnLockOnEsc) && !medicFlag){
+        // Esc - A sequence isn't in place
+        if (event.keyCode === 27 && (!switchTurnLock || releaseTurnLockOnEsc)){
             switchTurnLock = false;
             handHiddenFlag = false;
             document.getElementById('topMsg').innerHTML = myTurn == false ? "Opponent's Turn" : "Your Turn";
@@ -1387,8 +1377,8 @@ function keyPressed(event) {
             }
         }
 
-        // X Pressed 
-        if(event.keyCode===88 && myTurn && !cardSelectedFlag && !medicFlag && !leaderAbilityUsed){
+        // X  
+        if(event.keyCode===88 && myTurn && !cardSelectedFlag && !leaderAbilityUsed && !switchTurnLock){
             if(opLeaderId === "NGLeader1") document.getElementById('topMsg').innerHTML = "The opponent leader ability disables this action";
             
             if(leaderId !== "NGLeader1" && leaderId !== "STLeader3" && opLeaderId !== "NGLeader1"){
@@ -1398,8 +1388,8 @@ function keyPressed(event) {
             }
         }
         
-        // Space pressed 
-        if (event.keyCode===32 && myTurn && !switchTurnLock && !cardSelectedFlag && !medicFlag){
+        // Space  
+        if (event.keyCode===32 && myTurn && !switchTurnLock && !cardSelectedFlag){
             document.getElementById('pPass').innerHTML = "<p>Passed</p>";
             passedTurn = true;
             socket.emit('passTurn', SID);
@@ -1408,10 +1398,8 @@ function keyPressed(event) {
 }
 
 function cancelCardSelection() {
-        // Remove card from placeholder at top
         document.getElementById('cardSelected').style.display = "none";
         
-        // Remove any div highlights for where card can be placed and onclick attributes
         boardPosIds.forEach((id) =>{
             document.getElementById(id).style.background = "none";    
             document.getElementById(id).removeAttribute("onclick");
@@ -1419,14 +1407,12 @@ function cancelCardSelection() {
     
         // Remove any borders around cards (used for decoy card)
         pRows.forEach((row) => {
-            // Number of cards in each row
             let len = $("."+row).find('.cardSmall')["length"];
             for (let i=0; i<len; i++) {
                 $("."+row).find('.cardSmall')[i].style.border = '';
             }
         });
     
-        // Show hand and instructions again
         document.getElementById('hand').style = "display: fixed; bottom: 1%;";
         document.getElementById('leaderInstructions').innerHTML = getLeaderInstructionText();
         document.getElementById('instructions').innerHTML = instructionTextHide;
