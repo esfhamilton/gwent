@@ -182,11 +182,6 @@ io.on('connection', (socket) => {
         io.in(SID).emit('syncMonsterCard', opPlayer, cardId, 'op'+posId.substring(0,1).toUpperCase()+posId.substring(1));
     });
 
-    socket.on('drawFromDisc', (SID , player, cardId, drawFromOpDisc) => {
-        let opPlayer = player === "A" ? "B" : "A";
-        io.in(SID).emit('syncDrawFromDisc', opPlayer, cardId, drawFromOpDisc);
-    })
-
     socket.on('getOpponentHand', (SID, player) => {
         let opPlayer = player === "A" ? "B" : "A";
         io.in(SID).emit('opponentHandRequested', opPlayer);
