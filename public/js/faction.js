@@ -10,5 +10,5 @@ socket.emit('rejoinRequest', SID);
 
 function submit() {
     const faction = document.getElementById('faction').value;
-    location.replace(`${location.origin ?? originUrl}/deck.html?SID=${SID}&faction=${faction}`);
+    location.replace(`${location.origin}/deck.html?SID=${SID}&faction=${faction}`);
 }

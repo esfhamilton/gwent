@@ -24,7 +24,7 @@ socket.on("validRoom", (SID) => {
 
 // Advances users to faction selection after 2 users have connected to a room
 socket.on("continue", (SID) => {
-    location.replace(`${location.origin ?? originUrl}/faction.html?SID=${SID}`);
+    location.replace(`${location.origin}/faction.html?SID=${SID}`);
 });
 
 // Deals with users trying to join a full room
