@@ -40,7 +40,6 @@ function setCardStyle(elementId, styleId){
 }
 
 function factionPerkST() {
-    // Get the modal
     let modal = document.getElementById("STModal");
 
     modal.style.display = "block";

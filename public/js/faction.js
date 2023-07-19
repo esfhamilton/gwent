@@ -9,6 +9,6 @@ SID = +Object.values(roomQuery);
 socket.emit('rejoinRequest', SID);
 
 function submit() {
-    let faction = document.getElementById('faction').value;
-    location.replace(`${location.origin}/deck.html?SID=${SID}&faction=${faction}`);
+    const faction = document.getElementById('faction').value;
+    location.replace(`${location.origin ?? originUrl}/deck.html?SID=${SID}&faction=${faction}`);
 }
